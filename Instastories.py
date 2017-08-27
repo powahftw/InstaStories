@@ -12,6 +12,10 @@ headers =      { ############# }
 def download_media(url, path):
     urllib.request.urlretrieve(url, path)
 
+def curr_date():
+    year, month, day, _, _ = time.strftime("%Y,%m,%d,%H,%M").split(',')
+    return "{}-{}-{}".format(day, month, year)
+    
 def download_today_stories(arr_ids):
     
     url_id = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
@@ -31,24 +35,36 @@ def download_today_stories(arr_ids):
     
         print("Username: -| {} |-".format(username))
         usr_directory = os.path.join("ig_media", username)
+        
+        #####
+        
         if not os.path.exists(usr_directory):
             print("Creating Directory :{}".format(usr_directory))
             os.makedirs(usr_directory)
             
-            year, month, day, _, _ = time.strftime("%Y,%m,%d,%H,%M").split(',')
-            curr_date = "{}-{}-{}".format(day, month, year)
-            
-            time_directory = os.path.join(usr_directory, curr_date)
+            time_directory = os.path.join(usr_directory, curr_date())
             
             if not os.path.exists(time_directory):  
                 print("Creating Directory :{}".format(time_directory))
                 os.makedirs(time_directory)
+ 
+        else:
+            print("User already EXIST")
+            
+            time_directory = os.path.join(usr_directory, curr_date())
+            
+            if not os.path.exists(time_directory):  
+                print("Creating Directory :{}".format(time_directory))
+                os.makedirs(time_directory)
+            
             else:
-                print("We already processed this DAY and USER")
+                print("User media for this date already exist")
                 continue
-                
+
         for element in items:
+            
             media_id = element['id']
+            
             if element['media_type'] == 2: 
                 videos = element['video_versions']
                 video_url = videos[0]['url']
@@ -66,22 +82,27 @@ def get_stories_tray():
     #print (json.dumps(r.json(), indent = 2))
     return r.json()
 
+def print_ids_table(usr, ids):
+    table_data = [[x,y] for x, y in zip(usr, ids)]
+    table_data = [("Username", "ID")] + table_data
+    table = AsciiTable(table_data)
+    print (table.table)
+
 def tray_to_ids(stories):
     usr = [];    ids = []
     for element in stories['tray']:
-        print (element['id'])
         ids.append(element['id'])
         username = element['user']['username']
         usr.append(username)
-        print ("Username: {}".format(username))
-        print ("---")
+        
+    if PRINT_TABLE:
+        print_ids_table(usr, ids)
+    
     return ids
     
 stories = get_stories_tray() # Get the json of all the obtainable stories
 ids = tray_to_ids(stories)    # From the obtainable stories get the id of friends 
 download_today_stories(ids)  # Get stories of each person from their ID
-
-
 
 
 
