@@ -15,12 +15,20 @@ def download_media(url, path):
 def curr_date():
     year, month, day, _, _ = time.strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(day, month, year)
-    
+
+def time_from_story(element):
+    unix_ts = element['taken_at']
+    return posix_conv(unix_ts)
+
+def posix_conv(posix_time):
+    year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
+    return "{}-{}-{}".format(day, month, year)
+
 def download_today_stories(arr_ids):
     
     url_id = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
     
-    for ids in arr_ids:
+    for idx, ids in enumerate(arr_ids):
         url = url_id.format(ids)
         
         r = requests.get(url, headers = headers)
@@ -33,50 +41,48 @@ def download_today_stories(arr_ids):
             print("Empty stories for url{}".format(url))
             continue
     
-        print("Username: -| {} |-".format(username))
+        print("{}/{} Username: -| {} |-".format(idx+1, len(arr_ids), username))
         usr_directory = os.path.join("ig_media", username)
         
         #####
-        
+       
         if not os.path.exists(usr_directory):
             print("Creating Directory :{}".format(usr_directory))
             os.makedirs(usr_directory)
-            
-            time_directory = os.path.join(usr_directory, curr_date())
-            
-            if not os.path.exists(time_directory):  
-                print("Creating Directory :{}".format(time_directory))
-                os.makedirs(time_directory)
- 
         else:
             print("User already EXIST")
-            
-            time_directory = os.path.join(usr_directory, curr_date())
-            
-            if not os.path.exists(time_directory):  
-                print("Creating Directory :{}".format(time_directory))
-                os.makedirs(time_directory)
-            
-            else:
-                print("User media for this date already exist")
-                continue
-
+        
         for element in items:
             
             media_id = element['id']
             
+            date = time_from_story(element)
+            time_directory = os.path.join(usr_directory, date)
+               
+            if not os.path.exists(time_directory):  
+                print("Creating Directory :{}".format(time_directory))
+                os.makedirs(time_directory)
+                
             if element['media_type'] == 2: 
-                videos = element['video_versions']
-                video_url = videos[0]['url']
-                print("Video URL: {}".format(video_url))
-                download_media(video_url, os.path.join(time_directory, str(media_id) + ".mp4"))
+                filename = os.path.join(time_directory, str(media_id) + ".mp4")
+                if not os.path.isfile(filename): 
+                    videos = element['video_versions']
+                    video_url = videos[0]['url']
+                    print("Video URL: {}".format(video_url))
+                    download_media(video_url, filename)
+                else:
+                    print("Video media already saved")
 
             if element['media_type'] == 1: 
-                pics = element['image_versions2']['candidates']
-                pic_url = pics[0]['url']
-                print("Photo URL: {}".format(pic_url))
-                download_media(pic_url, os.path.join(time_directory, str(media_id) + ".jpg"))
-
+                filename = os.path.join(time_directory, str(media_id) + ".jpg")
+                if not os.path.isfile(filename):
+                    pics = element['image_versions2']['candidates']
+                    pic_url = pics[0]['url']
+                    print("Photo URL: {}".format(pic_url))
+                    download_media(pic_url, filename)
+                else:
+                    print("Video media already saved")
+            
 def get_stories_tray():
     r = requests.get(tray_endpoint, headers = headers)
     #print (json.dumps(r.json(), indent = 2))
