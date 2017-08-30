@@ -4,10 +4,11 @@ import urllib.request
 from terminaltables import AsciiTable
 import os
 import time
+import datetime
 
-tray_endpoint = "https://i.instagram.com/api/v1/feed/reels_tray/" # This Endpoint just provide unseen stories
+PRINT_TABLE = True
 
-headers =      { ############# }
+COOKIE =      {  ######  }
 
 def download_media(url, path):
     urllib.request.urlretrieve(url, path)
@@ -25,11 +26,24 @@ def posix_conv(posix_time):
     return "{}-{}-{}".format(day, month, year)
 
 def download_today_stories(arr_ids):
+    """
+    Download user stories. Create subdirectory for each user based on their username and media timestamp
+    Ex:
+    ig_media/user1/25-08-17
+                  /26-08-17
+             user2/22-08-17
+                  /23-09-17
+    Args:
+        arr_ids (List): List of ids of people we want to get the stories.
+    """
+    FOLDER = "ig_media"
     
-    url_id = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
+    count_i, count_v = 0, 0
+    
+    userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
     
     for idx, ids in enumerate(arr_ids):
-        url = url_id.format(ids)
+        url = userid_endpoint.format(ids)
         
         r = requests.get(url, headers = headers)
         d = r.json()
@@ -42,7 +56,7 @@ def download_today_stories(arr_ids):
             continue
     
         print("{}/{} Username: -| {} |-".format(idx+1, len(arr_ids), username))
-        usr_directory = os.path.join("ig_media", username)
+        usr_directory = os.path.join(FOLDER, username)
         
         #####
        
@@ -70,6 +84,7 @@ def download_today_stories(arr_ids):
                     video_url = videos[0]['url']
                     print("Video URL: {}".format(video_url))
                     download_media(video_url, filename)
+                    count_v += 1
                 else:
                     print("Video media already saved")
 
@@ -80,21 +95,46 @@ def download_today_stories(arr_ids):
                     pic_url = pics[0]['url']
                     print("Photo URL: {}".format(pic_url))
                     download_media(pic_url, filename)
+                    count_i += 1
                 else:
                     print("Video media already saved")
+    
+    print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), count_i, count_v))       
             
-def get_stories_tray():
-    r = requests.get(tray_endpoint, headers = headers)
-    #print (json.dumps(r.json(), indent = 2))
+def get_stories_tray(cookie):
+    """
+    Return the response of the API call to the Stories Tray
+    Args:
+        cookie (dict): Instagram Cookie for authentication in the requests.
+    Returns:
+        r.json (dict): A dict representation of the instagram response.
+    """
+    tray_endpoint = "https://i.instagram.com/api/v1/feed/reels_tray/" # This Endpoint provide unseen stories
+    
+    r = requests.get(tray_endpoint, headers = cookie)
     return r.json()
 
 def print_ids_table(usr, ids):
+    """
+    Print in a nice table the username and the corrisponding id.
+    Args:
+        usr (List): List of username.
+        ids (List): List of ids.
+    """
     table_data = [[x,y] for x, y in zip(usr, ids)]
     table_data = [("Username", "ID")] + table_data
     table = AsciiTable(table_data)
     print (table.table)
 
 def tray_to_ids(stories):
+    """
+    Extrapolate ids of instagram user that appear in the stories tray.
+    Nicely print them in a table before returning them.
+    Args:
+        stories (dict): A dict representation of the instagram response.
+    Returns:
+        ids (List): A list of users ids
+    """
     usr = [];    ids = []
     for element in stories['tray']:
         ids.append(element['id'])
@@ -106,9 +146,9 @@ def tray_to_ids(stories):
     
     return ids
     
-stories = get_stories_tray() # Get the json of all the obtainable stories
-ids = tray_to_ids(stories)    # From the obtainable stories get the id of friends 
-download_today_stories(ids)  # Get stories of each person from their ID
+stories = get_stories_tray(COOKIE) # Get the json of all the obtainable stories
+ids = tray_to_ids(stories)         # From the obtainable stories get the id of friends 
+download_today_stories(ids)        # Get stories of each person from their ID
 
 
 
