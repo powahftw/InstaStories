@@ -8,7 +8,9 @@ import datetime
 
 PRINT_TABLE = True
 
-COOKIE =      {  ######  }
+COOKIE =      { "cookie" : ########### INSERT HERE #############
+                "user-agent": "Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+",
+                "cache-control": "no-cache" }
 
 def download_media(url, path):
     urllib.request.urlretrieve(url, path)
@@ -25,7 +27,7 @@ def posix_conv(posix_time):
     year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(day, month, year)
 
-def download_today_stories(arr_ids):
+def download_today_stories(arr_ids, cookie):
     """
     Download user stories. Create subdirectory for each user based on their username and media timestamp
     Ex:
@@ -34,6 +36,7 @@ def download_today_stories(arr_ids):
              user2/22-08-17
                   /23-09-17
     Args:
+        cookie (dict): Instagram Cookie for authentication in the requests.
         arr_ids (List): List of ids of people we want to get the stories.
     """
     FOLDER = "ig_media"
@@ -45,7 +48,7 @@ def download_today_stories(arr_ids):
     for idx, ids in enumerate(arr_ids):
         url = userid_endpoint.format(ids)
         
-        r = requests.get(url, headers = headers)
+        r = requests.get(url, headers = cookie)
         d = r.json()
         
         if d['items']:
@@ -146,12 +149,6 @@ def tray_to_ids(stories):
     
     return ids
     
-stories = get_stories_tray(COOKIE) # Get the json of all the obtainable stories
-ids = tray_to_ids(stories)         # From the obtainable stories get the id of friends 
-download_today_stories(ids)        # Get stories of each person from their ID
-
-
-
-
-
-
+stories = get_stories_tray(COOKIE)      # Get the json of all the obtainable stories
+ids = tray_to_ids(stories)              # From the obtainable stories get the id of friends 
+download_today_stories(ids, COOKIE)     # Get stories of each person from their ID
