@@ -1,16 +1,23 @@
 import requests
 import json
 import urllib.request
-from terminaltables import AsciiTable
 import os
 import time
 import datetime
 
-PRINT_TABLE = True
+try:
+    from terminaltables import AsciiTable
+    PRINT_TABLE = True
+except ImportError as e:
+    PRINT_TABLE = False
 
-COOKIE =      { "cookie" : ########### INSERT HERE #############
-                "user-agent": "Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+",
-                "cache-control": "no-cache" }
+#####
+
+COOKIE =      {  "cookie": ########### INSERT HERE #############
+                 "user-agent": "Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+",
+                 "cache-control": "no-cache" }
+
+EXTRA_ID = [XXXXXXXX, XXXXXXXX, XXXXXXXX] # Get stories from unfollowed users by using their ID
 
 def download_media(url, path):
     urllib.request.urlretrieve(url, path)
@@ -36,8 +43,8 @@ def download_today_stories(arr_ids, cookie):
              user2/22-08-17
                   /23-09-17
     Args:
-        cookie (dict): Instagram Cookie for authentication in the requests.
         arr_ids (List): List of ids of people we want to get the stories.
+        cookie (dict): Instagram Cookie for authentication in the requests.
     """
     FOLDER = "ig_media"
     
@@ -55,7 +62,7 @@ def download_today_stories(arr_ids, cookie):
             items = d['items']
             username = items[0]['user']['username']
         else:
-            print("Empty stories for url{}".format(url))
+            print("Empty stories for url {}".format(url))
             continue
     
         print("{}/{} Username: -| {} |-".format(idx+1, len(arr_ids), username))
@@ -144,11 +151,11 @@ def tray_to_ids(stories):
         username = element['user']['username']
         usr.append(username)
         
-    if PRINT_TABLE:
+    if PRINT_TABLE:# Toggleable option to print the table
         print_ids_table(usr, ids)
     
     return ids
     
-stories = get_stories_tray(COOKIE)      # Get the json of all the obtainable stories
-ids = tray_to_ids(stories)              # From the obtainable stories get the id of friends 
-download_today_stories(ids, COOKIE)     # Get stories of each person from their ID
+stories = get_stories_tray(COOKIE)                 # Get the json of all the obtainable stories
+ids = tray_to_ids(stories)                         # From the obtainable stories get the id of friends 
+download_today_stories(ids + EXTRA_ID, COOKIE)     # Get stories of each person from their ID
