@@ -24,7 +24,7 @@ def download_media(url, path):
 
 def curr_date():
     year, month, day, _, _ = time.strftime("%Y,%m,%d,%H,%M").split(',')
-    return "{}-{}-{}".format(day, month, year)
+    return "{}-{}-{}".format(year, month, day)
 
 def time_from_story(element):
     unix_ts = element['taken_at']
@@ -32,7 +32,7 @@ def time_from_story(element):
 
 def posix_conv(posix_time):
     year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
-    return "{}-{}-{}".format(day, month, year)
+    return "{}-{}-{}".format(year, month, day)
 
 def download_today_stories(arr_ids, cookie):
     """
