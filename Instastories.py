@@ -33,7 +33,6 @@ def time_from_story(element):
 def posix_conv(posix_time):
     year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(year, month, day)
-
 def download_today_stories(arr_ids, cookie):
     """
     Download user stories. Create subdirectory for each user based on their username and media timestamp
@@ -58,7 +57,7 @@ def download_today_stories(arr_ids, cookie):
         r = requests.get(url, headers = cookie)
         d = r.json()
         
-        if d['items']:
+        if 'items' in d and d['items']:
             items = d['items']
             username = items[0]['user']['username']
         else:
@@ -109,8 +108,8 @@ def download_today_stories(arr_ids, cookie):
                 else:
                     print("Video media already saved")
     
-    print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), count_i, count_v))       
-            
+    print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), count_i, count_v)) 
+    
 def get_stories_tray(cookie):
     """
     Return the response of the API call to the Stories Tray
