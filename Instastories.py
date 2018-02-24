@@ -18,6 +18,7 @@ COOKIE =      {  "cookie": ########### INSERT HERE #############
                  "cache-control": "no-cache" }
 
 EXTRA_ID = [XXXXXXXX, XXXXXXXX, XXXXXXXX] # Get stories from unfollowed users by using their ID
+EXTRA_USR = ["xxxx", "yyyy", "zzzz"] # Get stories from unfollowed users by using their Nicknames
 
 def download_media(url, path):
     urllib.request.urlretrieve(url, path)
@@ -154,7 +155,26 @@ def tray_to_ids(stories):
         print_ids_table(usr, ids)
     
     return ids
-    
+
+def nicks_to_ids(usr_list):
+    """
+    Get corresponding ids from a list of user nicknames.
+    Args:
+        usr_list (List): List of username.
+    Returns:
+        ids (List): A list of users ids
+    """
+    base_url_info = "https://www.instagram.com/{}/?__a=1"
+    ids = []
+    for user in usr_list:
+        r = requests.get(base_url_info.format(user))
+        d = r.json()
+        print("{} - ID: {}".format(user, d["user"]["id"]))
+        ids.append(d["user"]["id"])
+    return ids    
+
 stories = get_stories_tray(COOKIE)                 # Get the json of all the obtainable stories
 ids = tray_to_ids(stories)                         # From the obtainable stories get the id of friends 
-download_today_stories(ids + EXTRA_ID, COOKIE)     # Get stories of each person from their ID
+other_ids = EXTRA_ID + nicks_to_ids(EXTRA_USR)     # Acquire stories from unfollowed users 
+download_today_stories(ids + other_ids, COOKIE)    # Get stories of each person from their ID
+
