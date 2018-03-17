@@ -169,8 +169,9 @@ def nicks_to_ids(usr_list):
     for user in usr_list:
         r = requests.get(base_url_info.format(user))
         d = r.json()
-        print("{} - ID: {}".format(user, d["user"]["id"]))
-        ids.append(d["user"]["id"])
+        print(d["graphql"]["user"]["edge_followed_by"]["count"])
+        print("{} - ID: {}".format(user, d["graphql"]["user"]["id"]))
+        ids.append(d["graphql"]["user"]["id"])
     return ids    
 
 stories = get_stories_tray(COOKIE)                 # Get the json of all the obtainable stories
