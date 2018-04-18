@@ -18,7 +18,7 @@ COOKIE =      {  "cookie": ########### INSERT HERE #############
                  "cache-control": "no-cache" }
 
 EXTRA_ID = [XXXXXXXX, XXXXXXXX, XXXXXXXX] # Get stories from unfollowed users by using their ID
-EXTRA_USR = ["xxxx", "yyyy", "zzzz"] # Get stories from unfollowed users by using their Nicknames
+#EXTRA_USR = ["xxxx", "yyyy", "zzzz"] # Get stories from unfollowed users by using their Nicknames, deprecated due to Instagram changes
 
 def download_media(url, path):
     urllib.request.urlretrieve(url, path)
