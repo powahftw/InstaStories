@@ -87,27 +87,36 @@ def download_today_stories(arr_ids, cookie):
                 print("Creating Directory :{}".format(time_directory))
                 os.makedirs(time_directory)
                 
+            new_media = True
+            
             if element['media_type'] == 2: 
-                filename = os.path.join(time_directory, str(media_id) + ".mp4")
-                if not os.path.isfile(filename): 
+                fn_video = os.path.join(time_directory, str(media_id) + ".mp4")
+                if not os.path.isfile(fn_video): 
                     videos = element['video_versions']
                     video_url = videos[0]['url']
                     print("Video URL: {}".format(video_url))
-                    download_media(video_url, filename)
+                    download_media(video_url, fn_video)
                     count_v += 1
                 else:
+                    new_media = False
                     print("Video media already saved")
 
             if element['media_type'] == 1: 
-                filename = os.path.join(time_directory, str(media_id) + ".jpg")
-                if not os.path.isfile(filename):
+                fn_img = os.path.join(time_directory, str(media_id) + ".jpg")
+                if not os.path.isfile(fn_img):
                     pics = element['image_versions2']['candidates']
                     pic_url = pics[0]['url']
                     print("Photo URL: {}".format(pic_url))
-                    download_media(pic_url, filename)
+                    download_media(pic_url, fn_img)
                     count_i += 1
                 else:
+                    new_media = False
                     print("Video media already saved")
+                    
+            if new_media: # Now save the metadata in a json file 
+                fn_json = os.path.join(time_directory, "json_log" + ".json")
+                with open(fn_json, "a+") as log:
+                    log.write(json.dumps(element))
     
     print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), count_i, count_v)) 
     
