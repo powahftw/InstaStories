@@ -3,6 +3,7 @@ import json
 import urllib.request
 import os
 import time
+import sys
 import datetime
 
 try:
@@ -11,14 +12,31 @@ try:
 except ImportError as e:
     PRINT_TABLE = False
 
-#####
+#  #  #  #  #
 
-COOKIE =      {  "cookie": ########### INSERT HERE #############
+COOKIE =      {  "cookie": None,
                  "user-agent": "Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+",
                  "cache-control": "no-cache" }
 
-EXTRA_ID = [XXXXXXXX, XXXXXXXX, XXXXXXXX] # Get stories from unfollowed users by using their ID
-#EXTRA_USR = ["xxxx", "yyyy", "zzzz"] # Get stories from unfollowed users by using their Nicknames, deprecated due to Instagram changes
+
+
+#EXTRA_ID = [X X X X X X X X, X X X X X X X X, X X X X X X X X] # Get stories from unfollowed users by using their ID
+#EXTRA_USR = ["x x x x", "y y y y", "z z z z"] # Get stories from unfollowed users by using their Nicknames, deprecated due to Instagram changes
+
+def getCookie():
+	cookie_path = sys.argv[2]
+	cookie_file = open(cookie_path, "r")
+	cookie = cookie_file.read()
+	COOKIE["cookie"] = cookie
+	cookie_file.close()
+
+	while 1:
+		if COOKIE.get("cookie") == None:
+			print("Invalid token, try again")
+		else:
+			break
+
+
 
 def download_media(url, path):
     urllib.request.urlretrieve(url, path)
@@ -34,7 +52,8 @@ def time_from_story(element):
 def posix_conv(posix_time):
     year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(year, month, day)
-def download_today_stories(arr_ids, cookie):
+
+def download_today_stories(arr_ids, cookie, FOLDER):
     """
     Download user stories. Create subdirectory for each user based on their username and media timestamp
     Ex:
@@ -46,13 +65,12 @@ def download_today_stories(arr_ids, cookie):
         arr_ids (List): List of ids of people we want to get the stories.
         cookie (dict): Instagram Cookie for authentication in the requests.
     """
-    FOLDER = "ig_media"
-    
+		
     count_i, count_v = 0, 0
     
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
     
-    for idx, ids in enumerate(arr_ids):
+    for idx, ids in enumerate(arr_ids[:10]):
         url = userid_endpoint.format(ids)
         
         r = requests.get(url, headers = cookie)
@@ -119,6 +137,7 @@ def download_today_stories(arr_ids, cookie):
                     log.write(json.dumps(element))
     
     print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), count_i, count_v)) 
+    return len(arr_ids)
     
 def get_stories_tray(cookie):
     """
@@ -183,8 +202,24 @@ def nicks_to_ids(usr_list):
         ids.append(d["graphql"]["user"]["id"])
     return ids    
 
-stories = get_stories_tray(COOKIE)                 # Get the json of all the obtainable stories
-ids = tray_to_ids(stories)                         # From the obtainable stories get the id of friends 
-other_ids = EXTRA_ID + nicks_to_ids(EXTRA_USR)     # Acquire stories from unfollowed users 
-download_today_stories(ids + other_ids, COOKIE)    # Get stories of each person from their ID
+
+if __name__ == "__main__":
+	getCookie()
+	FOLDER = os.path.join(sys.argv[1], "ig_media")
+	stories = get_stories_tray(COOKIE)
+	ids = tray_to_ids(stories)
+	download_today_stories(ids, COOKIE, FOLDER)
+
+
+	
+def startScraping():
+	cookie_file = open("token.txt", "r")
+	cookie = cookie_file.read()
+	COOKIE["cookie"] = cookie
+	FOLDER = "ig_media"
+	stories = get_stories_tray(COOKIE)                 	# Get the json of all the obtainable stories
+	ids = tray_to_ids(stories)                         	# From the obtainable stories get the id of friends 
+	return download_today_stories(ids , COOKIE, FOLDER)				# Get stories of each person from their ID
+	
+
 

@@ -1,0 +1,6 @@
+ig_media
+token.txt
+*.jpg
+*.mp4
+Flask
+__pycache__
