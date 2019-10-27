@@ -4,3 +4,5 @@ token.txt
 *.mp4
 Flask
 __pycache__
+run_history.log
+test.py

@@ -32,7 +32,7 @@ def getCookie():
 
     if __name__ == "__main__":
         parser = argparse.ArgumentParser(description="TOKEN PATH AND DESTINATION FOLDER")
-        parser.add_argument("-t", metavar="<token>", help="Insert the path of cookie file")
+        parser.add_argument("t", metavar="<token>", help="Insert the path of cookie file")
         args = parser.parse_args()
         cookie_path = args.t 
         with open(cookie_path, "r") as f:
@@ -60,7 +60,7 @@ def time_from_story(element):
 def posix_conv(posix_time):
     year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(year, month, day)
-def download_today_stories(arr_ids, cookie):
+def download_today_stories(arr_ids, cookie, number_of_persons):
     """
     Download user stories. Create subdirectory for each user based on their username and media timestamp
     Ex:
@@ -78,7 +78,7 @@ def download_today_stories(arr_ids, cookie):
     
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
     
-    for idx, ids in enumerate(arr_ids[:10]):
+    for idx, ids in enumerate(arr_ids[:number_of_persons]):
         url = userid_endpoint.format(ids)
         
         r = requests.get(url, headers = cookie)
@@ -144,7 +144,8 @@ def download_today_stories(arr_ids, cookie):
                 with open(fn_json, "a+") as log:
                     log.write(json.dumps(element))
     
-    print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), count_i, count_v)) 
+    print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids[:number_of_persons]), count_i, count_v)) 
+    return count_i, count_v
     
 def get_stories_tray(cookie):
     """
@@ -210,25 +211,53 @@ def nicks_to_ids(usr_list):
     return ids    
 
 
+def numberOfPeople():
 
-
-def startScrape(cookie):
-    stories = get_stories_tray(cookie)                 # Get the json of all the obtainable stories
-    ids = tray_to_ids(stories)                         # From the obtainable stories get the id of friends 
-    # other_ids = EXTRA_ID + nicks_to_ids(EXTRA_USR)     # Acquire stories from unfollowed users 
-    download_today_stories(ids , cookie)    # Get stories of each person from their ID
+    count = int(input("Please insert the number of people to scrape: "))
+    return count
 
 
 
+def logToHTML():
+    rendered_log = []
+    if not os.path.exists("run_history.log"):
+        f = open("run_history.log", "w").close()
+
+    with open("run_history.log", "r") as o:
+        for i in o.readlines():
+            rendered_log.append(str(i))
+        return rendered_log
 
 
 
-def scrape_from_web():
-    startScrape(getCookie())  
+
+def startScrape(cookie, amountScraped):
+    stories = get_stories_tray(cookie)                                        
+    ids = tray_to_ids(stories)                                                
+    count_i, count_v = download_today_stories(ids , cookie, amountScraped) 
+
+    timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
+
+    with open("run_history.log", "a+") as o:
+        o.write("Date: {}, {} people scraped, {} IMGs and {} VIDEOs \n".format(timestampStr, amountScraped, count_i, count_v))   
+    
+    return count_i, count_v
+
+
+
+
+
+
+
+def scrape_from_web(amountScraped):
+    return startScrape(getCookie(), amountScraped)  
 
 if __name__ == "__main__":
-    startScrape(getCookie())
+    count_i, count_v = startScrape(getCookie(), numberOfPeople())
 
 
 
 
+# ADDED LOG FILE
+# ADDED NUMBER OF PEOPLE TO SCRAPE
+# ADDED IMAGE AND VIDEO COUNTER ON INDEX

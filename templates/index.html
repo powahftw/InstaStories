@@ -1,8 +1,12 @@
 <html>
 
 	<head>
+        <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="-1" />
+
 		<title>Instagram Scraper</title>
-		
+
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
 		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
@@ -11,24 +15,47 @@
 
 	<body>
 		<container class="content">
-			<br><br><h1> Start Scrape</h1><br>
 
+			<br><br><div id="title"> Instagram Scraper</div><br>
 
 			<form action="/scrape/" method="post">
+                <h2>How many people do you want to scrape?</h2><br>
+                <input type="text" name ="amountToScrape">
+
 				<button name="scrapeBtn" type="submit" class="btn btn-warning"> Start Scraping!</button>
-			</form>
-			<br>
-			
-            <!--
-
-            <form method="get">
-				<h2>Total images scraped: </h2>
-				<h2 class="numberOfScraped">{{variable}}</h2>
-			</form>
+                </form>
 
 
 
-        -->
+                <br><br>    
+                <form method="GET">
+                    <div class="row d-flex justify-content-center">
+
+                        <div class="col-sm-3">
+                            <h4>Total images scraped</h4>
+                            <h5 class="count_i">{{count_i}}</h5>
+                        </div>
+
+
+
+                        <div class="col-sm-3">
+                            <h4>Total videos scraped</h4>
+                            <h5 class="count_v">{{count_v}}</h5>
+                        </div>
+
+                    </div>
+
+                    <div id="logs">
+                        {% for rendered_log_element in rendered_log %}
+                            <li>{{ rendered_log_element }} </li>
+                        {% endfor %}
+                    </div>
+                </form>
+			    <br>
+
+
+
+
 		</container>
 
 

@@ -1,5 +1,26 @@
 .content {
-	text-align: center;
-	padding: 300px;
+    text-align: center;
+    padding: 300px;
 }
+
+body {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #0a0a0a;
+    color: white;
+}
+
+#title {
+    font-size: 100px;
+    font-style: bold;
+}
+
+
+#logs {
+    background-color: #363636;
+    margin-top: 5vh;
+    padding-top: 5vh;
+    padding-bottom: 5vh;
+}
+
+
 
