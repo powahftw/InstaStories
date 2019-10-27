@@ -1,4 +1,4 @@
-from Instastories import *
+from Instastories import scrape_from_web
 from flask import Flask, render_template
 app = Flask(__name__)
 
@@ -9,8 +9,8 @@ def index():
 	
 @app.route("/scrape/", methods=['POST'])
 def scrape():
-	numberOfScraped = startScraping()
-	return render_template('index.html', variable= numberOfScraped)
+	scrape_from_web()
+	return render_template('index.html')
 	
 
 
