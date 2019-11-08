@@ -12,8 +12,6 @@ try:
 except ImportError as e:
     PRINT_TABLE = False
 
-#####
-
 COOKIE =      {  "cookie": None,
                  "user-agent": "Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+",
                  "cache-control": "no-cache" }
@@ -24,26 +22,15 @@ EXTRA_ID = [None] # Get stories from unfollowed users by using their ID
 
 # Get the optional token path argument from the command line
 
-def getCookie():
+def getCookie(cookie_path):
     token =      {
              "cookie": None,
              "user-agent": "Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+",
              "cache-control": "no-cache" }
 
-    if __name__ == "__main__":
-        parser = argparse.ArgumentParser(description="TOKEN PATH AND DESTINATION FOLDER")
-        parser.add_argument("t", metavar="<token>", help="Insert the path of cookie file")
-        args = parser.parse_args()
-        cookie_path = args.t 
-        with open(cookie_path, "r") as f:
-            token["cookie"] = f.read()
+    with open(cookie_path, "r") as f:
+        token["cookie"] = f.read()
         return token
-
-    else: 
-        with open("token.txt", "r") as f:
-            token["cookie"] = f.read()
-            return token
-
 
 
 def download_media(url, path):
@@ -210,54 +197,32 @@ def nicks_to_ids(usr_list):
         ids.append(d["graphql"]["user"]["id"])
     return ids    
 
-
 def numberOfPeople():
 
     count = int(input("Please insert the number of people to scrape: "))
     return count
 
-
-
-def logToHTML():
-    rendered_log = []
-    if not os.path.exists("run_history.log"):
-        f = open("run_history.log", "w").close()
-
-    with open("run_history.log", "r") as o:
-        for i in o.readlines():
-            rendered_log.append(str(i))
-        return rendered_log
-
-
-
-
-def startScrape(cookie, amountScraped):
+def startScrape(cookie, number_of_persons):
     stories = get_stories_tray(cookie)                                        
     ids = tray_to_ids(stories)                                                
-    count_i, count_v = download_today_stories(ids , cookie, amountScraped) 
+    count_i, count_v = download_today_stories(ids , cookie, number_of_persons) 
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
     with open("run_history.log", "a+") as o:
-        o.write("Date: {}, {} people scraped, {} IMGs and {} VIDEOs \n".format(timestampStr, amountScraped, count_i, count_v))   
+        o.write("Date: {}, {} people scraped, {} IMGs and {} VIDEOs \n".format(timestampStr, number_of_persons, count_i, count_v))   
     
     return count_i, count_v
 
-
-
-
-
-
-
-def scrape_from_web(amountScraped):
-    return startScrape(getCookie(), amountScraped)  
+def scrape_from_web(cookie_path, number_of_persons):
+    return startScrape(getCookie(cookie_path), number_of_persons)  
 
 if __name__ == "__main__":
-    count_i, count_v = startScrape(getCookie(), numberOfPeople())
+    parser = argparse.ArgumentParser(description="TOKEN PATH AND NUMBER OF PEOPLE SCRAPED")
+    parser.add_argument("t", metavar="<token>", help="Insert the path of cookie file")
+    parser.add_argument("n", metavar="<number_of_persons>", help="Insert the number of people to scrape")
+    args = parser.parse_args()
+    cookie_path = args.t 
+    number_of_persons = int(args.n)
 
-
-
-
-# ADDED LOG FILE
-# ADDED NUMBER OF PEOPLE TO SCRAPE
-# ADDED IMAGE AND VIDEO COUNTER ON INDEX
+    count_i, count_v = startScrape(getCookie(cookie_path), number_of_persons)

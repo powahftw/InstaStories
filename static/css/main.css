@@ -23,4 +23,26 @@ body {
 }
 
 
+.headerImage {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+}
+
+.custom_btn {
+    margin-top: 5vh;
+    font-size: 5vh;
+    margin-bottom: 5vh;
+}
+
+.custom_input {
+    font-size: 5vh;
+    padding-top: 1vh;
+    padding-bottom: 1vh;
+    padding-left: 5vh;
+    padding-right: 5vh;
+
+}
+
 
