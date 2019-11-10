@@ -6,20 +6,19 @@ app = Flask(__name__)
 COOKIE_PATH = "token.txt"
 
 def setLogFileList():
-    rendered_log = []
+    log_line = []
+
     if not os.path.exists("run_history.log"):
-        f = open("run_history.log", "w").close()
+        open("run_history.log", "w").close()
 
     with open("run_history.log", "r") as o:
-        for i in o.readlines():
-            rendered_log.append(str(i))
-        return rendered_log
+        return [log_line for log_line in o.readlines()]
 
 
 @app.route("/")
 def index():
-    render_log = setLogFileList()
-    return render_template("index.html", count_i = 0, count_v = 0, rendered_log = render_log)
+    log_line = setLogFileList()
+    return render_template("index.html", count_i = 0, count_v = 0, log_line = log_line)
 
 	
 @app.route("/scrape/", methods=['POST'])
@@ -29,8 +28,8 @@ def scrape():
         amountScraped = int(request.form["amountToScrape"])
         count_i, count_v = scrape_from_web(COOKIE_PATH, amountScraped)
 
-        rendered_log = setLogFileList()
-        return render_template('index.html', count_i = count_i, count_v = count_v, rendered_log = rendered_log)
+        log_line = setLogFileList()
+        return render_template('index.html', count_i = count_i, count_v = count_v, log_line = log_line)
 
 
 	

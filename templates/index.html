@@ -42,8 +42,8 @@
                     </div>
 
                     <div id="logs">
-                        {% for rendered_log_element in rendered_log %}
-                            <li>{{ rendered_log_element }} </li>
+                        {% for log_line_element in log_line.reverse() %}
+                            <li>{{ log_line_element }} </li>
                         {% endfor %}
                     </div>
                 </form>
