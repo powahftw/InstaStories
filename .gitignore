@@ -6,3 +6,4 @@ Flask
 __pycache__
 run_history.log
 test.py
+paths.json

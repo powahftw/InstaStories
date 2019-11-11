@@ -44,7 +44,7 @@ def time_from_story(element):
 def posix_conv(posix_time):
     year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(year, month, day)
-def download_today_stories(arr_ids, cookie, number_of_persons):
+def download_today_stories(arr_ids, cookie, folder_path, number_of_persons):
     """
     Download user stories. Create subdirectory for each user based on their username and media timestamp
     Ex:
@@ -56,7 +56,6 @@ def download_today_stories(arr_ids, cookie, number_of_persons):
         arr_ids (List): List of ids of people we want to get the stories.
         cookie (dict): Instagram Cookie for authentication in the requests.
     """
-    FOLDER = "ig_media"
     
     count_i, count_v = 0, 0
     
@@ -76,7 +75,7 @@ def download_today_stories(arr_ids, cookie, number_of_persons):
             continue
     
         print("{}/{} Username: -| {} |-".format(idx+1, len(arr_ids), username))
-        usr_directory = os.path.join(FOLDER, username)
+        usr_directory = os.path.join(folder_path, username)
         
         #####
        
@@ -199,10 +198,10 @@ def numberOfPeople():
     count = int(input("Please insert the number of people to scrape: "))
     return count
 
-def startScrape(cookie, number_of_persons):
+def startScrape(cookie, folder_path, number_of_persons):
     stories = get_stories_tray(cookie)                                        
     ids = tray_to_ids(stories)                                                
-    count_i, count_v = download_today_stories(ids , cookie, number_of_persons) 
+    count_i, count_v = download_today_stories(ids , cookie, folder_path, number_of_persons) 
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
@@ -211,8 +210,8 @@ def startScrape(cookie, number_of_persons):
     
     return count_i, count_v
 
-def scrape_from_web(cookie_path, number_of_persons):
-    return startScrape(getCookie(cookie_path), number_of_persons)  
+def scrape_from_web(cookie_path, folder_path, number_of_persons):
+    return startScrape(getCookie(cookie_path), folder_path, number_of_persons)  
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="TOKEN PATH AND NUMBER OF PEOPLE SCRAPED")
@@ -222,4 +221,5 @@ if __name__ == "__main__":
     cookie_path = args.t 
     number_of_persons = int(args.n)
 
-    count_i, count_v = startScrape(getCookie(cookie_path), number_of_persons)
+    FOLDER = "ig_media"
+    count_i, count_v = startScrape(getCookie(cookie_path), FOLDER, number_of_persons)

@@ -5,7 +5,7 @@
 
 body {
     font-family: 'Courier New', Courier, monospace;
-    background-color: #0a0a0a;
+    background-color: #171717;
     color: white;
 }
 
@@ -13,15 +13,6 @@ body {
     font-size: 100px;
     font-style: bold;
 }
-
-
-#logs {
-    background-color: #363636;
-    margin-top: 5vh;
-    padding-top: 5vh;
-    padding-bottom: 5vh;
-}
-
 
 .headerImage {
   display: block;
@@ -45,4 +36,22 @@ body {
 
 }
 
+.settings_title {
+    padding-top: 10vh; 
+    font-size: 10vh
+}
 
+.container_box {
+    background-color: #1c1c1c;
+    margin-top: 4vh;
+    padding-bottom: 2vh;
+    margin-bottom: 4vh;
+}
+
+.logs{
+    background-color: #1c1c1c;
+    margin-top: 5vh;
+    padding-top: 5vh;
+    padding-bottom: 5vh;
+    text-align: center;
+}

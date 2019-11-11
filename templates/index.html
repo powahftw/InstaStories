@@ -10,11 +10,28 @@
 	</head>
 
 	<body>
+
+       <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">Instagram-stories</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item active">
+                        <a class="nav-link" href={{url_for("index")}}>Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href={{url_for("settings")}}>Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
 		<container class="content">
 
             <img class="headerImage" src="/static/images/index_header.png">
-
-			<form action="/scrape/" method="post">
+			<form action="/" method="post">
                 <h2>How many people do you want to scrape?</h2>
                 <input type="text" name ="amountToScrape" class="custom_input">
                 <br>
@@ -40,12 +57,6 @@
                         </div>
 
                     </div>
-
-                    <div id="logs">
-                        {% for log_line_element in log_line.reverse() %}
-                            <li>{{ log_line_element }} </li>
-                        {% endfor %}
-                    </div>
                 </form>
 			    
 
@@ -56,5 +67,10 @@
 
 
 	</body>
-
+    <footer class="logs">
+        <h4>Last Scraping Logs:</h4>
+        {% for log_line_element in log_line %}
+            <li>{{ log_line_element }} </li>
+        {% endfor %}
+    </footer>
 </html>
