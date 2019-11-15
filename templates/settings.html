@@ -11,7 +11,7 @@
 <body >
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <a class="navbar-brand" href="#">Instagram-stories</a>
+            <a class="navbar-brand" href={{url_for("index")}}>Instagram-stories</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -32,14 +32,14 @@
 
 
 
-                <h4 class="text-center" style="margin-bottom: 5vh">There are the settings, you can dsiplay and choose the path for the "download" folder and the path to "cookie.txt"</h4>
+                <h4 class="text-center" style="margin-bottom: 5vh">There are the settings, you can dsiplay and choose the path for the "download" folder and the path to "token.txt"</h4>
 
 
             <form action="/settings" method="post">
 
                 <h6 class="text-danger">DOWNLOAD FOLDER PATH: </h6> <p>{{folder_path}}</p>
                 <h6 style="padding-left: 5vh">Change the download folder name: </h6>
-                <input type="text" name ="folder_name" style="margin-left: 5vh"><br><br>
+                <input type="text" name ="folder_path" style="margin-left: 5vh"><br><br>
                 
 
                 <h6 class="text-danger">COOKIE FILE PATH: </h6> <p>{{cookie_path}}</p>
@@ -47,16 +47,9 @@
 
                 <input type="text" name ="cookie_path" style="margin-left: 5vh"><br>
 
-                <button type="submit" id="submitBtn" class="btn btn-warning" style="margin-top: 5vh; margin-left: 5vh" onclick="disableBtn()">Click here to update settings</button>
+                <button type="submit" id="submitBtn" class="btn btn-warning" style="margin-top: 5vh; margin-left: 5vh">Click here to update settings</button>
             </form>
         </div>
 
 </body>
-
-<script>
-    function disableBtn() {
-        document.getElementById("submitBtn").disabled = true;
-    }
-</script>
-
 </html>

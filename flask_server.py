@@ -15,18 +15,20 @@ def setLogFileList():
     with open("run_history.log", "r") as o:
         return [log_line for log_line in o.readlines()]
 
-def savePaths(cookie_path, folder_path):
-    paths_dict = {'cookie_path' : cookie_path, 'folder_path' : folder_path}
-    with open('paths.json', 'w') as f:
-        json.dump(paths_dict, f)
 
-def setUpdatedPaths():
-    with open('paths.json', 'r') as f:
-        paths_dict = json.load(f)
+def setSettings(settings_dict):
+    with open("settings.json", "w+") as settings_json:
+        json.dump(settings_dict, settings_json)
 
-    # Returns cookie_path, folder_path
+def getSettings():
 
-    return paths_dict["cookie_path"], paths_dict["folder_path"]
+    if not os.path.exists("settings.json"):
+        settings_dict = {"cookie_path": "token.txt", "folder_path": "ig_media"}
+    else:
+        with open("settings.json") as settings_json:
+            settings_dict = json.load(settings_json)
+
+    return settings_dict
 
 ################### ROUTES #################
 
@@ -36,42 +38,36 @@ def index():
 
     if request.method == "POST":
         amountScraped = int(request.form["amountToScrape"])
-        count_i, count_v = scrape_from_web(cookie_path, folder_path, amountScraped)
+        count_i, count_v = scrape_from_web(getSettings()["cookie_path"], getSettings()["folder_path"], amountScraped)
         log_line = setLogFileList()
-        return render_template('index.html', count_i = count_i, count_v = count_v, log_line = log_line, error = "0")
-
-    return render_template("index.html", count_i = 0, count_v = 0, log_line = log_line)
+        return render_template('index.html', count_i = count_i, count_v = count_v, log_line = log_line)
+    else:
+        return render_template("index.html", count_i = 0, count_v = 0, log_line = log_line)
 
 	
 @app.route("/settings/", methods=['GET','POST'])
 def settings():
-    global cookie_path, folder_path
-
     if request.method == "POST":
-        if len(request.form["cookie_path"]) > 0:
-            new_cookie_path = request.form["cookie_path"]
-        else:
-            new_cookie_path = os.path.join(os.getcwd(), cookie_path)
 
-        if len(request.form["folder_name"]) > 0:
-            new_folder_path = request.form["folder_name"]
-        else:
-            new_folder_path = os.path.join(os.getcwd(), folder_path)
+        # Dictionary of default settings values
+        # Creates the new dictionary for updated settings
+        new_settings_dict = {"cookie_path": "token.txt", "folder_path": "ig_media"}
 
-        savePaths(new_cookie_path, new_folder_path)
-        cookie_path, folder_path = setUpdatedPaths()
-        return render_template("settings.html", folder_path = os.path.join(os.getcwd(), folder_path), cookie_path = os.path.join(os.getcwd(), cookie_path))
+        for form in request.form:
+            if len(request.form[form]) > 0:
+                new_settings_dict[form] = request.form[form]
+            elif os.path.exists("settings.json"):
+                with open("settings.json") as settings_json:
+                    settings_json_dict = json.load(settings_json)
+                    new_settings_dict[form] = settings_json_dict[form]
 
-    return render_template("settings.html", folder_path = os.path.join(os.getcwd(), folder_path), cookie_path = os.path.join(os.getcwd(), cookie_path))
+        setSettings(new_settings_dict)
+
+        return render_template("settings.html", folder_path = getSettings()["folder_path"], cookie_path = getSettings()["cookie_path"])
+    else:
+        return render_template("settings.html", folder_path = getSettings()["folder_path"], cookie_path = getSettings()["cookie_path"])
 
 ############### RUN #####################
 
 if __name__ == "__main__":
-
-    if os.path.exists("paths.json"):
-        cookie_path, folder_path = setUpdatedPaths()
-    else:
-        cookie_path = "token.txt"
-        folder_path = "ig_media"
-
     app.run()

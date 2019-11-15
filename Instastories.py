@@ -17,7 +17,7 @@ EXTRA_ID = [None] # Get stories from unfollowed users by using their ID
 #EXTRA_USR = ["xxxx", "yyyy", "zzzz"] # Get stories from unfollowed users by using their Nicknames, deprecated due to Instagram changes
 
 
-# Get the optional token path argument from the command line
+################# UTILS FUNCTIONS #########################
 
 def getCookie(cookie_path):
     token =      {
@@ -44,6 +44,17 @@ def time_from_story(element):
 def posix_conv(posix_time):
     year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(year, month, day)
+
+def getFolderPath():
+    if os.path.exists("settings.json"):
+            with open('settings.json', 'r') as f:
+                paths_dict = json.load(f)
+            return paths_dict["folder_path"]
+    else:
+        return "ig_media"
+
+############################## DOWNLOAD AND MANAGE STORIES AND JSON ######################################
+
 def download_today_stories(arr_ids, cookie, folder_path, number_of_persons):
     """
     Download user stories. Create subdirectory for each user based on their username and media timestamp
@@ -56,7 +67,7 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons):
         arr_ids (List): List of ids of people we want to get the stories.
         cookie (dict): Instagram Cookie for authentication in the requests.
     """
-    
+
     count_i, count_v = 0, 0
     
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
@@ -193,10 +204,7 @@ def nicks_to_ids(usr_list):
         ids.append(d["graphql"]["user"]["id"])
     return ids    
 
-def numberOfPeople():
-
-    count = int(input("Please insert the number of people to scrape: "))
-    return count
+#################### START SCRAPING FUNCTIONS ###################
 
 def startScrape(cookie, folder_path, number_of_persons):
     stories = get_stories_tray(cookie)                                        
@@ -213,6 +221,10 @@ def startScrape(cookie, folder_path, number_of_persons):
 def scrape_from_web(cookie_path, folder_path, number_of_persons):
     return startScrape(getCookie(cookie_path), folder_path, number_of_persons)  
 
+
+
+############################ MAIN #######################
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="TOKEN PATH AND NUMBER OF PEOPLE SCRAPED")
     parser.add_argument("t", metavar="<token>", help="Insert the path of cookie file")
@@ -221,5 +233,4 @@ if __name__ == "__main__":
     cookie_path = args.t 
     number_of_persons = int(args.n)
 
-    FOLDER = "ig_media"
-    count_i, count_v = startScrape(getCookie(cookie_path), FOLDER, number_of_persons)
+    count_i, count_v = startScrape(getCookie(cookie_path), getFolderPath(), number_of_persons)
