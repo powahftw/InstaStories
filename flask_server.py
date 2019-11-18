@@ -16,7 +16,7 @@ def setLogFileList():
         return [log_line for log_line in o.readlines()]
 
 
-def setSettings(settings_dict):
+def saveSettings(settings_dict):
     with open("settings.json", "w+") as settings_json:
         json.dump(settings_dict, settings_json)
 
@@ -38,7 +38,8 @@ def index():
 
     if request.method == "POST":
         amountScraped = int(request.form["amountToScrape"])
-        count_i, count_v = scrape_from_web(getSettings()["cookie_path"], getSettings()["folder_path"], amountScraped)
+        mode = request.form["mode_dropdown"]
+        count_i, count_v = scrape_from_web(getSettings()["cookie_path"], getSettings()["folder_path"], amountScraped, mode)
         log_line = setLogFileList()
         return render_template('index.html', count_i = count_i, count_v = count_v, log_line = log_line)
     else:
@@ -53,15 +54,15 @@ def settings():
         # Creates the new dictionary for updated settings
         new_settings_dict = {"cookie_path": "token.txt", "folder_path": "ig_media"}
 
-        for form in request.form:
-            if len(request.form[form]) > 0:
-                new_settings_dict[form] = request.form[form]
+        for setting in request.form:
+            if len(request.form[setting]) > 0:
+                new_settings_dict[setting] = request.form[setting]
             elif os.path.exists("settings.json"):
                 with open("settings.json") as settings_json:
                     settings_json_dict = json.load(settings_json)
-                    new_settings_dict[form] = settings_json_dict[form]
+                    new_settings_dict[setting] = settings_json_dict[setting]
 
-        setSettings(new_settings_dict)
+        saveSettings(new_settings_dict)
 
         return render_template("settings.html", folder_path = getSettings()["folder_path"], cookie_path = getSettings()["cookie_path"])
     else:

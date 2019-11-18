@@ -28,11 +28,9 @@ body {
 }
 
 .custom_input {
-    font-size: 5vh;
+    font-size: 3vh;
     padding-top: 1vh;
     padding-bottom: 1vh;
-    padding-left: 5vh;
-    padding-right: 5vh;
 
 }
 
@@ -54,4 +52,10 @@ body {
     padding-top: 5vh;
     padding-bottom: 5vh;
     text-align: center;
+    font-size: 2vh;
+}
+
+#mode_dropdown {
+    height: 5vh;
+    margin-bottom: 1vh;
 }

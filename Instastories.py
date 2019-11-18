@@ -45,17 +45,10 @@ def posix_conv(posix_time):
     year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(year, month, day)
 
-def getFolderPath():
-    if os.path.exists("settings.json"):
-            with open('settings.json', 'r') as f:
-                paths_dict = json.load(f)
-            return paths_dict["folder_path"]
-    else:
-        return "ig_media"
 
 ############################## DOWNLOAD AND MANAGE STORIES AND JSON ######################################
 
-def download_today_stories(arr_ids, cookie, folder_path, number_of_persons):
+def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode_flag):
     """
     Download user stories. Create subdirectory for each user based on their username and media timestamp
     Ex:
@@ -109,34 +102,45 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons):
                 
             new_media = True
             
-            if element['media_type'] == 2: 
-                fn_video = os.path.join(time_directory, str(media_id) + ".mp4")
-                if not os.path.isfile(fn_video): 
-                    videos = element['video_versions']
-                    video_url = videos[0]['url']
-                    print("Video URL: {}".format(video_url))
-                    download_media(video_url, fn_video)
-                    count_v += 1
-                else:
-                    new_media = False
-                    print("Video media already saved")
 
-            if element['media_type'] == 1: 
-                fn_img = os.path.join(time_directory, str(media_id) + ".jpg")
-                if not os.path.isfile(fn_img):
-                    pics = element['image_versions2']['candidates']
-                    pic_url = pics[0]['url']
-                    print("Photo URL: {}".format(pic_url))
-                    download_media(pic_url, fn_img)
-                    count_i += 1
-                else:
-                    new_media = False
-                    print("Video media already saved")
+            """
+            MODE FLAGS: 
+
+            all: download both media and metadata
+            media: download only media
+            metadata: download only metadata
+            """
+
+            if mode_flag == "all" or mode_flag == "media":
+                if element['media_type'] == 2: 
+                    fn_video = os.path.join(time_directory, str(media_id) + ".mp4")
+                    if not os.path.isfile(fn_video): 
+                        videos = element['video_versions']
+                        video_url = videos[0]['url']
+                        print("Video URL: {}".format(video_url))
+                        download_media(video_url, fn_video)
+                        count_v += 1
+                    else:
+                        new_media = False
+                        print("Video media already saved")
+
+                if element['media_type'] == 1: 
+                    fn_img = os.path.join(time_directory, str(media_id) + ".jpg")
+                    if not os.path.isfile(fn_img):
+                        pics = element['image_versions2']['candidates']
+                        pic_url = pics[0]['url']
+                        print("Photo URL: {}".format(pic_url))
+                        download_media(pic_url, fn_img)
+                        count_i += 1
+                    else:
+                        new_media = False
+                        print("Video media already saved")
                     
-            if new_media: # Now save the metadata in a json file 
-                fn_json = os.path.join(time_directory, "json_log" + ".json")
-                with open(fn_json, "a+") as log:
-                    log.write(json.dumps(element))
+            if mode_flag == "all" or mode_flag == "metadata":
+                if new_media: # Now save the metadata in a json file 
+                    fn_json = os.path.join(time_directory, "json_log" + ".json")
+                    with open(fn_json, "a+") as log:
+                        log.write(json.dumps(element))
     
     print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids[:number_of_persons]), count_i, count_v)) 
     return count_i, count_v
@@ -206,10 +210,10 @@ def nicks_to_ids(usr_list):
 
 #################### START SCRAPING FUNCTIONS ###################
 
-def startScrape(cookie, folder_path, number_of_persons):
+def startScrape(cookie, folder_path, number_of_persons, mode_flag):
     stories = get_stories_tray(cookie)                                        
     ids = tray_to_ids(stories)                                                
-    count_i, count_v = download_today_stories(ids , cookie, folder_path, number_of_persons) 
+    count_i, count_v = download_today_stories(ids , cookie, folder_path, number_of_persons, mode_flag) 
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
@@ -218,8 +222,8 @@ def startScrape(cookie, folder_path, number_of_persons):
     
     return count_i, count_v
 
-def scrape_from_web(cookie_path, folder_path, number_of_persons):
-    return startScrape(getCookie(cookie_path), folder_path, number_of_persons)  
+def scrape_from_web(cookie_path, folder_path, number_of_persons, mode_flag):
+    return startScrape(getCookie(cookie_path), folder_path, number_of_persons, mode_flag)  
 
 
 
@@ -228,9 +232,16 @@ def scrape_from_web(cookie_path, folder_path, number_of_persons):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="TOKEN PATH AND NUMBER OF PEOPLE SCRAPED")
     parser.add_argument("t", metavar="<token>", help="Insert the path of cookie file")
-    parser.add_argument("n", metavar="<number_of_persons>", help="Insert the number of people to scrape")
+    parser.add_argument("n", metavar="<number of persons>", help="Insert the number of people to scrape")
+    parser.add_argument("f", metavar="<folder path>", help="Insert the destination folder in which you want to download files")
+    parser.add_argument("m", metavar="<mode>", help="Set the scraping mode:\n all: scrape media and metadata\n media: scrape only media\n metadata: scrape only metadata")
     args = parser.parse_args()
     cookie_path = args.t 
     number_of_persons = int(args.n)
+    folder_path = args.f
+    mode_flag = args.m
 
-    count_i, count_v = startScrape(getCookie(cookie_path), getFolderPath(), number_of_persons)
+    if mode_flag == "all" or mode_flag == "media" or mode_flag == "metadata":
+        count_i, count_v = startScrape(getCookie(cookie_path), folder_path, number_of_persons, mode_flag)
+    else:
+        print("Mode not recognized, the script will now close")
