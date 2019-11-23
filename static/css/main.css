@@ -46,6 +46,7 @@ body {
     margin-bottom: 4vh;
 }
 
+
 .logs{
     background-color: #1c1c1c;
     margin-top: 5vh;
@@ -53,6 +54,12 @@ body {
     padding-bottom: 5vh;
     text-align: center;
     font-size: 2vh;
+}
+
+.lastScrapedImages {
+    height: 30vh;
+    margin-bottom: 1vh;
+
 }
 
 #mode_dropdown {

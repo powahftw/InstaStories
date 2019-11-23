@@ -5,5 +5,5 @@ token.txt
 Flask
 __pycache__
 run_history.log
-test.py
 settings.json
+start_server.bat

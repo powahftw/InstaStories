@@ -5,6 +5,7 @@ import os
 import time
 import argparse
 import datetime
+import base64
 
 try:
     from terminaltables import AsciiTable
@@ -45,6 +46,14 @@ def posix_conv(posix_time):
     year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(year, month, day)
 
+def urlToBase64Image(url, media_type_flag):
+    if media_type_flag == "video":
+        content_type = "video/webm"
+    elif media_type_flag == "image":
+        content_type = "image/png"
+    image = base64.b64encode(requests.get(url).content).decode("utf-8")
+    return "data:{};base64,".format(content_type) + image
+
 
 ############################## DOWNLOAD AND MANAGE STORIES AND JSON ######################################
 
@@ -62,6 +71,7 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
     """
 
     count_i, count_v = 0, 0
+    base64_images = []
     
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
     
@@ -111,7 +121,7 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
             metadata: download only metadata
             """
 
-            if mode_flag == "all" or mode_flag == "media":
+            if mode_flag in ["all", "media"]:
                 if element['media_type'] == 2: 
                     fn_video = os.path.join(time_directory, str(media_id) + ".mp4")
                     if not os.path.isfile(fn_video): 
@@ -119,6 +129,7 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
                         video_url = videos[0]['url']
                         print("Video URL: {}".format(video_url))
                         download_media(video_url, fn_video)
+                        # base64_images.append(urlToBase64Image(video_url, "video"))
                         count_v += 1
                     else:
                         new_media = False
@@ -131,19 +142,20 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
                         pic_url = pics[0]['url']
                         print("Photo URL: {}".format(pic_url))
                         download_media(pic_url, fn_img)
+                        base64_images.append(urlToBase64Image(pic_url, "image"))
                         count_i += 1
                     else:
                         new_media = False
                         print("Video media already saved")
                     
-            if mode_flag == "all" or mode_flag == "metadata":
+            if mode_flag in ["all", "metadata"]:
                 if new_media: # Now save the metadata in a json file 
                     fn_json = os.path.join(time_directory, "json_log" + ".json")
                     with open(fn_json, "a+") as log:
                         log.write(json.dumps(element))
     
     print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids[:number_of_persons]), count_i, count_v)) 
-    return count_i, count_v
+    return count_i, count_v, base64_images
     
 def get_stories_tray(cookie):
     """
@@ -210,17 +222,17 @@ def nicks_to_ids(usr_list):
 
 #################### START SCRAPING FUNCTIONS ###################
 
-def startScrape(cookie, folder_path, number_of_persons, mode_flag):
+def startScrape(cookie, folder_path, number_of_persons, mode_flag = "all"):
     stories = get_stories_tray(cookie)                                        
     ids = tray_to_ids(stories)                                                
-    count_i, count_v = download_today_stories(ids , cookie, folder_path, number_of_persons, mode_flag) 
+    count_i, count_v, base64_images = download_today_stories(ids , cookie, folder_path, number_of_persons, mode_flag) 
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
     with open("run_history.log", "a+") as o:
         o.write("Date: {}, {} people scraped, {} IMGs and {} VIDEOs \n".format(timestampStr, number_of_persons, count_i, count_v))   
     
-    return count_i, count_v
+    return count_i, count_v, base64_images
 
 def scrape_from_web(cookie_path, folder_path, number_of_persons, mode_flag):
     return startScrape(getCookie(cookie_path), folder_path, number_of_persons, mode_flag)  
@@ -242,6 +254,6 @@ if __name__ == "__main__":
     mode_flag = args.m
 
     if mode_flag == "all" or mode_flag == "media" or mode_flag == "metadata":
-        count_i, count_v = startScrape(getCookie(cookie_path), folder_path, number_of_persons, mode_flag)
+        count_i, count_v, base64_images = startScrape(getCookie(cookie_path), folder_path, number_of_persons, mode_flag)
     else:
         print("Mode not recognized, the script will now close")
