@@ -20,7 +20,7 @@ EXTRA_ID = [None] # Get stories from unfollowed users by using their ID
 
 ################# UTILS FUNCTIONS #########################
 
-def getCookie(cookie_path):
+def get_cookie(cookie_path):
     token =      {
              "cookie": None,
              "user-agent": "Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+",
@@ -31,8 +31,11 @@ def getCookie(cookie_path):
         return token
 
 
-def download_media(url, path):
+def get_media(url, path, media_type, username):
     urllib.request.urlretrieve(url, path)
+    with open(path, "rb") as image:
+        base64_media = (base64.b64encode(image.read()).decode("utf-8"), media_type, username)
+        return base64_media
 
 def curr_date():
     year, month, day, _, _ = time.strftime("%Y,%m,%d,%H,%M").split(',')
@@ -45,15 +48,6 @@ def time_from_story(element):
 def posix_conv(posix_time):
     year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(year, month, day)
-
-def urlToBase64Image(url, media_type_flag):
-    if media_type_flag == "video":
-        content_type = "video/webm"
-    elif media_type_flag == "image":
-        content_type = "image/png"
-    image = base64.b64encode(requests.get(url).content).decode("utf-8")
-    return "data:{};base64,".format(content_type) + image
-
 
 ############################## DOWNLOAD AND MANAGE STORIES AND JSON ######################################
 
@@ -71,7 +65,7 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
     """
 
     count_i, count_v = 0, 0
-    base64_images = []
+    base64_media = []
     
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
     
@@ -128,8 +122,8 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
                         videos = element['video_versions']
                         video_url = videos[0]['url']
                         print("Video URL: {}".format(video_url))
-                        download_media(video_url, fn_video)
-                        # base64_images.append(urlToBase64Image(video_url, "video"))
+                        base64_media.append(get_media(video_url, fn_video,"video/mp4", username))
+
                         count_v += 1
                     else:
                         new_media = False
@@ -141,8 +135,7 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
                         pics = element['image_versions2']['candidates']
                         pic_url = pics[0]['url']
                         print("Photo URL: {}".format(pic_url))
-                        download_media(pic_url, fn_img)
-                        base64_images.append(urlToBase64Image(pic_url, "image"))
+                        base64_media.append(get_media(pic_url, fn_img, "img/png", username))
                         count_i += 1
                     else:
                         new_media = False
@@ -155,7 +148,7 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
                         log.write(json.dumps(element))
     
     print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids[:number_of_persons]), count_i, count_v)) 
-    return count_i, count_v, base64_images
+    return count_i, count_v, base64_media
     
 def get_stories_tray(cookie):
     """
@@ -222,20 +215,19 @@ def nicks_to_ids(usr_list):
 
 #################### START SCRAPING FUNCTIONS ###################
 
-def startScrape(cookie, folder_path, number_of_persons, mode_flag = "all"):
+def start_scrape(cookie_path, folder_path, number_of_persons, mode_flag = "all"):
+    cookie = get_cookie(cookie_path)
     stories = get_stories_tray(cookie)                                        
     ids = tray_to_ids(stories)                                                
-    count_i, count_v, base64_images = download_today_stories(ids , cookie, folder_path, number_of_persons, mode_flag) 
+    count_i, count_v, base64_media = download_today_stories(ids , cookie, folder_path, number_of_persons, mode_flag) 
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
     with open("run_history.log", "a+") as o:
         o.write("Date: {}, {} people scraped, {} IMGs and {} VIDEOs \n".format(timestampStr, number_of_persons, count_i, count_v))   
     
-    return count_i, count_v, base64_images
+    return count_i, count_v, base64_media
 
-def scrape_from_web(cookie_path, folder_path, number_of_persons, mode_flag):
-    return startScrape(getCookie(cookie_path), folder_path, number_of_persons, mode_flag)  
 
 
 
@@ -252,8 +244,7 @@ if __name__ == "__main__":
     number_of_persons = int(args.n)
     folder_path = args.f
     mode_flag = args.m
-
-    if mode_flag == "all" or mode_flag == "media" or mode_flag == "metadata":
-        count_i, count_v, base64_images = startScrape(getCookie(cookie_path), folder_path, number_of_persons, mode_flag)
+    if mode_flag in ["all", "media", "metadata"]:
+        count_i, count_v, base64_media = start_scrape(get_cookie(cookie_path), folder_path, number_of_persons, mode_flag)
     else:
         print("Mode not recognized, the script will now close")

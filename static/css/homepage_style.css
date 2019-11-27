@@ -1,0 +1,117 @@
+/* General section */
+    body {
+        background-color: #212121;
+    }
+
+    img {
+        vertical-align: baseline;
+    }
+    .custom-container {
+        padding-left: 10vh;
+        padding-right: 10vh;
+        padding-top: 5vh;
+    }
+
+    .logs-container {
+        margin-top: 5vh;
+        margin-right: 2vw;
+        margin-left: 2vw;
+        padding-top: 1vh;
+        padding-bottom: 1vh;
+        background-color: #393939;
+        color: white;
+
+    }
+
+    .rendered-stories {
+        width: 10vw;
+    }
+
+    .flex-container {
+        display: flex;
+        overflow: hidden;
+        will-change: overflow;
+        height: 100vh;
+        width: 100%; 
+        position: relative;
+    }
+
+
+    .images-window {
+        overflow: auto;
+        height: auto;
+        -webkit-overflow-scrolling: touch;
+        -ms-overflow-style: none;
+    }
+
+    .images-window::-webkit-scrollbar {
+    display: none;
+}
+
+/* Navbar section */
+    .navbar-custom {
+        background-color: #101010;
+    }
+
+    .navbar-logo {
+        height: 5vh;
+    }
+
+    .navbar-icon {
+        height: 3vh;
+        margin-left: 2vh;
+    }
+
+/* Main text */
+    .centered-text {
+        text-align: center;
+    }
+
+    .right-aligned-text {
+        text-align: right;
+    }
+
+    .main-desc {
+        font-size: 2vw;
+        color: white;
+        font-weight: 600;
+        margin-bottom: 10vh;
+    }
+
+    .main-text {
+        font-size: 1vw;
+        margin-bottom: 4vh;
+        color: white;
+    }
+
+    .counters-text {
+        font-size: 1vw;
+        color: white; 
+    }
+
+    .return-values {
+        padding-top: 2vh;
+    }
+/* Inputs, dropdowns ans buttons */
+    .custom-input {
+        border-radius: 20px;
+        height: 2vw;
+        width: 10vw;
+        padding-left: 1vw;
+    }
+
+    .custom-dropdown {
+        border-radius: 20px;
+        margin-top: 2vh;
+        height: 2vw;
+        width: 10vw;
+    }
+
+    .custom-btn {
+        margin-top: 5vh;
+        border-radius: 20px;
+        width: 10vw;
+        height: 5vh;
+
+    }
+
