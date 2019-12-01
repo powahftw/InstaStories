@@ -1,4 +1,8 @@
 /* General section */
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
         background-color: #212121;
     }
@@ -6,6 +10,11 @@
     img {
         vertical-align: baseline;
     }
+    
+    hr {
+        border-top: 1px solid white;
+    }
+
     .custom-container {
         padding-left: 10vh;
         padding-right: 10vh;
@@ -86,11 +95,16 @@
 
     .counters-text {
         font-size: 1vw;
-        color: white; 
+        color: white;
+        width:100%; 
     }
 
     .return-values {
         padding-top: 2vh;
+    }
+
+    .username-text {
+        color: white;
     }
 /* Inputs, dropdowns ans buttons */
     .custom-input {

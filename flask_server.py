@@ -26,18 +26,20 @@ def get_settings():
         return json.load(settings_json)
 
 def render_base64_media(base64_media):
-    """
-    base64_media structure: 
-        0 - Data
-        1 - content type
-        2 - username
-    """
     rendered_base64_media = []
+    index_username = None
     for media in base64_media:
-        content_tag = "img" if "img" in media[1] else "video controls"
-        html_string = "<" + content_tag + " src=\"data:{};base64,".format(media[1]) + media[0] + "\"" + " class=\"rendered-stories\"></" + content_tag + ">"
-        rendered_base64_media.append(Markup(html_string))
+        base64_data, media_type, username = media
+        content_tag = "img" if "img" in media_type else "video controls"
+        if username != index_username:
+            rendered_base64_media.append(Markup(f"<hr><div class=\"username-text\">{username}</div><br>"))
+            rendered_base64_media.append(Markup(f"<{content_tag} src=\"data:{media_type};base64,{base64_data}\" class=\"rendered-stories\"></{content_tag}>"))
+            index_username = username
+        else:
+            rendered_base64_media.append(Markup(f"<{content_tag} src=\"data:{media_type};base64,{base64_data}\" class=\"rendered-stories\"></{content_tag}>"))
     return rendered_base64_media
+        
+
 
 ################### ROUTES ###################
 
@@ -65,19 +67,26 @@ def settings():
     settings = get_settings()    # Gets the settings
     cookie_path = settings["cookie_path"] if "cookie_path" in settings else "token.txt"
     folder_path = settings["folder_path"]  if "folder_path" in settings else "ig_media"
+    updated_settings = {}
 
     if request.method == "POST":
-        updated_settings = {}
-
         for setting in request.form:
             if len(request.form[setting]) > 0:
                 updated_settings[setting] = request.form[setting]
         save_settings(updated_settings)
+    return render_template("settings.html", folder_path = updated_settings["folder_path"] if "folder_path" in updated_settings else folder_path, cookie_path = updated_settings["cookie_path"] if "cookie_path" in updated_settings else cookie_path)
+
+@app.route("/gallery/", methods=['GET'])
+def gallery():
+    settings = get_settings()    # Gets the settings
+    folder_path = settings["folder_path"]  if "folder_path" in settings else "ig_media"
+    
 
 
-        return render_template("settings.html", folder_path = updated_settings["folder_path"] if "folder_path" in updated_settings else folder_path, cookie_path = updated_settings["cookie_path"] if "cookie_path" in updated_settings else cookie_path)
-    else:
-        return render_template("settings.html", folder_path = folder_path, cookie_path = cookie_path)
+    return render_template("gallery.html")
+
+
+
 
 ################### RUN ###################
 if __name__ == "__main__":
