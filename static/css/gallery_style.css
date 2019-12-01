@@ -1,3 +1,30 @@
 body {
     color: white;
+    padding-bottom: 2vh;
+}
+
+.gallery-dropdown {
+    background-color: #212121;
+    color: white;
+    border: 1px solid #2a2a2a;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    text-align: left;
+    font-size: 15px;
+}
+
+.active, .gallery-dropdown:hover {
+  background-color: #2a2a2a;
+}
+
+.gallery-dropdown-content {
+    background-color: #212121;
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
+}
+
+.rendered-stories {
+    width: 10vw;
 }

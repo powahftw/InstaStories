@@ -2,6 +2,7 @@ from Instastories import start_scrape
 from flask import Flask, render_template, request, url_for, Markup
 import os
 import json
+import base64
 
 app = Flask(__name__)
 
@@ -38,6 +39,34 @@ def render_base64_media(base64_media):
         else:
             rendered_base64_media.append(Markup(f"<{content_tag} src=\"data:{media_type};base64,{base64_data}\" class=\"rendered-stories\"></{content_tag}>"))
     return rendered_base64_media
+
+def get_gallery(basepath):
+    rendered_gallery = []
+    if not os.path.exists(basepath):
+        return []
+    for user in os.listdir(basepath):
+        rendered_gallery.append(Markup(f"<button type=\"button\" class=\"gallery-dropdown\">{user}</button>"))
+        rendered_gallery.append(Markup(f"<div class=\"gallery-dropdown-content\">"))
+        user_path = os.path.join(basepath, user)
+        for date in os.listdir(user_path):
+            rendered_gallery.append(Markup(f"<button type=\"button\" class=\"gallery-dropdown\">{date}</button>"))
+            rendered_gallery.append(Markup(f"<div class=\"gallery-dropdown-content\">"))
+            date_path = os.path.join(user_path, date)
+            for image in os.listdir(date_path):
+                if "json" in image:
+                    break
+                image_path = os.path.join(date_path, image)
+                media_type = "img/png" if "jpg" in image_path else "video/mp4"
+                content_tag = "img" if "jpg" in image_path else "video controls"
+                with open(image_path, "rb") as image:
+                    base64_media = base64.b64encode(image.read()).decode("utf-8")
+                    rendered_base64_media = Markup(f"<{content_tag} src=\"data:{media_type};base64,{base64_media}\" class=\"rendered-stories\"></{content_tag}>")
+                rendered_gallery.append(rendered_base64_media)
+            rendered_gallery.append(Markup(f"</div>"))
+        rendered_gallery.append(Markup(f"</div>"))
+    return rendered_gallery
+    
+ 
         
 
 
@@ -80,10 +109,8 @@ def settings():
 def gallery():
     settings = get_settings()    # Gets the settings
     folder_path = settings["folder_path"]  if "folder_path" in settings else "ig_media"
-    
-
-
-    return render_template("gallery.html")
+    rendered_gallery = get_gallery(folder_path)
+    return render_template("gallery.html", rendered_gallery = rendered_gallery)
 
 
 
