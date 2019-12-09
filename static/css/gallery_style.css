@@ -3,6 +3,18 @@ body {
     padding-bottom: 2vh;
 }
 
+.urls {
+    display: block;
+    width: 10vw;
+    height: 4vh;
+    vertical-align: center;
+    background: #4E9CAF;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
 .gallery-dropdown {
     background-color: #212121;
     color: white;
