@@ -248,3 +248,4 @@ if __name__ == "__main__":
         count_i, count_v, base64_media = start_scrape(get_cookie(cookie_path), folder_path, number_of_persons, mode_flag)
     else:
         print("Mode not recognized, the script will now close")
+        

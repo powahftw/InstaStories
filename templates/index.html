@@ -1,35 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Insta scraper</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+{% extends 'base.html' %}
+
+{% block header %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/homepage_style.css') }}">
-    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
-</head>
-<body>
+{% endblock %}
 
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
-        <a class="navbar-brand" href={{url_for("index")}}><img src="static/images/logo.png" class="navbar-logo"/></a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-                <li class="nav-item active">
-                    <a class="nav-link" href={{url_for("index")}}><img src="static/images/home_icon.png" class="navbar-icon"><span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href={{url_for("index")}}><img src="static/images/gallery_icon.png" class="navbar-icon"></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href={{url_for("settings")}}><img src="static/images/settings_icon.png" class="navbar-icon"></a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-    <!-- END OF NAVBAR -->
-
+{% block content %}
     <!-- TWO COLUMNS CONTAINER -->
     <div class="custom-container">
         <div class="row">
@@ -78,6 +53,7 @@
             </div>
             <div class="col-sm">
                 <!-- OUTPUT COLUMN -->
+                <div class="main-desc centered-text">Your scraped images should appear here:</div>
                 <div class="flex-container">
                     <div class="images-window">
                         {% for image in images %}
@@ -90,6 +66,4 @@
         </div>
     </div>
 
-
-</body>
-</html>
+{% endblock %}

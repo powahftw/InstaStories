@@ -4,7 +4,6 @@
 }
 
 body {
-    font-family: 'Courier New', Courier, monospace;
     background-color: #171717;
     color: white;
 }
@@ -45,7 +44,7 @@ img {
 .container_box {
     background-color: #1c1c1c;
     margin-top: 4vh;
-    padding-bottom: 2vh;
+    padding: 2vh;
     margin-bottom: 4vh;
 }
 
