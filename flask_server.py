@@ -52,7 +52,7 @@ def get_rendered_folders(path, url):
 def get_rendered_media(path):
     rendered_media = []
     for media in os.listdir(path):
-        if  media.endswith(".json"): continue
+        if media.endswith(".json"): continue
         media_type = "img/png" if media.endswith(".jpg") else "video/mp4"
         with open(f"{path}\\{media}", "rb") as media_element:
             base64_media = base64.b64encode(media_element.read()).decode("utf-8")
@@ -81,7 +81,7 @@ def index():
 def settings():
     settings = get_settings()    # Gets the settings
     if request.method == "POST":
-        updated_settings = {}
+        updated_settings = settings
         for setting in request.form:
             if len(request.form[setting]) > 0:
                 updated_settings[setting] = request.form[setting]
