@@ -1,14 +1,12 @@
 from Instastories import start_scrape
 from flask import Flask, render_template, request, url_for, Markup
-import os
-import json
-import base64
+import os, json, base64, time, random, re
 
 app = Flask(__name__)
 
 ################### UTIL FUNCTIONS ###################
 
-def set_log_file_list():
+def get_log_file_list():
     log_line = []
     if not os.path.exists("run_history.log"):
         open("run_history.log", "w").close()
@@ -63,18 +61,22 @@ def get_rendered_media(path):
 
 @app.route("/", methods=['GET','POST'])
 def index():
-    log_line = set_log_file_list()
     settings = get_settings()
-    count_i, count_v = 0, 0
+    count_i, count_v, count_u = 0, 0, 0
     rendered_base64_media = []
     cookie_path = settings["cookie_path"] if "cookie_path" in settings else "token.txt"
     folder_path = settings["folder_path"]  if "folder_path" in settings else "ig_media"
     if request.method == "POST":
         amountScraped = int(request.form["amountToScrape"])
         mode = request.form["mode_dropdown"]
-        count_i, count_v, base64_media = start_scrape(cookie_path, folder_path, amountScraped, mode)
+        base64_media = start_scrape(cookie_path, folder_path, amountScraped, mode)
         rendered_base64_media = render_base64_media(base64_media)
-        log_line = set_log_file_list()
+    log_line = get_log_file_list()  
+    print(log_line) 
+    if len(log_line) > 0:
+        _, users_count, img_count, video_count = log_line[-1].split(",")
+        count_u, count_i, count_v = [int(val.strip().split(" ")[0]) for val in [users_count, img_count, video_count]]
+        
     return render_template('index.html', count_i = count_i, count_v = count_v, log_line = log_line, images = rendered_base64_media)
 	
 @app.route("/settings/", methods=['GET','POST'])

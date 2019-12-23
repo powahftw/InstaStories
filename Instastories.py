@@ -3,7 +3,6 @@ import json
 import urllib.request
 import os
 import time
-import argparse
 import datetime
 import base64
 
@@ -68,7 +67,7 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
     base64_media = []
     
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
-    
+    if number_of_persons == 0: number_of_persons = len(arr_ids)
     for idx, ids in enumerate(arr_ids[:number_of_persons]):
         url = userid_endpoint.format(ids)
         
@@ -190,7 +189,7 @@ def tray_to_ids(stories):
         username = element['user']['username']
         usr.append(username)
         
-    if PRINT_TABLE:# Toggleable option to print the table
+    if PRINT_TABLE: # Toggleable option to print the table
         print_ids_table(usr, ids)
     
     return ids
@@ -224,28 +223,6 @@ def start_scrape(cookie_path, folder_path, number_of_persons, mode_flag = "all")
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
     with open("run_history.log", "a+") as o:
-        o.write("Date: {}, {} people scraped, {} IMGs and {} VIDEOs \n".format(timestampStr, number_of_persons, count_i, count_v))   
+        o.write("Date: {}, {} people scraped, {} IMGs, {} VIDEOs \n".format(timestampStr, number_of_persons, count_i, count_v))   
     
-    return count_i, count_v, base64_media
-
-
-
-
-############################ MAIN #######################
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="TOKEN PATH AND NUMBER OF PEOPLE SCRAPED")
-    parser.add_argument("t", metavar="<token>", help="Insert the path of cookie file")
-    parser.add_argument("n", metavar="<number of persons>", help="Insert the number of people to scrape")
-    parser.add_argument("f", metavar="<folder path>", help="Insert the destination folder in which you want to download files")
-    parser.add_argument("m", metavar="<mode>", help="Set the scraping mode:\n all: scrape media and metadata\n media: scrape only media\n metadata: scrape only metadata")
-    args = parser.parse_args()
-    cookie_path = args.t 
-    number_of_persons = int(args.n)
-    folder_path = args.f
-    mode_flag = args.m
-    if mode_flag in ["all", "media", "metadata"]:
-        count_i, count_v, base64_media = start_scrape(get_cookie(cookie_path), folder_path, number_of_persons, mode_flag)
-    else:
-        print("Mode not recognized, the script will now close")
-        
+    return base64_media

@@ -6,4 +6,4 @@ Flask
 __pycache__
 run_history.log
 settings.json
-
+.vscode
