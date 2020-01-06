@@ -67,7 +67,7 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
     base64_media = []
     
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
-    if number_of_persons == 0: number_of_persons = len(arr_ids)
+    if number_of_persons <= 0: number_of_persons = len(arr_ids)
     for idx, ids in enumerate(arr_ids[:number_of_persons]):
         url = userid_endpoint.format(ids)
         
@@ -223,6 +223,6 @@ def start_scrape(cookie_path, folder_path, number_of_persons, mode_flag = "all")
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
     with open("run_history.log", "a+") as o:
-        o.write("Date: {}, {} people scraped, {} IMGs, {} VIDEOs \n".format(timestampStr, number_of_persons, count_i, count_v))   
+        o.write("Date: {} - {} people scraped - {} IMGs - {} VIDEOs \n".format(timestampStr, number_of_persons, count_i, count_v))   
     
     return base64_media

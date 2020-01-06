@@ -7,11 +7,10 @@ app = Flask(__name__)
 ################### UTIL FUNCTIONS ###################
 
 def get_log_file_list():
-    log_line = []
     if not os.path.exists("run_history.log"):
         open("run_history.log", "w").close()
     with open("run_history.log", "r") as o:
-        return [log_line for log_line in o.readlines()]
+        return [log_lines for log_lines in o.readlines()]
 
 def save_settings(settings):
     with open("settings.json", "w+") as settings_json:
@@ -57,6 +56,11 @@ def get_rendered_media(path):
         rendered_media.append(create_markup(base64_media, media_type))
     return rendered_media
 
+def get_stats_from_log_line(log_lines):
+    _, users_count, img_count, video_count = log_lines[-1].split(" - ")
+    count_u, count_i, count_v = [int(val.strip().split(" ")[0]) for val in [users_count, img_count, video_count]]
+    return count_u, count_i, count_v
+
 ################### ROUTES ###################
 
 @app.route("/", methods=['GET','POST'])
@@ -71,14 +75,11 @@ def index():
         mode = request.form["mode_dropdown"]
         base64_media = start_scrape(cookie_path, folder_path, amountScraped, mode)
         rendered_base64_media = render_base64_media(base64_media)
-    log_line = get_log_file_list()  
-    print(log_line) 
-    if len(log_line) > 0:
-        _, users_count, img_count, video_count = log_line[-1].split(",")
-        count_u, count_i, count_v = [int(val.strip().split(" ")[0]) for val in [users_count, img_count, video_count]]
-        
-    return render_template('index.html', count_i = count_i, count_v = count_v, log_line = log_line, images = rendered_base64_media)
-	
+    log_lines = get_log_file_list()   
+    if len(log_lines) > 0:
+        count_u, count_i, count_v = get_stats_from_log_line(log_lines)      
+    return render_template('index.html', count_i = count_i, count_v = count_v, log_lines = log_lines, images = rendered_base64_media)
+
 @app.route("/settings/", methods=['GET','POST'])
 def settings():
     settings = get_settings()    # Gets the settings
