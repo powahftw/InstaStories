@@ -67,7 +67,7 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
     base64_media = []
     
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
-    if number_of_persons <= -1: number_of_persons = len(arr_ids)
+    if number_of_persons < 0: number_of_persons = len(arr_ids)
     for idx, ids in enumerate(arr_ids[:number_of_persons]):
         url = userid_endpoint.format(ids)
         
