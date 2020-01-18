@@ -25,7 +25,7 @@
                                 <option value="media">Only media</option>
                                 <option value="metadata">Only metadata</option>
                             </select>
-                            <button name="scrapeBtn" type="submit" class="btn btn-warning custom-btn">Start scrape</button>
+                            <button name="scrapeBtn" type="submit" value="False"  class="btn btn-warning custom-btn">Start scrape</button>
                         </div>
                     </div>
                 </form>
@@ -44,7 +44,7 @@
                 <div class="logs-container">
                     <div class="main-text">Last scraping logs:</div>  
                     <div>
-                        {% for log_line_element in log_line %}
+                        {% for log_line_element in log_lines %}
                             <li>{{ log_line_element }} </li>
                         {% endfor %}
                     </div>

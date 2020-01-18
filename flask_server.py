@@ -1,19 +1,16 @@
 from Instastories import start_scrape
 from flask import Flask, render_template, request, url_for, Markup
-import os
-import json
-import base64
+import os, json, base64, time, random, re
 
 app = Flask(__name__)
 
 ################### UTIL FUNCTIONS ###################
 
-def set_log_file_list():
-    log_line = []
+def get_log_file_list():
     if not os.path.exists("run_history.log"):
         open("run_history.log", "w").close()
     with open("run_history.log", "r") as o:
-        return [log_line for log_line in o.readlines()]
+        return [log_lines for log_lines in o.readlines()]
 
 def save_settings(settings):
     with open("settings.json", "w+") as settings_json:
@@ -59,24 +56,30 @@ def get_rendered_media(path):
         rendered_media.append(create_markup(base64_media, media_type))
     return rendered_media
 
+def get_stats_from_log_line(log_lines):
+    _, users_count, img_count, video_count = log_lines[-1].split(" - ")
+    count_u, count_i, count_v = [int(val.strip().split(" ")[0]) for val in [users_count, img_count, video_count]]
+    return count_u, count_i, count_v
+
 ################### ROUTES ###################
 
 @app.route("/", methods=['GET','POST'])
 def index():
-    log_line = set_log_file_list()
     settings = get_settings()
-    count_i, count_v = 0, 0
+    count_i, count_v, count_u = 0, 0, 0
     rendered_base64_media = []
     cookie_path = settings["cookie_path"] if "cookie_path" in settings else "token.txt"
     folder_path = settings["folder_path"]  if "folder_path" in settings else "ig_media"
     if request.method == "POST":
         amountScraped = int(request.form["amountToScrape"])
         mode = request.form["mode_dropdown"]
-        count_i, count_v, base64_media = start_scrape(cookie_path, folder_path, amountScraped, mode)
+        base64_media = start_scrape(cookie_path, folder_path, amountScraped, mode)
         rendered_base64_media = render_base64_media(base64_media)
-        log_line = set_log_file_list()
-    return render_template('index.html', count_i = count_i, count_v = count_v, log_line = log_line, images = rendered_base64_media)
-	
+    log_lines = get_log_file_list()   
+    if len(log_lines) > 0:
+        count_u, count_i, count_v = get_stats_from_log_line(log_lines)      
+    return render_template('index.html', count_i = count_i, count_v = count_v, log_lines = log_lines, images = rendered_base64_media)
+
 @app.route("/settings/", methods=['GET','POST'])
 def settings():
     settings = get_settings()    # Gets the settings
