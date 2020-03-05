@@ -18,6 +18,22 @@ EXTRA_ID = [None] # Get stories from unfollowed users by using their ID
 
 
 ################# UTILS FUNCTIONS #########################
+def get_session_id(username, password):
+    LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/'
+    USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
+    session = requests.Session()
+    session.headers = {'User-Agent': USER_AGENT}
+    session.headers.update({'X-CSRFToken': 'NMFp6WC8vn1tM9qUzm2jRZqq17CWwpzz'})
+    login_data = {'username': username, 'password': password}
+    login = session.post(LOGIN_URL, data=login_data, allow_redirects=True)
+    try:
+        session_id = "sessionid=" + login.cookies.get_dict(domain=".instagram.com")["sessionid"]
+        with open("token.txt", "w") as token:
+            token.write(session_id)
+        return 0
+    except:
+        print("You have entered invalid credentials, please retry.")        
+        return 1
 
 def get_cookie(cookie_path):
     token =      {
@@ -210,19 +226,22 @@ def nicks_to_ids(usr_list):
         print(d["graphql"]["user"]["edge_followed_by"]["count"])
         print("{} - ID: {}".format(user, d["graphql"]["user"]["id"]))
         ids.append(d["graphql"]["user"]["id"])
-    return ids    
+    return ids   
 
 #################### START SCRAPING FUNCTIONS ###################
 
 def start_scrape(cookie_path, folder_path, number_of_persons, mode_flag = "all"):
     cookie = get_cookie(cookie_path)
     stories = get_stories_tray(cookie)                                        
-    ids = tray_to_ids(stories)                                                
+    ids = tray_to_ids(stories)                                              
     count_i, count_v, base64_media = download_today_stories(ids , cookie, folder_path, number_of_persons, mode_flag) 
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
     with open("run_history.log", "a+") as o:
-        o.write("Date: {} - {} people scraped - {} IMGs - {} VIDEOs \n".format(timestampStr, number_of_persons, count_i, count_v))   
-    
+        if number_of_persons < 0:
+            scraped_users = len(ids)
+        else:
+            scraped_users = number_of_persons
+        o.write("Date: {} - {} people scraped - {} IMGs - {} VIDEOs \n".format(timestampStr, scraped_users, count_i, count_v))   
     return base64_media
