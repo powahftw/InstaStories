@@ -95,7 +95,8 @@ def settings():
 @app.route("/settings/logout")
 def logout():
     settings = get_settings()
-    if "session_id" in settings: del settings["session_id"]
+    if "session_id" in settings: settings.pop("session_id")
+    save_settings(settings)
     return render_template("settings.html", folder_path = get_folder_path(), disclaimer = {"logged_in": False, "login_error": False})
 
 @app.route("/gallery/", methods=['GET'], defaults = {"username": None, "date": None})

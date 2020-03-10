@@ -42,8 +42,6 @@ def store_session_id(username, password):
         settings = get_settings()
         settings["session_id"] = session_id_string
         save_settings(settings)
-        with open("token.txt", "w") as token:
-            token.write(session_id_string)
         return 0
     else:
         print("You have entered invalid credentials, please retry.")        
