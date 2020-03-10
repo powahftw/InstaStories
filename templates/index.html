@@ -14,10 +14,7 @@
                 <form action="/" method="POST">
                     <!-- DESC AND INPUTS ROW -->
                     <div class="row">
-                        {% if empty_form %}
-                            <div style="width: 100%;"><p class="text-danger text-center">You must enter a number in range -1 to infinite</p></div>
-                        {% endif %}
-                        {% if not logged_in %}
+                        {% if disclaimer['logged_in_error'] %}
                             <div style="width: 100%;"><p class="text-danger text-center">You must login in the "Settings" page before proceed</p></div>
                         {% endif %}
                         <div class="col-sm-8 right-aligned-text">

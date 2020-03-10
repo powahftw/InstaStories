@@ -1,26 +1,23 @@
-from Instastories import start_scrape, get_session_id
+from Instastories import start_scrape, store_session_id, get_settings, save_settings
 from flask import Flask, render_template, request, url_for, Markup
 import os, json, base64, time, random, re
 
 app = Flask(__name__)
 
 ################### UTIL FUNCTIONS ###################
+def check_login_status():
+    settings = get_settings()
+    return True if "session_id" in settings else False
+
+def get_folder_path():
+    settings = get_settings()
+    return settings["folder_path"] if "folder_path" in settings else "ig_media"
 
 def get_log_file_list():
     if not os.path.exists("run_history.log"):
         open("run_history.log", "w").close()
     with open("run_history.log", "r") as o:
         return [log_lines for log_lines in o.readlines()]
-
-def save_settings(settings):
-    with open("settings.json", "w+") as settings_json:
-        json.dump(settings, settings_json)
-
-def get_settings():
-    if not os.path.exists("settings.json"):
-        return {}
-    with open("settings.json", "r") as settings_json:
-        return json.load(settings_json)
 
 def create_markup(base64_data, media_type = None, username = None):
     if username != None:
@@ -68,52 +65,44 @@ def index():
     settings = get_settings()
     count_i, count_v, count_u = 0, 0, 0
     rendered_base64_media = []
-    cookie_path = settings["cookie_path"] if "cookie_path" in settings else "token.txt"
-    folder_path = settings["folder_path"]  if "folder_path" in settings else "ig_media"
-    if request.method == "POST":
-        if not os.path.exists("token.txt"):
-            log_lines = get_log_file_list() 
-            return render_template('index.html', count_i= count_i, count_v = count_v, log_lines = log_lines, images = rendered_base64_media, empty_form = False, logged_in = False)
-        if request.form["amountToScrape"].isnumeric():
-            amountScraped = int(request.form["amountToScrape"])
-        else:
-            log_lines = get_log_file_list() 
-            return render_template('index.html', count_i= count_i, count_v = count_v, log_lines = log_lines, images = rendered_base64_media, empty_form = True, logged_in = True)
+    folder_path = get_folder_path()
+    if request.method == "POST" and check_login_status():
+        amount_to_scrape = int(request.form["amountToScrape"]) if request.form["amountToScrape"].isnumeric() else -1
         mode = request.form["mode_dropdown"]
-        base64_media = start_scrape(cookie_path, folder_path, amountScraped, mode)
+        base64_media = start_scrape(folder_path, amount_to_scrape, mode)
         rendered_base64_media = render_base64_media(base64_media)
+    logged_in_error = request.method == "POST" and not check_login_status()   
     log_lines = get_log_file_list()   
     if len(log_lines) > 0:
         count_u, count_i, count_v = get_stats_from_log_line(log_lines)      
-    return render_template('index.html', count_i = count_i, count_v = count_v, log_lines = log_lines, images = rendered_base64_media, empty_form = False, logged_in = True)
+    return render_template('index.html', count_i = count_i, count_v = count_v, log_lines = log_lines, images = rendered_base64_media, disclaimer = {"logged_in_error": logged_in_error})
 
 @app.route("/settings/", methods=['GET','POST'])
 def settings():
-    credentials_error = False
+    login_error = False
     settings = get_settings()    # Gets the settings
     if request.method == "POST":
         updated_settings = settings
         for setting in request.form:
-            if len(request.form[setting]) > 0:
+            if len(request.form[setting]) > 0 and not ("username" or "password") in request.form:
                 updated_settings[setting] = request.form[setting]
         save_settings(updated_settings)
-        if request.form["username"] and request.form["password"] != "":
-            if not get_session_id(request.form["username"], request.form["password"]) == 0:
-                credentials_error = True
-    cookie_path = settings["cookie_path"] if "cookie_path" in settings else "token.txt"
-    folder_path = settings["folder_path"]  if "folder_path" in settings else "ig_media"
-    if os.path.exists("token.txt"):
-        logged_in = True
-    else:
-        logged_in = False
-    return render_template("settings.html", folder_path = folder_path, cookie_path = cookie_path, logged_in = logged_in, credentials_error = credentials_error)
+        if ("username" and "password") in request.form:
+            login_error = store_session_id(request.form["username"], request.form["password"])
+    logged_in = check_login_status()
+    return render_template("settings.html", folder_path = get_folder_path(), disclaimer = {"logged_in": logged_in, "login_error": login_error})
+
+@app.route("/settings/logout")
+def logout():
+    settings = get_settings()
+    if "session_id" in settings: del settings["session_id"]
+    return render_template("settings.html", folder_path = get_folder_path(), disclaimer = {"logged_in": False, "login_error": False})
 
 @app.route("/gallery/", methods=['GET'], defaults = {"username": None, "date": None})
 @app.route("/gallery/<username>/", methods=['GET'], defaults = {"date": None})
 @app.route("/gallery/<username>/<date>/", methods=['GET'])
 def gallery(username, date):
-    settings = get_settings()
-    folder_path = settings["folder_path"]  if "folder_path" in settings else "ig_media" 
+    folder_path = get_folder_path() 
     if date != None:
         date_path = os.path.join(os.path.join(folder_path, username), date)
         rendered_items = get_rendered_media(date_path)
