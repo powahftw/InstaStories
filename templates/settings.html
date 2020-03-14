@@ -1,32 +1,41 @@
 {% extends 'base.html' %}
 
-{% block header %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
-{% endblock %}
-
 {% block content %}
-        <div class="container container_box">
-            <p class="settings_title text-center">SETTINGS</p>
-            <h4 class="text-center" style="margin-bottom: 5vh">There are the settings, you can display and choose the path for the "download" folder and the path to "token.txt"</h4>
-            <form action="/settings" method="POST">
-                {%if disclaimer["login_error"] %}
-                    <div style="width: 100%;"><p class="text-danger text-center">You have entered invalid credentials!</p></div>
-                {% endif %}
-                {% if not disclaimer["logged_in"] %}
-                    <h6 class="text-danger">USERNAME: </h6>
-                    <input type="text" name="username" style="margin-left: 5vh;"><br><br>
-
-                    <h6 class="text-danger">PASSWORD: </h6>
-                    <input type="password" name="password" style="margin-left: 5vh;"><br><br>
-                {% endif %}
-                <h6 class="text-danger">DOWNLOAD FOLDER PATH: </h6> <p>{{folder_path}}</p>
-                <h6 style="padding-left: 5vh">Change the download folder name: </h6>
-                <input type="text" name ="folder_path" style="margin-left: 5vh"><br><br>
-
-                <button type="submit" id="submitBtn" class="btn btn-warning" style="margin-top: 5vh; margin-left: 5vh">Click here to update settings</button>
-            </form>
-            {% if disclaimer["logged_in"] %}
-                <button class="btn btn-danger" onclick="location.href='/settings/logout'" style="margin-top: 5vh; margin-left: 5vh">Logout</button>
+{% if not disclaimer["logged_in"] %}
+<form action="/settings" method="POST">
+    <div class="settings-login-container">
+        <p>If it's the first time you use this tool, log in.</p>
+        <div class="settings-login-box">
+            <h2>Please log in</h2>
+            {% if disclaimer["login_error"] %}
+                <div class="errors">You entered invalid credentials</div>
             {% endif %}
+            <label for="username">username</label><input class="input" type="text" name="username" id="username">
+            <label for="password">password</label><input class="input" type="password" name="password" id="password">
+            <button class="btn" type="submit" id="submitBtn">LOG IN</button>
         </div>
+
+    </div>
+</form>
+{% endif %}
+
+{% if disclaimer["logged_in"] %}
+<form action="/settings" method="POST">
+    <div class="settings-container">
+        <div class="settings-settings-box">
+            <ul>
+                <li><h2>Settings</h2></li>
+                <li><label for="folder_path">Download folder path: {{folder_path}}</label><input class="input" id="folder_path" type="text" name ="folder_path" class="settings-input"></li>
+                <ul>
+                    <li><button type="submit" id="submitBtn" class="btn sub-btn">UPDATE SETTINGS</button></li>
+                    <li><button class="btn sub-btn logout-btn" onclick="location.href='/settings/logout'">LOG OUT</button></li>
+                    <li><button class="btn sub-btn delete-btn" onclick="location.href='/settings/delete-media'">DELETE ALL MEDIA</button></li>
+                </ul>
+            </ul>    
+        </div>
+    </div>
+</form>
+{% endif %}
+
+       
 {% endblock %}

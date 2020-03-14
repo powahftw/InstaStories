@@ -13,6 +13,7 @@ except ImportError as e:
     PRINT_TABLE = False
 
 
+SETTINGS_PATH = "settings.json"
 EXTRA_ID = [None] # Get stories from unfollowed users by using their ID
 #EXTRA_USR = ["xxxx", "yyyy", "zzzz"] # Get stories from unfollowed users by using their Nicknames, deprecated due to Instagram changes
 
@@ -20,13 +21,13 @@ EXTRA_ID = [None] # Get stories from unfollowed users by using their ID
 ################# UTILS FUNCTIONS #########################
 
 def save_settings(settings):
-    with open("settings.json", "w+") as settings_json:
+    with open(SETTINGS_PATH, "w+") as settings_json:
         json.dump(settings, settings_json)
 
 def get_settings():
-    if not os.path.exists("settings.json"):
+    if not os.path.exists(SETTINGS_PATH):
         return {}
-    with open("settings.json", "r") as settings_json:
+    with open(SETTINGS_PATH, "r") as settings_json:
         return json.load(settings_json)
         
 def store_session_id(username, password):
@@ -250,10 +251,7 @@ def start_scrape(folder_path, number_of_persons, mode_flag = "all"):
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
     with open("run_history.log", "a+") as o:
-        scraped_users = len(ids) if number_of_persons < 0 or number_of_persons > len(ids) else number_of_persons
+        scraped_users = len(ids)
         o.write(f"Date: {timestampStr} - {scraped_users} people scraped - {count_i} IMGs - {count_v} VIDEOs \n")
 
     return base64_media
-
-
-store_session_id("fisronehilat", "asd12345%")

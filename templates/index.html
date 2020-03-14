@@ -1,72 +1,58 @@
 {% extends 'base.html' %}
 
 {% block header %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/homepage_style.css') }}">
 {% endblock %}
 
 {% block content %}
-    <!-- TWO COLUMNS CONTAINER -->
-    <div class="custom-container">
-        <div class="row">
-            <div class="col-sm centered-text">
-                <!-- INPUT COLUMN -->
-                <div class="main-desc">Welcome to the Instagram stories scraper! <br> Please complie the following forms to start.</div>
-                <form action="/" method="POST">
-                    <!-- DESC AND INPUTS ROW -->
-                    <div class="row">
-                        {% if disclaimer['logged_in_error'] %}
-                            <div style="width: 100%;"><p class="text-danger text-center">You must login in the "Settings" page before proceed</p></div>
-                        {% endif %}
-                        <div class="col-sm-8 right-aligned-text">
-                            <div class="main-text">Insert the number of people to scrape: </div>
-                            <div class="main-text">Insert the scraping mode: </div>
-                        </div>
-                        <div class="col-sm-2">
-                            <input type="text" name="amountToScrape" class="custom-input"/>
-                            <select name="mode_dropdown" class="btn btn-success custom-dropdown">
-                                <option value="all">All</option>
-                                <option value="media">Only media</option>
-                                <option value="metadata">Only metadata</option>
-                            </select>
-                            <button name="scrapeBtn" type="submit" value="False"  class="btn btn-warning custom-btn">Start scrape</button>
-                        </div>
-                    </div>
-                </form>
-                <!-- OUTPUT VALUES ROW-->
-                <form method="GET">
-                    <div class="row justify-content-center return-values">
-                        <div class="col-sm-3">
-                            <div class="counters-text">Total images scraped:<br>{{count_i}}</div>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="counters-text">Total videos scraped:<br>{{count_v}}</div>
-                        </div>
-                    </div>
-                </form>
-                <!-- LOG ROW -->
-                <div class="logs-container">
-                    <div class="main-text">Last scraping logs:</div>  
-                    <div>
-                        {% for log_line_element in log_lines %}
-                            <li>{{ log_line_element }} </li>
-                        {% endfor %}
-                    </div>
-                </div>
-                <!-- END OF INPUT COLUMN -->
+
+    <div class="index-logo">
+        <a href="/"><img src="/static/images/logo.png" alt=""></a>
+        <h1>InstaStories</h1>
+    </div>
+    <form action="/" method="POST">
+        <div class="index-scraping-sect">
+            {% if disclaimer['logged_in_error'] %}
+                <div class="errors">You must login in settings before start scraping</div>
+            {% endif %}
+            <ul>
+                <li><h3>Insert the number of people to scrape</h3></li>
+                <li><input type="text" name="amountToScrape" class="input"/></li>
+                <li><button class="btn" name="scrapeBtn" value="False" type="submit">START SCRAPE</button></li>
+            </ul>
+            <ul class="index-settings-btn">
+                <li><div class="btn sub-btn" onclick="setPanel('logs')">LOGS</div></li>
+                <li><div class="btn sub-btn" onclick="setPanel('images')">LAST SCRAPED IMAGES</div></li>
+                <li><div class="btn sub-btn" onclick="setPanel('advanced')">ADVANCED</div></li>
+            </ul>
+            <div class="index-logs" id="index-logs">
+                <h2>LOGS</h2>
+                <ul>
+                    {% for log_line_element in log_lines %}
+                        <li>{{ log_line_element }} </li>
+                    {% endfor %}
+                </ul>
             </div>
-            <div class="col-sm">
-                <!-- OUTPUT COLUMN -->
-                <div class="main-desc centered-text">Your scraped images should appear here:</div>
-                <div class="flex-container">
-                    <div class="images-window">
-                        {% for image in images %}
-                            {{ image }}
-                        {% endfor %}
-                    </div>
+
+            <div class="index-images" id="index-images">
+                <h2>LAST SCRAPED IMAGES</h2>
+                {% for image in images %}
+                    {{ image }}
+                {% endfor %}
+            </div>
+
+            <div class="index-advanced" id="index-advanced">
+                <div class="index-mode">
+                    <h2>SCRAPING MODE</h2>
+                    <div class="checkgroup"><label for="all">All</label><input class="radio-btn" name="mode_dropdown" type="radio" value="all" id="all" checked /></div>
+                    <div class="checkgroup"><label for="media">Media</label><input class="radio-btn" name="mode_dropdown" type="radio" value="media" id="media" /></div>
+                    <div class="checkgroup"><label for="metadata">Metadata</label><input class="radio-btn"  name="mode_dropdown" type="radio" value="metadata" id="metadata" /></div>
                 </div>
-                <!-- END OF OUTPUT COLUMN -->
+                
             </div>
         </div>
-    </div>
+    </form>
 
+    <footer>
+        <h2>InstaStories</h2>
+    </footer>
 {% endblock %}

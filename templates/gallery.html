@@ -5,9 +5,12 @@
 {% endblock %}
 
 {% block content %}
-    {% for item in rendered_items %}
-        {{ item }}
-    {% endfor %}
+    <div class="gallery-container">
+        <ul>
+            {% for item in rendered_items %}
+                <li>{{ item }}</li>
+            {% endfor %}
 
-
+        </ul>
+    </div>
 {% endblock %}

@@ -1,6 +1,6 @@
 from Instastories import start_scrape, store_session_id, get_settings, save_settings
 from flask import Flask, render_template, request, url_for, Markup
-import os, json, base64, time, random, re
+import os, json, base64, time, random, shutil
 
 app = Flask(__name__)
 
@@ -40,7 +40,7 @@ def get_rendered_folders(path, url):
     rendered_folders = []
     if not os.path.exists(path) : return []
     for folder in os.listdir(path):
-        rendered_folders.append(Markup(f"<a href=\"{url}{folder}\" class=\"urls\">{folder}</a>"))
+        rendered_folders.append(Markup(f"<div class=\"gallery-folders\"><a href=\"{url}{folder}\">{folder}</a></div>"))
     return rendered_folders
 
 def get_rendered_media(path):
@@ -95,9 +95,14 @@ def settings():
 @app.route("/settings/logout")
 def logout():
     settings = get_settings()
-    if "session_id" in settings: settings.pop("session_id")
+    settings.pop("session_id", None)
     save_settings(settings)
     return render_template("settings.html", folder_path = get_folder_path(), disclaimer = {"logged_in": False, "login_error": False})
+
+@app.route("/settings/delete-media")
+def delete_media():
+    folder_path = get_folder_path()
+    shutil.rmtree(folder_path)
 
 @app.route("/gallery/", methods=['GET'], defaults = {"username": None, "date": None})
 @app.route("/gallery/<username>/", methods=['GET'], defaults = {"date": None})

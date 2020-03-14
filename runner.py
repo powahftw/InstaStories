@@ -1,5 +1,5 @@
-from Instastories import start_scrape, store_session_id
-import argparse, random, time, os
+from Instastories import start_scrape, store_session_id, get_settings, save_settings
+import argparse, random, time, os, getpass
 
 COOKIE_PATH = "token.txt"
 
@@ -17,15 +17,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
     number_of_persons, folder_path, mode_flag, loop_flag, base_delay, variance = args.n, args.f, args.m, args.l, args.d, args.dp
 
-    if args.login:
-        username = input("Please insert your instagram username: ")
-        password = input("Please insert your instagram password: ")
+    if args.login and not "session_id" in get_settings():
+        username = input("Username: ")
+        password = getpass.getpass()
         store_session_id(username, password)
+    else:
+        print("\n\nYou are already logged in, start scraping\n\n")
 
-    if os.path.exists("token.txt"):
+    if "session_id" in get_settings():
         running = True
         while running:
-            base64_media = start_scrape(COOKIE_PATH, folder_path, number_of_persons, mode_flag)
+            base64_media = start_scrape(folder_path, number_of_persons, mode_flag)
             if loop_flag == "single": running = False
             elif loop_flag == "loop":
                 variance = int(base_delay / 100 * variance)

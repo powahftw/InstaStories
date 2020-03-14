@@ -1,0 +1,297 @@
+
+/* BASE */
+
+
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: white;
+    background-color: #212121;
+
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+nav {
+    display: block;
+    height: 100vh;
+    width: 70px;
+    background-color: #131313;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+}
+
+nav img {
+    width: 30px;
+}
+
+nav ul li {
+    padding: 10px 0;
+}
+
+.logo {
+    width: 50px;
+}
+
+.container {
+    height: 100vh;
+    padding-left: 70px;
+}
+
+.btn {
+    background-color: #00FFC2;  
+    padding: 20px 30px;
+    border: none;
+    border-radius: 60px;
+    color: #212121;
+    font-weight: bold;
+    font-size: 18px;
+    margin: 0 10px;
+    cursor: pointer;
+}
+
+.sub-btn {
+    padding: 5px 20px;
+    font-size: 14px;
+}
+
+.logout-btn {
+    background-color: #F64343;
+}
+
+.delete-btn {
+    background-color: #fff455;
+}
+
+.radio-btn {
+    height: 30px;
+    width: 30px;
+    background-color: #eee;
+    border-radius: 50%;
+}
+
+.errors {
+    color: #F64343;
+    padding-bottom: 10px;
+}
+
+/* INDEX.HTML */
+
+.index-logo {
+    text-align: center;
+    padding-top: 17.5vh;
+}
+
+.index-logo img {
+    width: 400px;
+    margin: -20px;
+}
+
+.index-logo h1 {
+    font-size: 40px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.index-scraping-sect {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.index-scraping-sect h3{
+    font-weight: normal;
+    font-size: 20px;
+}
+
+.index-scraping-sect ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.input {
+    display: block;
+    margin: 0 10px;
+    border: none;
+    border-radius: 60px;
+    height: 30px;
+    width: 120px;
+    text-indent: 10px;
+}
+
+.index-settings-btn {
+    margin: 30px;
+}
+
+.index-logs {
+    margin-top: 30px;
+    background-color: #131313;
+    height: 16vh;
+    padding: 20px;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.index-images {
+    display: none;
+    background-color: #131313;
+    padding: 20px 20%;
+    min-height: 12vh;
+}
+
+.index-mode h2, .index-images h2, .index-logs h2 {
+    font-size: 16px;
+}
+
+.index-logs ul {
+    display: flex;
+    flex-direction: column;
+}
+
+.index-logs ul li {
+    padding: 10px 0;
+    font-size: 20px;
+}
+
+.index-advanced {
+    display: none;
+    margin-top: 30px;
+    background-color: #131313;
+    height: 12vh;
+    padding: 20px;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.checkgroup {
+    display: inline-block;
+    text-align: center;
+}
+
+.checkgroup label{
+    display: block;
+}
+
+.checkgroup input {
+    margin: 5px 40px;
+}
+
+.rendered-stories {
+    width: 200px;
+    margin: 20px;
+}
+
+.settings-login-container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 20vh;
+}
+
+.settings-login-box {
+    background-color: #131313;
+    border-radius: 50px;
+    padding: 50px;
+    width: 250px;
+    display: inline-block;
+}
+
+.settings-login-box label {
+    text-align: left;
+}
+
+.settings-login-box input {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 30px;
+}
+
+.gallery-container {
+    padding: 50px;
+    align-items: center;
+    background-color: #161616;
+    height: 100vh;
+    margin: 0 170px;
+}
+
+.gallery-folders {
+    background-image: url(/static/images/folder.png);
+    background-repeat: no-repeat;
+    height: 182px;
+    width: 235px;
+    margin: 20px;
+    padding-top: 91px;
+    text-align: center;
+}
+
+.gallery-folders a{
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #212121;
+}
+
+.gallery-container ul{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.settings-container {
+    background-color: #161616;
+    height: 100vh;
+    margin: 0px 170px;
+}
+
+.settings-settings-box ul{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.settings-settings-box ul li {
+    margin: 20px 0;
+}
+
+.settings-settings-box label {
+    padding-left: 330px;
+}
+
+.settings-settings-box .input {
+    width: 800px;
+}
+
+.settings-settings-box ul ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+footer {
+    background-color: #00FFC2;
+    color: black;
+    text-align: center;
+    padding: 1px;
+    margin-top: -20px;
+}
