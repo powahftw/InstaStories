@@ -13,21 +13,49 @@ except ImportError as e:
     PRINT_TABLE = False
 
 
+SETTINGS_PATH = "settings.json"
 EXTRA_ID = [None] # Get stories from unfollowed users by using their ID
 #EXTRA_USR = ["xxxx", "yyyy", "zzzz"] # Get stories from unfollowed users by using their Nicknames, deprecated due to Instagram changes
 
 
 ################# UTILS FUNCTIONS #########################
 
-def get_cookie(cookie_path):
+def save_settings(settings):
+    with open(SETTINGS_PATH, "w+") as settings_json:
+        json.dump(settings, settings_json)
+
+def get_settings():
+    if not os.path.exists(SETTINGS_PATH):
+        return {}
+    with open(SETTINGS_PATH, "r") as settings_json:
+        return json.load(settings_json)
+        
+def store_session_id(username, password):
+    LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/'
+    USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
+    session = requests.Session()
+    session.headers = {'User-Agent': USER_AGENT, 'X-CSRFToken': 'NMFp6WC8vn1tM9qUzm2jRZqq17CWwpzz'}
+    login_data = {'username': username, 'password': password}
+    login = session.post(LOGIN_URL, data = login_data, allow_redirects = True)
+    if "sessionid" in login.cookies.get_dict(domain = ".instagram.com"):
+        session_id = login.cookies.get_dict(domain = ".instagram.com")["sessionid"]
+        session_id_string = f"sessionid={session_id}"
+        settings = get_settings()
+        settings["session_id"] = session_id_string
+        save_settings(settings)
+        return 0
+    else:
+        print("You have entered invalid credentials, please retry.")        
+        return 1
+
+def get_cookie():
     token =      {
              "cookie": None,
              "user-agent": "Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+",
              "cache-control": "no-cache" }
-
-    with open(cookie_path, "r") as f:
-        token["cookie"] = f.read()
-        return token
+    settings = get_settings()
+    token["cookie"] = settings["session_id"]
+    return token
 
 
 def get_media(url, path, media_type, username):
@@ -210,19 +238,20 @@ def nicks_to_ids(usr_list):
         print(d["graphql"]["user"]["edge_followed_by"]["count"])
         print("{} - ID: {}".format(user, d["graphql"]["user"]["id"]))
         ids.append(d["graphql"]["user"]["id"])
-    return ids    
+    return ids   
 
 #################### START SCRAPING FUNCTIONS ###################
 
-def start_scrape(cookie_path, folder_path, number_of_persons, mode_flag = "all"):
-    cookie = get_cookie(cookie_path)
+def start_scrape(folder_path, number_of_persons, mode_flag = "all"):
+    cookie = get_cookie()
     stories = get_stories_tray(cookie)                                        
-    ids = tray_to_ids(stories)                                                
+    ids = tray_to_ids(stories)                                              
     count_i, count_v, base64_media = download_today_stories(ids , cookie, folder_path, number_of_persons, mode_flag) 
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
     with open("run_history.log", "a+") as o:
-        o.write("Date: {} - {} people scraped - {} IMGs - {} VIDEOs \n".format(timestampStr, number_of_persons, count_i, count_v))   
-    
+        scraped_users = len(ids)
+        o.write(f"Date: {timestampStr} - {scraped_users} people scraped - {count_i} IMGs - {count_v} VIDEOs \n")
+
     return base64_media
