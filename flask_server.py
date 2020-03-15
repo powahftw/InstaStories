@@ -3,8 +3,10 @@ from flask import Flask, render_template, request, url_for, Markup
 import os, json, base64, time, random, shutil
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 ################### UTIL FUNCTIONS ###################
+
 def check_login_status():
     settings = get_settings()
     return True if "session_id" in settings else False
@@ -36,11 +38,11 @@ def render_base64_media(base64_media):
         rendered_base64_media.append(create_markup(base64_data, media_type))
     return rendered_base64_media
 
-def get_rendered_folders(path, url):
-    rendered_folders = []
+def get_folders(path, url):
+    rendered_folders = [] # List of {url: X name: Y}
     if not os.path.exists(path) : return []
     for folder in os.listdir(path):
-        rendered_folders.append(Markup(f"<div class=\"gallery-folders\"><a href=\"{url}{folder}\">{folder}</a></div>"))
+        rendered_folders.append({'type': 'folder', 'url': f"{url}{folder}", 'name': f"{folder}"})
     return rendered_folders
 
 def get_rendered_media(path):
@@ -62,8 +64,6 @@ def get_stats_from_log_line(log_lines):
 
 @app.route("/", methods=['GET','POST'])
 def index():
-    settings = get_settings()
-    count_i, count_v, count_u = 0, 0, 0
     rendered_base64_media = []
     folder_path = get_folder_path()
     if request.method == "POST" and check_login_status():
@@ -72,10 +72,8 @@ def index():
         base64_media = start_scrape(folder_path, amount_to_scrape, mode)
         rendered_base64_media = render_base64_media(base64_media)
     logged_in_error = request.method == "POST" and not check_login_status()   
-    log_lines = get_log_file_list()   
-    if len(log_lines) > 0:
-        count_u, count_i, count_v = get_stats_from_log_line(log_lines)      
-    return render_template('index.html', count_i = count_i, count_v = count_v, log_lines = log_lines, images = rendered_base64_media, disclaimer = {"logged_in_error": logged_in_error})
+    log_lines = get_log_file_list()
+    return render_template('index.html', log_lines = log_lines, images = rendered_base64_media, disclaimer = {"logged_in_error": logged_in_error})
 
 @app.route("/settings/", methods=['GET','POST'])
 def settings():
@@ -114,13 +112,13 @@ def gallery(username, date):
         rendered_items = get_rendered_media(date_path)
     elif username != None:
         user_path = os.path.join(folder_path, username)
-        rendered_items = get_rendered_folders(user_path, request.url)
+        rendered_items = get_folders(user_path, request.url)
     else:
-        rendered_items = get_rendered_folders(folder_path, request.url)
+        rendered_items = get_folders(folder_path, request.url)
      
     return render_template("gallery.html", rendered_items = rendered_items )
 
 ################### RUN ###################
 if __name__ == "__main__":
-    app.run()
+    app.run(debug = True)
     

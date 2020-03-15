@@ -47,12 +47,26 @@
                     <div class="checkgroup"><label for="media">Media</label><input class="radio-btn" name="mode_dropdown" type="radio" value="media" id="media" /></div>
                     <div class="checkgroup"><label for="metadata">Metadata</label><input class="radio-btn"  name="mode_dropdown" type="radio" value="metadata" id="metadata" /></div>
                 </div>
-                
             </div>
+
         </div>
     </form>
 
-    <footer>
-        <h2>InstaStories</h2>
-    </footer>
+    <script>   
+        function hideById(id) {
+            document.getElementById(id).style.display = "none";
+        }
+
+        function showById(id) {
+            document.getElementById(id).style.display = "block";
+        }
+
+        function setPanel(panelName) {
+            console.log(panelName);
+            for (const id of ["index-logs", "index-advanced", "index-images"]) {
+                id.endsWith(panelName) ? showById(id) : hideById(id);
+            } 
+        }
+    </script>
+
 {% endblock %}

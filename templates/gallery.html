@@ -1,16 +1,22 @@
 {% extends 'base.html' %}
 
-{% block header %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/gallery_style.css') }}">
-{% endblock %}
-
 {% block content %}
     <div class="gallery-container">
         <ul>
             {% for item in rendered_items %}
+                {% if item['type'] == 'folder' %}
+                <li>
+                    <a href={{ item['url'] }}>
+                        <div class="gallery-folders">
+                            {{ item['name'] }}
+                        </div>  
+                    </a>  
+                </li>
+                {% else %} {# Raw data already rendered python side #}
                 <li>{{ item }}</li>
+                {% endif %}
+                
             {% endfor %}
-
         </ul>
     </div>
 {% endblock %}

@@ -32,24 +32,5 @@
             {% endblock %}
         </div>
 
-        
-    <script>
-        function setPanel(panel) {
-            if (panel == "logs") {
-                document.getElementById("index-logs").style.display = "block";
-                document.getElementById("index-advanced").style.display = "none";
-                document.getElementById("index-images").style.display = "none";
-            }   else if (panel == "advanced") {
-                document.getElementById("index-logs").style.display = "none";
-                document.getElementById("index-images").style.display = "none";
-                document.getElementById("index-advanced").style.display = "block";
-            }   else if (panel == "images") {
-                document.getElementById("index-logs").style.display = "none";
-                document.getElementById("index-advanced").style.display = "none";
-                document.getElementById("index-images").style.display = "block";
-            }
-        }
-    </script>
-
     </body>
 </html>
