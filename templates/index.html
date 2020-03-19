@@ -36,7 +36,12 @@
             <div class="index-images" id="index-images">
                 <h2>LAST SCRAPED IMAGES</h2>
                 {% for image in images %}
-                    {{ image }}
+                    {% if image["type"] == "media" %}
+                        <{{ image["data"]["content_tag"] }} src="data:{{image["data"]["media_type"]}};base64,{{ image["data"]["base64_data"] }}" class="rendered-stories"></{{ image["data"]["content_tag"] }}>
+                    {% elif image["type"] == "username" %}
+                        <hr>
+                        <div class="username">{{image["data"]}}</div><br>
+                    {% endif %}
                 {% endfor %}
             </div>
 

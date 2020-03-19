@@ -8,7 +8,7 @@
         <div class="settings-login-box">
             <h2>Please log in</h2>
             {% if disclaimer["login_error"] %}
-                <div class="errors">You entered invalid credentials</div>
+            <div class="errors">You entered invalid credentials</div>
             {% endif %}
             <label for="username">username</label><input class="input" type="text" name="username" id="username">
             <label for="password">password</label><input class="input" type="password" name="password" id="password">
@@ -21,21 +21,24 @@
 
 {% if disclaimer["logged_in"] %}
 <form action="/settings" method="POST">
-    <div class="settings-container">
-        <div class="settings-settings-box">
+    <div class="settings-settings-box">
+        <ul>
+            <li>
+                <h2>Settings</h2>
+            </li>
+            <li><label for="folder_path">Download folder path: {{folder_path}}</label>
+                <input class="input" id="folder_path" type="text" name="folder_path"></li>
             <ul>
-                <li><h2>Settings</h2></li>
-                <li><label for="folder_path">Download folder path: {{folder_path}}</label><input class="input" id="folder_path" type="text" name ="folder_path" class="settings-input"></li>
-                <ul>
-                    <li><button type="submit" id="submitBtn" class="btn sub-btn">UPDATE SETTINGS</button></li>
-                    <li><button class="btn sub-btn logout-btn" onclick="location.href='/settings/logout'">LOG OUT</button></li>
-                    <li><button class="btn sub-btn delete-btn" onclick="location.href='/settings/delete-media'">DELETE ALL MEDIA</button></li>
-                </ul>
-            </ul>    
-        </div>
+                <li><button type="submit" id="submitBtn" class="btn sub-btn">UPDATE SETTINGS</button></li>
+                <li><button class="btn sub-btn logout-btn" onclick="location.href='/settings/logout'">LOG OUT</button>
+                </li>
+                <li><button class="btn sub-btn delete-btn" onclick="location.href='/settings/delete-media'">DELETE ALL
+                        MEDIA</button></li>
+            </ul>
+        </ul>
     </div>
 </form>
 {% endif %}
 
-       
+
 {% endblock %}
