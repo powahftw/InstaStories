@@ -252,7 +252,9 @@ def start_scrape(folder_path, number_of_persons, mode_flag = "all"):
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
     with open("run_history.log", "a+") as o:
-        scraped_users = len(ids) if number_of_persons < 0 or number_of_persons > len(ids) else number_of_persons
+
+        min(max(0, number_of_persons), len(ids))
+        scraped_users = len(ids) if number_of_persons < 0 or number_of_persons > len(ids) else number_of_persons    # number_of_persons is the limit we set, but at most we can scrape len(ids) users.
         o.write(f"Date: {timestampStr} - {scraped_users} people scraped - {count_i} IMGs - {count_v} VIDEOs \n")
 
     return base64_media
