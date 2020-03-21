@@ -3,7 +3,7 @@
 {% block content %}
     <div class="gallery-container">
         <ul>
-            {% for item in rendered_items %}
+            {% for item in to_render_items %}
                 {% if item['type'] == 'folder' %}
                 <li>
                     <a href={{ item['url'] }}>
