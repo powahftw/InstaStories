@@ -272,11 +272,11 @@ a .gallery-folders {
 }
 
 .settings-settings-box label {
-    padding-left: 330px;
+    padding-left: 30px;
 }
 
 .settings-settings-box .input {
-    width: 800px;
+    width: 50vw;
 }
 
 .settings-settings-box ul ul {
