@@ -77,9 +77,28 @@ def posix_conv(posix_time):
     year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(year, month, day)
 
+def print_extra_ids(ids):
+    table = []
+    table.append(["Additional IDS"])
+    for i in ids:
+        table.append(ids)
+    print(AsciiTable(table).table)
+
+def get_extra_ids():
+    extra_ids = []
+    settings = get_settings()
+    if "extra_ids" in settings:
+        for extra_id in settings["extra_ids"]:
+                extra_ids.append(extra_id)
+        if PRINT_TABLE:
+            print_extra_ids(extra_ids)
+        return extra_ids
+    else:
+        return []            
+
 ############################## DOWNLOAD AND MANAGE STORIES AND JSON ######################################
 
-def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode_flag):
+def download_today_stories(arr_ids, arr_extra_ids, cookie, folder_path, number_of_persons, mode_flag):
     """
     Download user stories. Create subdirectory for each user based on their username and media timestamp
     Ex:
@@ -97,11 +116,14 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
     
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
     if number_of_persons < 0: number_of_persons = len(arr_ids)
-    for idx, ids in enumerate(arr_ids[:number_of_persons]):
+    for idx, ids in enumerate(arr_ids[:number_of_persons] + arr_extra_ids):
         url = userid_endpoint.format(ids)
         
         r = requests.get(url, headers = cookie)
-        d = r.json()
+        try:
+            d = r.json()
+        except:
+            continue
         
         if 'items' in d and d['items']:
             items = d['items']
@@ -174,7 +196,7 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
                     fn_json = os.path.join(time_directory, "json_log" + ".json")
                     with open(fn_json, "a+") as log:
                         log.write(json.dumps(element))
-    
+    number_of_people_scraped = len(arr_ids[:number_of_persons] + arr_extra_ids) if number_of_persons > 0 or number_of_persons <= len(arr_ids) else len(arr_ids + arr_extra_ids)
     print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids[:number_of_persons]), count_i, count_v)) 
     return count_i, count_v, base64_media
     
@@ -246,8 +268,9 @@ def nicks_to_ids(usr_list):
 def start_scrape(folder_path, number_of_persons, mode_flag = "all"):
     cookie = get_cookie()
     stories = get_stories_tray(cookie)                                        
-    ids = tray_to_ids(stories)                                              
-    count_i, count_v, base64_media = download_today_stories(ids , cookie, folder_path, number_of_persons, mode_flag) 
+    ids = tray_to_ids(stories)
+    extra_ids = get_extra_ids()                                        
+    count_i, count_v, base64_media = download_today_stories(ids, extra_ids, cookie, folder_path, number_of_persons, mode_flag) 
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 

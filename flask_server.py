@@ -78,23 +78,29 @@ def index():
 def settings():
     login_error = False
     settings = get_settings()    # Gets the settings
+    extra_ids = settings["extra_ids"] if "extra_ids" in settings else []
     if request.method == "POST":
         updated_settings = settings
         for setting in request.form:
             if len(request.form[setting]) > 0 and not ("username" or "password") in request.form:
-                updated_settings[setting] = request.form[setting]
+                if setting == "extra_ids":
+                    updated_settings[setting] = request.form[setting].splitlines()
+                    continue
+                updated_settings[setting] = request.form[setting]    
         save_settings(updated_settings)
+        extra_ids = updated_settings["extra_ids"]
         if ("username" and "password") in request.form:
             login_error = store_session_id(request.form["username"], request.form["password"])
     logged_in = check_login_status()
-    return render_template("settings.html", folder_path = get_folder_path(), disclaimer = {"logged_in": logged_in, "login_error": login_error})
+    return render_template("settings.html", folder_path = get_folder_path(), extra_ids = extra_ids, disclaimer = {"logged_in": logged_in, "login_error": login_error})
 
 @app.route("/settings/logout")
 def logout():
     settings = get_settings()
     settings.pop("session_id", None)
+    extra_ids = settings["extra_ids"] if "extra_ids" in settings else ""
     save_settings(settings)
-    return render_template("settings.html", folder_path = get_folder_path(), disclaimer = {"logged_in": False, "login_error": False})
+    return render_template("settings.html", folder_path = get_folder_path(), extra_ids = extra_ids, disclaimer = {"logged_in": False, "login_error": False})
 
 @app.route("/settings/delete-media")
 def delete_media():
