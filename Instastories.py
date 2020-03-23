@@ -214,6 +214,7 @@ def tray_to_ids(stories):
     """
     usr = [];    ids = []
     for element in stories['tray']:
+        if element['reel_type'] == "mas_reel": continue # Skip promotional stories.
         ids.append(element['id'])
         username = element['user']['username']
         usr.append(username)
