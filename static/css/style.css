@@ -41,6 +41,12 @@ nav ul li {
     padding: 10px 0;
 }
 
+textarea {
+    resize: none;
+    width: 50vw;
+    height: 200px;
+}
+
 .logo {
     width: 50px;
 }
@@ -260,26 +266,26 @@ a .gallery-folders {
     margin: 0px 170px;
 }
 
-.settings-settings-box ul{
+.settings-box ul{
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-.settings-settings-box ul li {
+.settings-box ul li {
     margin: 20px 0;
 }
 
-.settings-settings-box label {
+.settings-box label {
     padding-left: 30px;
 }
 
-.settings-settings-box .input {
+.settings-box .input {
     width: 50vw;
 }
 
-.settings-settings-box ul ul {
+.settings-box ul ul {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
