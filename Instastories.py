@@ -12,11 +12,7 @@ try:
 except ImportError as e:
     PRINT_TABLE = False
 
-
 SETTINGS_PATH = "settings.json"
-EXTRA_ID = [None] # Get stories from unfollowed users by using their ID
-#EXTRA_USR = ["xxxx", "yyyy", "zzzz"] # Get stories from unfollowed users by using their Nicknames, deprecated due to Instagram changes
-
 
 ################# UTILS FUNCTIONS #########################
 
@@ -120,7 +116,17 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
             os.makedirs(usr_directory)
         else:
             print("User already EXIST")
-        
+
+        new_metadata = False # Used to update the .txt and .json metadata file only if necessary.
+        seen_stories_txt = os.path.join(usr_directory, "saved.txt")
+        saved_stories_json = os.path.join(usr_directory, f"{username}.json")
+        if not os.path.exists(seen_stories_txt) or not os.path.exists(saved_stories_json):
+            json_stories_seen, json_stories_saved = set(), []
+        else:
+            with open(seen_stories_txt, 'r') as seen, open(saved_stories_json, 'r') as saved:
+                json_stories_seen = set(seen.read().splitlines())
+                json_stories_saved = json.load(saved)
+
         for element in items:
             
             media_id = element['id']
@@ -130,14 +136,10 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
                
             if not os.path.exists(time_directory):  
                 print("Creating Directory :{}".format(time_directory))
-                os.makedirs(time_directory)
-                
-            new_media = True
-            
+                os.makedirs(time_directory) 
 
             """
             MODE FLAGS: 
-
             all: download both media and metadata
             media: download only media
             metadata: download only metadata
@@ -151,10 +153,8 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
                         video_url = videos[0]['url']
                         print("Video URL: {}".format(video_url))
                         base64_media.append(get_media(video_url, fn_video,"video/mp4", username))
-
                         count_v += 1
                     else:
-                        new_media = False
                         print("Video media already saved")
 
                 if element['media_type'] == 1: 
@@ -166,14 +166,20 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
                         base64_media.append(get_media(pic_url, fn_img, "img/png", username))
                         count_i += 1
                     else:
-                        new_media = False
                         print("Video media already saved")
-                    
+            
             if mode_flag in ["all", "metadata"]:
-                if new_media: # Now save the metadata in a json file 
-                    fn_json = os.path.join(time_directory, "json_log" + ".json")
-                    with open(fn_json, "a+") as log:
-                        log.write(json.dumps(element))
+                if media_id not in json_stories_seen: # Now save the metadata in a json file
+                    json_stories_seen.add(media_id)
+                    json_stories_saved.append(element)
+                    new_metadata = True
+
+        if new_metadata:
+            with open(seen_stories_txt, 'w') as seen, open(saved_stories_json, 'w') as saved:
+                for id in json_stories_seen:
+                    seen.write(f'{id}\n')
+                json_stories_saved = json.dump(json_stories_saved, saved)
+
     
     print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids[:number_of_persons]), count_i, count_v)) 
     return count_i, count_v, base64_media
