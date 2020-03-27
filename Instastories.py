@@ -75,11 +75,6 @@ def posix_conv(posix_time):
     year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(year, month, day)
 
-def get_ids(stories_ids, extra_ids, number_of_persons):
-    if number_of_persons <= 0: 
-        number_of_persons = len(stories_ids)
-    return stories_ids[:number_of_persons] + extra_ids
-
 ############################## DOWNLOAD AND MANAGE STORIES AND JSON ######################################
 
 def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
@@ -103,11 +98,10 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
         url = userid_endpoint.format(ids)
         
         r = requests.get(url, headers = cookie)
-        try:
-            d = r.json()
-        except:
+        d = r.json()
+        if d["status"] == "fail":
             continue
-        
+
         if 'items' in d and d['items']:
             items = d['items']
             username = items[0]['user']['username']
@@ -250,11 +244,12 @@ def nicks_to_ids(usr_list):
 
 def start_scrape(folder_path, number_of_persons, mode_flag = "all"):
     settings = get_settings()
-    cookie = get_cookie(settings["session_id"])
+    cookie = get_cookie(settings["session_id"])  # The check logic for the existence of "session_id" is on the runner.py and flask_server.py files
     stories = get_stories_tray(cookie)                                        
     stories_ids = tray_to_ids(stories)
     extra_ids = settings["extra_ids"]
-    ids = get_ids(stories_ids, extra_ids, number_of_persons)                                        
+    if number_of_persons < 0: number_of_persons = len(stories_ids)
+    ids = stories_ids[:number_of_persons] + extra_ids                                
     count_i, count_v, base64_media = download_today_stories(ids, cookie, folder_path, mode_flag) 
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
