@@ -45,13 +45,11 @@ def store_session_id(username, password):
         print("You have entered invalid credentials, please retry.")        
         return 1
 
-def get_cookie():
+def get_cookie(cookie):
     token =      {
-             "cookie": None,
+             "cookie": cookie,
              "user-agent": "Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+",
              "cache-control": "no-cache" }
-    settings = get_settings()
-    token["cookie"] = settings["session_id"]
     return token
 
 
@@ -73,9 +71,14 @@ def posix_conv(posix_time):
     year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(year, month, day)
 
+def get_ids(stories_ids, extra_ids, number_of_persons):
+    if number_of_persons <= 0: 
+        number_of_persons = len(stories_ids)
+    return stories_ids[:number_of_persons] + extra_ids
+
 ############################## DOWNLOAD AND MANAGE STORIES AND JSON ######################################
 
-def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode_flag):
+def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
     """
     Download user stories. Create subdirectory for each user based on their username and media timestamp
     Ex:
@@ -92,12 +95,14 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
     base64_media = []
     
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
-    if number_of_persons < 0: number_of_persons = len(arr_ids)
-    for idx, ids in enumerate(arr_ids[:number_of_persons]):
+    for idx, ids in enumerate(arr_ids):
         url = userid_endpoint.format(ids)
         
         r = requests.get(url, headers = cookie)
-        d = r.json()
+        try:
+            d = r.json()
+        except:
+            continue
         
         if 'items' in d and d['items']:
             items = d['items']
@@ -179,9 +184,7 @@ def download_today_stories(arr_ids, cookie, folder_path, number_of_persons, mode
                 for id in json_stories_seen:
                     seen.write(f'{id}\n')
                 json_stories_saved = json.dump(json_stories_saved, saved)
-
-    
-    print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids[:number_of_persons]), count_i, count_v)) 
+    print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), count_i, count_v)) 
     return count_i, count_v, base64_media
     
 def get_stories_tray(cookie):
@@ -220,6 +223,7 @@ def tray_to_ids(stories):
     """
     usr = [];    ids = []
     for element in stories['tray']:
+        if element['reel_type'] == "mas_reel": continue # Skip promotional stories.
         ids.append(element['id'])
         username = element['user']['username']
         usr.append(username)
@@ -250,15 +254,18 @@ def nicks_to_ids(usr_list):
 #################### START SCRAPING FUNCTIONS ###################
 
 def start_scrape(folder_path, number_of_persons, mode_flag = "all"):
-    cookie = get_cookie()
+    settings = get_settings()
+    cookie = get_cookie(settings["session_id"])
     stories = get_stories_tray(cookie)                                        
-    ids = tray_to_ids(stories)                                              
-    count_i, count_v, base64_media = download_today_stories(ids , cookie, folder_path, number_of_persons, mode_flag) 
+    stories_ids = tray_to_ids(stories)
+    extra_ids = settings["extra_ids"]
+    ids = get_ids(stories_ids, extra_ids, number_of_persons)                                        
+    count_i, count_v, base64_media = download_today_stories(ids, cookie, folder_path, mode_flag) 
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
     with open("run_history.log", "a+") as o:
-        scraped_users = len(ids) if number_of_persons < 0 or number_of_persons > len(ids) else number_of_persons    # number_of_persons is the limit we set, but at most we can scrape len(ids) users.
+        scraped_users = len(ids)
         o.write(f"Date: {timestampStr} - {scraped_users} people scraped - {count_i} IMGs - {count_v} VIDEOs \n")
 
     return base64_media
