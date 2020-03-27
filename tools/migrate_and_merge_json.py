@@ -38,6 +38,6 @@ def convert_user_json(username_folder_path):
 
 if __name__ == '__main__':
     BASE_FOLDER =  "ig_media"
-    for username_folder in os.listdir(base_folder):
-        username_folder_path = os.path.join(base_folder, username_folder)
+    for username_folder in os.listdir(BASE_FOLDER):
+        username_folder_path = os.path.join(BASE_FOLDER, username_folder)
         convert_user_json(username_folder_path)
