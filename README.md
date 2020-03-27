@@ -13,8 +13,11 @@ This script make uses of the requests library and terminaltables for pretty prin
 
 ### Cookie
 
-You will need to provide your IG Cookies to make the script authenticate the request to the api.
+You will need to provide your IG Cookie to make the script authenticate the request to the api.
 
 To get them simply use Chrome Dev Tools while visiting instagram.com and copy the cookie you are sending to them.
 
+Add "session_id": "sessionid=YOUR_VALUE"
+To a settings.json file. 
 
+You can also use the Webapp settings page to log in and get the token automatically (your login data is not stored nor sent elsewhere, check out the source code)
