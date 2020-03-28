@@ -8,5 +8,4 @@ ig_media
 # Settings and log files
 __pycache__
 run_history.log
-settings.json
 .vscode

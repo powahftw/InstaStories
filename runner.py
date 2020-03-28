@@ -1,9 +1,6 @@
 from Instastories import start_scrape, store_session_id, get_settings, save_settings
 import argparse, random, time, os, getpass
 
-COOKIE_PATH = "token.txt"
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="TOKEN PATH AND NUMBER OF PEOPLE SCRAPED")
     parser.add_argument("-login", help="Use this argument ONLY for login the first time and generate the session id token", action="store_true", default=None)
@@ -16,18 +13,19 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     number_of_persons, folder_path, mode_flag, loop_flag, base_delay, variance = args.n, args.f, args.m, args.l, args.d, args.dp
+    settings = get_settings()
 
-    if args.login and not "session_id" in get_settings():
+    if args.login and not "session_id" in settings:
         username = input("Username: ")
         password = getpass.getpass()
         store_session_id(username, password)
     else:
         print("\n\nYou are already logged in, start scraping\n\n")
 
-    if "session_id" in get_settings():
+    if "session_id" in settings:
         running = True
         while running:
-            base64_media = start_scrape(folder_path, number_of_persons, mode_flag)
+            base64_media = start_scrape(settings, folder_path, number_of_persons, mode_flag)
             if loop_flag == "single": running = False
             elif loop_flag == "loop":
                 variance = int(base_delay / 100 * variance)
