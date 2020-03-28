@@ -2,8 +2,8 @@ ig_media
 token.txt
 *.jpg
 *.mp4
+*.json
 Flask
 __pycache__
 run_history.log
-settings.json
 .vscode

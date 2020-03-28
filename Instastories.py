@@ -99,7 +99,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
         
         r = requests.get(url, headers = cookie)
         d = r.json()
-        if d["status"] == "fail":
+        if d["status"] == "fail":  #This ensures that bad ids and banned users are skipped
             continue
 
         if 'items' in d and d['items']:
@@ -242,8 +242,7 @@ def nicks_to_ids(usr_list):
 
 #################### START SCRAPING FUNCTIONS ###################
 
-def start_scrape(folder_path, number_of_persons, mode_flag = "all"):
-    settings = get_settings()
+def start_scrape(settings, folder_path, number_of_persons, mode_flag = "all"):
     cookie = get_cookie(settings["session_id"])  # The check logic for the existence of "session_id" is on the runner.py and flask_server.py files
     stories = get_stories_tray(cookie)                                        
     stories_ids = tray_to_ids(stories)

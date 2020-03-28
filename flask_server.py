@@ -11,10 +11,6 @@ def check_login_status():
     settings = get_settings()
     return True if "session_id" in settings else False
 
-def get_folder_path():
-    settings = get_settings()
-    return settings["folder_path"] if "folder_path" in settings else "ig_media"
-
 def get_log_file_list():
     if not os.path.exists("run_history.log"):
         open("run_history.log", "w").close()
@@ -64,11 +60,12 @@ def get_stats_from_log_line(log_lines):
 @app.route("/", methods=['GET','POST'])
 def index():
     converted_files = []
-    folder_path = get_folder_path()
+    settings = get_settings()
+    folder_path = settings["folder_path"] if "folder_path" in settings else "ig_media"
     if request.method == "POST" and check_login_status():
         amount_to_scrape = int(request.form["amountToScrape"]) if request.form["amountToScrape"].isnumeric() else -1
         mode = request.form["mode_dropdown"]
-        base64_media = start_scrape(folder_path, amount_to_scrape, mode)
+        base64_media = start_scrape(settings, folder_path, amount_to_scrape, mode)
         converted_files = convert_media_files(base64_media)
     logged_in_error = request.method == "POST" and not check_login_status()   
     log_lines = get_log_file_list()
@@ -78,6 +75,7 @@ def index():
 def settings():
     login_error = False
     settings = get_settings()    # Gets the settings
+    folder_path = settings["folder_path"] if "folder_path" in settings else "ig_media"
     extra_ids = settings["extra_ids"] if "extra_ids" in settings else []
     if request.method == "POST":
         updated_settings = settings
@@ -92,26 +90,29 @@ def settings():
         if ("username" and "password") in request.form:
             login_error = store_session_id(request.form["username"], request.form["password"])
     logged_in = check_login_status()
-    return render_template("settings.html", folder_path = get_folder_path(), extra_ids = extra_ids, disclaimer = {"logged_in": logged_in, "login_error": login_error})
+    return render_template("settings.html", folder_path = folder_path, extra_ids = extra_ids, disclaimer = {"logged_in": logged_in, "login_error": login_error})
 
 @app.route("/settings/logout")
 def logout():
     settings = get_settings()
+    folder_path = settings["folder_path"] if "folder_path" in settings else "ig_media"
     settings.pop("session_id", None)
     extra_ids = settings["extra_ids"] if "extra_ids" in settings else ""
     save_settings(settings)
-    return render_template("settings.html", folder_path = get_folder_path(), extra_ids = extra_ids, disclaimer = {"logged_in": False, "login_error": False})
+    return render_template("settings.html", folder_path = folder_path, extra_ids = extra_ids, disclaimer = {"logged_in": False, "login_error": False})
 
 @app.route("/settings/delete-media")
 def delete_media():
-    folder_path = get_folder_path()
+    settings = get_settings()
+    folder_path = settings["folder_path"] if "folder_path" in settings else "ig_media"
     shutil.rmtree(folder_path)
 
 @app.route("/gallery/", methods=['GET'], defaults = {"username": None, "date": None})
 @app.route("/gallery/<username>/", methods=['GET'], defaults = {"date": None})
 @app.route("/gallery/<username>/<date>/", methods=['GET'])
 def gallery(username, date):
-    folder_path = get_folder_path() 
+    settings = get_settings()
+    folder_path = settings["folder_path"] if "folder_path" in settings else "ig_media"
     if date != None:
         date_path = os.path.join(os.path.join(folder_path, username), date)
         to_render_items = get_media(date_path)
