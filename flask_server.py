@@ -65,7 +65,8 @@ def index():
     if request.method == "POST" and check_login_status():
         amount_to_scrape = int(request.form["amountToScrape"]) if request.form["amountToScrape"].isnumeric() else -1
         mode = request.form["mode_dropdown"]
-        base64_media = start_scrape(settings, folder_path, amount_to_scrape, mode)
+        source_ids = request.form["ids_dropdown"]
+        base64_media = start_scrape(settings, folder_path, amount_to_scrape, mode, source_ids)
         converted_files = convert_media_files(base64_media)
     logged_in_error = request.method == "POST" and not check_login_status()   
     log_lines = get_log_file_list()

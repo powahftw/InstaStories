@@ -242,13 +242,19 @@ def nicks_to_ids(usr_list):
 
 #################### START SCRAPING FUNCTIONS ###################
 
-def start_scrape(settings, folder_path, number_of_persons, mode_flag = "all"):
+def start_scrape(settings, folder_path, number_of_persons, mode_flag = "all", ids_type = "all"):
     cookie = get_cookie(settings["session_id"])  # The check logic for the existence of "session_id" is on the runner.py and flask_server.py files
     stories = get_stories_tray(cookie)                                        
     stories_ids = tray_to_ids(stories)
     extra_ids = settings["extra_ids"]
     if number_of_persons < 0: number_of_persons = len(stories_ids)
-    ids = stories_ids[:number_of_persons] + extra_ids                                
+    if ids_type == "all":
+        ids = stories_ids[:number_of_persons] + extra_ids                            
+    elif ids_type == "stories":
+        ids = stories_ids[:number_of_persons]
+    elif ids_type == "extra":
+        ids = extra_ids
+
     count_i, count_v, base64_media = download_today_stories(ids, cookie, folder_path, mode_flag) 
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")

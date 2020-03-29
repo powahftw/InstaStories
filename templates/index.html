@@ -52,6 +52,12 @@
                     <div class="checkgroup"><label for="media">Media</label><input class="radio-btn" name="mode_dropdown" type="radio" value="media" id="media" /></div>
                     <div class="checkgroup"><label for="metadata">Metadata</label><input class="radio-btn"  name="mode_dropdown" type="radio" value="metadata" id="metadata" /></div>
                 </div>
+                <div class="index-mode">
+                    <h2>SOURCE IDS</h2>
+                    <div class="checkgroup"><label for="all">All</label><input class="radio-btn" name="ids_dropdown" type="radio" value="all" id="all" checked /></div>
+                    <div class="checkgroup"><label for="media">Stories Tray</label><input class="radio-btn" name="ids_dropdown" type="radio" value="stories" id="media" /></div>
+                    <div class="checkgroup"><label for="metadata">Extra IDS</label><input class="radio-btn"  name="ids_dropdown" type="radio" value="extra" id="metadata" /></div>
+                </div>
             </div>
 
         </div>
@@ -63,7 +69,11 @@
         }
 
         function showById(id) {
-            document.getElementById(id).style.display = "block";
+            if (id == "index-advanced") {
+            document.getElementById(id).style.display = "flex";
+            } else {
+                document.getElementById(id).style.display = "block";
+            }
         }
 
         function setPanel(panelName) {
