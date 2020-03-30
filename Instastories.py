@@ -40,10 +40,10 @@ def store_session_id(username, password):
         settings = get_settings()
         settings["session_id"] = session_id_string
         save_settings(settings)
-        return 0
+        return True
     else:
         print("You have entered invalid credentials, please retry.")        
-        return 1
+        return False
 
 def get_cookie(cookie):
     token =      {
@@ -59,6 +59,10 @@ def get_media(url, path, media_type, username):
         base64_media = (base64.b64encode(image.read()).decode("utf-8"), media_type, username)
         return base64_media
 
+def get_ids(stories_ids, number_of_persons, extra_ids, ids_mode):
+    return (stories_ids[:number_of_persons] if ids_mode != "extra_ids_only" else []) + \
+           (extra_ids if ids_mode != "stories_ids_only" else [])
+       
 def curr_date():
     year, month, day, _, _ = time.strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(year, month, day)
@@ -92,9 +96,8 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
     for idx, ids in enumerate(arr_ids):
         url = userid_endpoint.format(ids)
-        
-        r = requests.get(url, headers = cookie)
-        d = r.json()
+        r = requests.get(url, headers = cookie)   
+        d = r.json()   
         if d["status"] == "fail":  #This ensures that bad ids and banned users are skipped
             continue
 
@@ -247,13 +250,14 @@ def nicks_to_ids(usr_list):
 
 #################### START SCRAPING FUNCTIONS ###################
 
-def start_scrape(settings, folder_path, number_of_persons, mode_flag = "all"):
+def start_scrape(settings, folder_path, number_of_persons, mode_flag = "all", ids_mode = "all"):
     cookie = get_cookie(settings["session_id"])  # The check logic for the existence of "session_id" is on the runner.py and flask_server.py files
     stories = get_stories_tray(cookie)                                        
     stories_ids = tray_to_ids(stories)
     extra_ids = settings["extra_ids"]
     if number_of_persons < 0: number_of_persons = len(stories_ids)
-    ids = stories_ids[:number_of_persons] + extra_ids                                
+    ids = get_ids(stories_ids, number_of_persons, extra_ids, ids_mode)
+
     count_i, count_v, base64_media = download_today_stories(ids, cookie, folder_path, mode_flag) 
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")

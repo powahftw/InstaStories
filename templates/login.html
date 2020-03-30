@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form action="/login" method="POST">
+    <div class="settings-login-container">
+        <p>If it's the first time you use this tool, log in.</p>
+        <div class="settings-login-box">
+            <h2>Please log in</h2>
+            {% if disclaimer and disclaimer["login_error"] %}
+                <div class="errors">You entered invalid credentials</div>
+            {% endif %}
+            <label for="username">username</label><input class="input" type="text" name="username" id="username">
+            <label for="password">password</label><input class="input" type="password" name="password" id="password">
+            <button class="btn" type="submit" id="submitBtn">LOG IN</button>
+        </div>
+
+    </div>
+</form>
+
+{% endblock %}

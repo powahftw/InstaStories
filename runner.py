@@ -7,12 +7,13 @@ if __name__ == "__main__":
     parser.add_argument("-n", metavar="<number of persons>", type=int, help="Insert the number of people to scrape (default is all the people)", default=-1)
     parser.add_argument("-f", metavar="<folder path>", help="Insert the destination folder in which you want to download files", default="ig_media")
     parser.add_argument("-m", metavar="<mode>", choices={"all", "media", "metadata"}, help="Set the scraping mode:\n all: scrape media and metadata\n media: scrape only media\n metadata: scrape only metadata", default="all")
+    parser.add_argument("-ids", metavar="<ids source>", choices={"all", "stories_ids_only", "extra_ids_only"}, default="all", help="Set the source of ids:\n all: scrapes users from stories tray and from extra_ids\n stories: scrapes users from stories tray only\n extra: scrapes users from extra_ids only")
     parser.add_argument("-l", metavar="<loop>", choices={"single", "loop"}, help="Use \"single\" for a single scraping cycle, \"loop\" for keep looping", default="single")
     parser.add_argument("-d", metavar="<delay>", type=int, help="Set the delay (in seconds) between scraping sessions in \"loop\" mode", default= 60 * 60 * 8)
     parser.add_argument("-dp", metavar="<delay variance percentage>", type=int, help="Set minimum and maximum delay variance (in percentage)", default=15)
 
     args = parser.parse_args()
-    number_of_persons, folder_path, mode_flag, loop_flag, base_delay, variance = args.n, args.f, args.m, args.l, args.d, args.dp
+    number_of_persons, folder_path, mode_flag, ids_type_flag, loop_flag, base_delay, variance = args.n, args.f, args.m, args.ids, args.l, args.d, args.dp
     settings = get_settings()
 
     if args.login and not "session_id" in settings:
@@ -25,7 +26,7 @@ if __name__ == "__main__":
     if "session_id" in settings:
         running = True
         while running:
-            base64_media = start_scrape(settings, folder_path, number_of_persons, mode_flag)
+            base64_media = start_scrape(settings, folder_path, number_of_persons, mode_flag, ids_type_flag)
             if loop_flag == "single": running = False
             elif loop_flag == "loop":
                 variance = int(base_delay / 100 * variance)
