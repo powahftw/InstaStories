@@ -5,83 +5,83 @@
 
 {% block content %}
 
-    <div class="index-logo">
-        <a href="/"><img src="/static/images/logo.png" alt=""></a>
-        <h1>InstaStories</h1>
-    </div>
-    <form action="/" method="POST">
-        <div class="index-scraping-sect">
-            {% if disclaimer['logged_in_error'] %}
-                <div class="errors">You must login in settings before start scraping</div>
-            {% endif %}
+<div class="index-logo">
+    <a href="/"><img src="/static/images/logo.png" alt=""></a>
+    <h1>InstaStories</h1>
+</div>
+<form action="/" method="POST">
+    <div class="index-scraping-sect">
+        {% if disclaimer['logged_in_error'] %}
+            <div class="errors">You must login in settings before start scraping</div>
+        {% endif %}
+        <ul>
+            <li><h3>Insert the number of people to scrape</h3></li>
+            <li><input type="text" name="amountToScrape" class="input"/></li>
+            <li><button class="btn" name="scrapeBtn" value="False" type="submit">START SCRAPE</button></li>
+        </ul>
+        <ul class="index-settings-btn">
+            <li><div class="btn sub-btn" onclick="setPanel('logs')">LOGS</div></li>
+            <li><div class="btn sub-btn" onclick="setPanel('images')">LAST SCRAPED IMAGES</div></li>
+            <li><div class="btn sub-btn" onclick="setPanel('advanced')">ADVANCED</div></li>
+        </ul>
+        <div class="index-logs" id="index-logs">
+            <h2>LOGS</h2>
             <ul>
-                <li><h3>Insert the number of people to scrape</h3></li>
-                <li><input type="text" name="amountToScrape" class="input"/></li>
-                <li><button class="btn" name="scrapeBtn" value="False" type="submit">START SCRAPE</button></li>
-            </ul>
-            <ul class="index-settings-btn">
-                <li><div class="btn sub-btn" onclick="setPanel('logs')">LOGS</div></li>
-                <li><div class="btn sub-btn" onclick="setPanel('images')">LAST SCRAPED IMAGES</div></li>
-                <li><div class="btn sub-btn" onclick="setPanel('advanced')">ADVANCED</div></li>
-            </ul>
-            <div class="index-logs" id="index-logs">
-                <h2>LOGS</h2>
-                <ul>
-                    {% for log_line_element in log_lines %}
-                        <li>{{ log_line_element }} </li>
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <div class="index-images" id="index-images">
-                <h2>LAST SCRAPED IMAGES</h2>
-                {% for image in images %}
-                    {% if image["type"] == "media" %}
-                        <{{ image["data"]["content_tag"] }} src="data:{{image["data"]["media_type"]}};base64,{{ image["data"]["base64_data"] }}" class="rendered-stories"></{{ image["data"]["content_tag"] }}>
-                    {% elif image["type"] == "username" %}
-                        <hr>
-                        <div class="username">{{image["data"]}}</div><br>
-                    {% endif %}
+                {% for log_line_element in log_lines %}
+                    <li>{{ log_line_element }} </li>
                 {% endfor %}
-            </div>
-
-            <div class="index-advanced" id="index-advanced">
-                <div class="index-mode">
-                    <h2>SCRAPING MODE</h2>
-                    <div class="checkgroup"><label for="all">All</label><input class="radio-btn" name="mode_dropdown" type="radio" value="all" id="all" checked /></div>
-                    <div class="checkgroup"><label for="media">Media</label><input class="radio-btn" name="mode_dropdown" type="radio" value="media" id="media" /></div>
-                    <div class="checkgroup"><label for="metadata">Metadata</label><input class="radio-btn"  name="mode_dropdown" type="radio" value="metadata" id="metadata" /></div>
-                </div>
-                <div class="index-mode">
-                    <h2>SOURCE IDS</h2>
-                    <div class="checkgroup"><label for="all">All</label><input class="radio-btn" name="ids_dropdown" type="radio" value="all" id="all" checked /></div>
-                    <div class="checkgroup"><label for="media">Stories Tray</label><input class="radio-btn" name="ids_dropdown" type="radio" value="stories" id="media" /></div>
-                    <div class="checkgroup"><label for="metadata">Extra IDS</label><input class="radio-btn"  name="ids_dropdown" type="radio" value="extra" id="metadata" /></div>
-                </div>
-            </div>
-
+            </ul>
         </div>
-    </form>
 
-    <script>   
-        function hideById(id) {
-            document.getElementById(id).style.display = "none";
-        }
+        <div class="index-images" id="index-images">
+            <h2>LAST SCRAPED IMAGES</h2>
+            {% for image in images %}
+                {% if image["type"] == "media" %}
+                    <{{ image["data"]["content_tag"] }} src="data:{{image["data"]["media_type"]}};base64,{{ image["data"]["base64_data"] }}" class="rendered-stories"></{{ image["data"]["content_tag"] }}>
+                {% elif image["type"] == "username" %}
+                    <hr>
+                    <div class="username">{{image["data"]}}</div><br>
+                {% endif %}
+            {% endfor %}
+        </div>
 
-        function showById(id) {
-            if (id == "index-advanced") {
-            document.getElementById(id).style.display = "flex";
-            } else {
-                document.getElementById(id).style.display = "block";
-            }
-        }
+        <div class="index-advanced" id="index-advanced">
+            <div class="index-mode">
+                <h2>SCRAPING MODE</h2>
+                <div class="checkgroup"><label for="all">All</label><input class="radio-btn" name="mode_dropdown" type="radio" value="all" id="all" checked /></div>
+                <div class="checkgroup"><label for="media">Media</label><input class="radio-btn" name="mode_dropdown" type="radio" value="media" id="media" /></div>
+                <div class="checkgroup"><label for="metadata">Metadata</label><input class="radio-btn"  name="mode_dropdown" type="radio" value="metadata" id="metadata" /></div>
+            </div>
+            <div class="index-mode">
+                <h2>SOURCE IDS</h2>
+                <div class="checkgroup"><label for="all_stories">All</label><input class="radio-btn" name="ids_dropdown" type="radio" value="all" id="all_stories" checked /></div>
+                <div class="checkgroup"><label for="stories_ids">Stories Tray</label><input class="radio-btn" name="ids_dropdown" type="radio" value="stories_ids_only" id="stories_ids" /></div>
+                <div class="checkgroup"><label for="extra_ids">Extra IDS</label><input class="radio-btn"  name="ids_dropdown" type="radio" value="extra_ids_only" id="extra_ids" /></div>
+            </div>
+        </div>
 
-        function setPanel(panelName) {
-            console.log(panelName);
-            for (const id of ["index-logs", "index-advanced", "index-images"]) {
-                id.endsWith(panelName) ? showById(id) : hideById(id);
-            } 
+    </div>
+</form>
+
+<script>   
+    function hideById(id) {
+        document.getElementById(id).style.display = "none";
+    }
+
+    function showById(id) {
+        if (id == "index-advanced") {
+        document.getElementById(id).style.display = "flex";
+        } else {
+            document.getElementById(id).style.display = "block";
         }
-    </script>
+    }
+
+    function setPanel(panelName) {
+        console.log(panelName);
+        for (const id of ["index-logs", "index-advanced", "index-images"]) {
+            id.endsWith(panelName) ? showById(id) : hideById(id);
+        } 
+    }
+</script>
 
 {% endblock %}

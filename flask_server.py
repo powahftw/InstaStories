@@ -65,42 +65,40 @@ def index():
     if request.method == "POST" and check_login_status():
         amount_to_scrape = int(request.form["amountToScrape"]) if request.form["amountToScrape"].isnumeric() else -1
         mode = request.form["mode_dropdown"]
-        source_ids = request.form["ids_dropdown"]
-        base64_media = start_scrape(settings, folder_path, amount_to_scrape, mode, source_ids)
+        ids_mode = request.form["ids_dropdown"]
+        base64_media = start_scrape(settings, folder_path, amount_to_scrape, mode, ids_mode)
         converted_files = convert_media_files(base64_media)
-    logged_in_error = request.method == "POST" and not check_login_status()   
+    logged_in_error = request.method == "POST" and not check_login_status()  
     log_lines = get_log_file_list()
     return render_template('index.html', log_lines = log_lines, images = converted_files, disclaimer = {"logged_in_error": logged_in_error})
 
 @app.route("/settings/", methods=['GET','POST'])
 def settings():
     settings = get_settings()    # Gets the settings
-    if not "session_id" in settings: return redirect("/login")
+    if not "session_id" in settings: return redirect("/login")  # Prompt the user to log-in if he's not
     folder_path = settings["folder_path"] if "folder_path" in settings else "ig_media"
-    extra_ids = settings["extra_ids"] if "extra_ids" in settings else [] 
+    extra_ids = settings["extra_ids"] if "extra_ids" in settings else []
     if request.method == "POST":
         updated_settings = settings
         for setting in request.form:
             if len(request.form[setting]) > 0:
                 if setting == "extra_ids":
-                    updated_settings[setting] = request.form[setting].splitlines()
+                    updated_settings[setting] = list(map(int, request.form[setting].splitlines()))
                     continue
                 updated_settings[setting] = request.form[setting]    
         save_settings(updated_settings)
         extra_ids = updated_settings["extra_ids"]
     return render_template("settings.html", folder_path = folder_path, extra_ids = extra_ids)
 
-
 @app.route("/login", methods=['GET','POST'])
 def login():
-    login_error = False
-    if request.method == "POST":
-        print("POSTTT")
-        if ("username" and "password") in request.form:
-                login_error = store_session_id(request.form["username"], request.form["password"])
-                print(login_error)
-                if login_error == False: return redirect("/settings")
-    return render_template("login.html", disclaimer = {"login_error": login_error})
+    if request.method == "GET":
+        return render_template("login.html")
+    elif request.method == "POST":
+            if store_session_id(request.form["username"], request.form["password"]):
+                return redirect("/settings")
+            else: 
+                return render_template("login.html", disclaimer = {"login_error": True})
     
 @app.route("/settings/logout")
 def logout():
