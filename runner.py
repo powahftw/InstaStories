@@ -1,5 +1,5 @@
-from Instastories import start_scrape, store_session_id, get_settings, save_settings
-import argparse, random, time, os, getpass
+from Instastories import start_scrape, store_session_id, get_settings
+import argparse, random, time, getpass
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="TOKEN PATH AND NUMBER OF PEOPLE SCRAPED")
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     number_of_persons, folder_path, mode_flag, ids_type_flag, loop_flag, base_delay, variance = args.n, args.f, args.m, args.ids, args.l, args.d, args.dp
     settings = get_settings()
 
-    if args.login and not "session_id" in settings:
+    if args.login and "session_id" not in settings:
         username = input("Username: ")
         password = getpass.getpass()
         store_session_id(username, password)
@@ -34,4 +34,3 @@ if __name__ == "__main__":
                 time.sleep(delay)
     else:
         print("You have to login into your instagram account int order to use the scraper, use the \"-login\" argument")
-
