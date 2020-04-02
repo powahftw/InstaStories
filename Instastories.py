@@ -26,7 +26,7 @@ def get_settings():
     with open(SETTINGS_PATH, "r") as settings_json:
         return json.load(settings_json)
 
-def store_session_id(username, password):
+def login_and_store_session_id(username, password):
     LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/'
     USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
     session = requests.Session()
