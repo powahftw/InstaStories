@@ -1,4 +1,4 @@
-from Instastories import start_scrape, store_session_id, get_settings
+from Instastories import start_scrape, login_and_store_session_id, get_settings
 import argparse, random, time, getpass
 
 if __name__ == "__main__":
@@ -19,7 +19,7 @@ if __name__ == "__main__":
     if args.login and "session_id" not in settings:
         username = input("Username: ")
         password = getpass.getpass()
-        store_session_id(username, password)
+        login_and_store_session_id(username, password)
     else:
         print("\n\nYou are already logged in, start scraping\n\n")
 

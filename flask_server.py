@@ -11,7 +11,7 @@ LOG_FILE = "run_history.log"
 ################### UTIL FUNCTIONS ###################
 
 def is_session_id_provided():
-    return "session_id" in  get_settings()
+    return "session_id" in get_settings()
 
 def get_log_file_list():
     with open(LOG_FILE, "r+") as o:
@@ -77,12 +77,12 @@ def settings():
         for setting_name in request.form:
             if len(request.form[setting_name]) == 0: continue # No update for the given setting.
             if setting_name == "extra_ids":
-                extra_ids = list(map(int, request.form["extra_ids"].splitlines())
-                settings["extra_ids"] = extra_ids
+                extra_ids = list(map(int, request.form["extra_ids"].splitlines()))
             else:
                 settings[setting_name] = request.form[setting_name]
-        save_settings(updated_settings)
-        extra_ids = updated_settings["extra_ids"]
+        settings["extra_ids"] = extra_ids
+        save_settings(settings)
+        extra_ids = settings["extra_ids"]
     return render_template("settings.html", folder_path=folder_path, extra_ids=extra_ids)
 
 @app.route("/login", methods=['GET','POST'])
@@ -102,9 +102,10 @@ def logout():
     return render_template("login.html", disclaimer={"login_error": False})
 
 @app.route("/settings/delete-media")
-def delete_media():
+def delete_media_folder_if_present():
     folder_path = get_settings().get("folder_path", DEFAULT_FOLDER)
-    shutil.rmtree(folder_path)
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path)
 
 @app.route("/gallery/", methods=['GET'], defaults={"username": None, "date": None})
 @app.route("/gallery/<username>/", methods=['GET'], defaults={"date": None})
