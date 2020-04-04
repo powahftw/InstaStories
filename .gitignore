@@ -6,6 +6,7 @@ ig_media
 */*.json
 */saved.txt
 # Settings and log files
+settings.json
 __pycache__
 run_history.log
 .vscode
