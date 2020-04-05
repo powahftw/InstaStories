@@ -8,6 +8,8 @@ import settings
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
+SKIP_EXTENSIONS = (".json", ".txt")
+
 ################### UTIL FUNCTIONS ###################
 
 def get_log_file_list():
@@ -33,6 +35,7 @@ def get_folders(path, url):
     rendered_folders = []  # List of {type: 'folder', url: X, name: Y}
     if not os.path.exists(path): return []
     for folder in os.listdir(path):
+        if folder.endswith(SKIP_EXTENSIONS): continue
         rendered_folders.append({'type': 'folder',
                                  'url': f"{url}{folder}",
                                  'name': f"{folder}"})
@@ -41,7 +44,7 @@ def get_folders(path, url):
 def get_media(path):
     to_render_media = []
     for media in os.listdir(path):
-        if media.endswith(".json"): continue
+        if media.endswith(SKIP_EXTENSIONS): continue
         media_type = "img/png" if media.endswith(".jpg") else "video/mp4"
         content_tag = "img" if media_type == "img/png" else "video controls"
         with open(os.path.join(path, media), "rb") as media_element:
