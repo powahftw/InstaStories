@@ -5,6 +5,7 @@ import os
 import time
 import datetime
 import base64
+import settings
 
 try:
     from terminaltables import AsciiTable
@@ -12,19 +13,7 @@ try:
 except ImportError as e:
     PRINT_TABLE = False
 
-SETTINGS_PATH = "settings.json"
-
 ################# UTILS FUNCTIONS #########################
-
-def save_settings(settings):
-    with open(SETTINGS_PATH, "w+") as settings_json:
-        json.dump(settings, settings_json)
-
-def get_settings():
-    if not os.path.exists(SETTINGS_PATH):
-        return {}
-    with open(SETTINGS_PATH, "r") as settings_json:
-        return json.load(settings_json)
 
 def login_and_store_session_id(username, password):
     LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/'
@@ -37,12 +26,10 @@ def login_and_store_session_id(username, password):
     if "sessionid" in login.cookies.get_dict(domain=".instagram.com"):
         session_id = login.cookies.get_dict(domain=".instagram.com")["sessionid"]
         session_id_string = f"sessionid={session_id}"
-        settings = get_settings()
-        settings["session_id"] = session_id_string
-        save_settings(settings)
+        settings.update("session_id", session_id_string)
         return True
     else:
-        print("You have entered invalid credentials, please retry.")        
+        print("You have entered invalid credentials, please retry.")
         return False
 
 def get_cookie(cookie):
@@ -94,8 +81,8 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
     for idx, ids in enumerate(arr_ids):
         url = userid_endpoint.format(ids)
-        r = requests.get(url, headers=cookie)   
-        d = r.json()   
+        r = requests.get(url, headers=cookie)
+        d = r.json()
         if d["status"] == "fail":  # This ensures that bad ids and banned users are skipped
             continue
 
@@ -106,7 +93,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
             print("Empty stories for url {}".format(url))
             continue
 
-        print("{}/{} Username: -| {} |-".format(idx+1, len(arr_ids), username))
+        print("{}/{} Username: -| {} |-".format(idx + 1, len(arr_ids), username))
         usr_directory = os.path.join(folder_path, username)
 
         #####
@@ -134,21 +121,21 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
             date = time_from_story(element)
             time_directory = os.path.join(usr_directory, date)
 
-            if not os.path.exists(time_directory):  
+            if not os.path.exists(time_directory):
                 print("Creating Directory :{}".format(time_directory))
-                os.makedirs(time_directory) 
+                os.makedirs(time_directory)
 
             """
-            MODE FLAGS: 
+            MODE FLAGS:
             all: download both media and metadata
             media: download only media
             metadata: download only metadata
             """
 
             if mode_flag in ["all", "media"]:
-                if element['media_type'] == 2: 
+                if element['media_type'] == 2:
                     fn_video = os.path.join(time_directory, str(media_id) + ".mp4")
-                    if not os.path.isfile(fn_video): 
+                    if not os.path.isfile(fn_video):
                         videos = element['video_versions']
                         video_url = videos[0]['url']
                         print("Video URL: {}".format(video_url))
@@ -157,7 +144,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                     else:
                         print("Video media already saved")
 
-                if element['media_type'] == 1: 
+                if element['media_type'] == 1:
                     fn_img = os.path.join(time_directory, str(media_id) + ".jpg")
                     if not os.path.isfile(fn_img):
                         pics = element['image_versions2']['candidates']
@@ -179,7 +166,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                 for id in json_stories_seen:
                     seen.write(f'{id}\n')
                 json_stories_saved = json.dump(json_stories_saved, saved)
-    print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), count_i, count_v)) 
+    print("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), count_i, count_v))
     return count_i, count_v, base64_media
 
 def get_stories_tray(cookie):
@@ -216,7 +203,7 @@ def tray_to_ids(stories):
     Returns:
         ids (List): A list of users ids
     """
-    usr = [];    ids = []
+    usr, ids = [], []
     for element in stories['tray']:
         if element['reel_type'] == "mas_reel": continue  # Skip promotional stories.
         ids.append(element['id'])
@@ -244,19 +231,19 @@ def nicks_to_ids(usr_list):
         print(d["graphql"]["user"]["edge_followed_by"]["count"])
         print("{} - ID: {}".format(user, d["graphql"]["user"]["id"]))
         ids.append(d["graphql"]["user"]["id"])
-    return ids   
+    return ids
 
 #################### START SCRAPING FUNCTIONS ###################
 
-def start_scrape(settings, folder_path, number_of_persons, mode_flag="all", ids_mode="all"):
-    cookie = get_cookie(settings["session_id"])  # The check logic for the existence of "session_id" is on the runner.py and flask_server.py files
-    stories = get_stories_tray(cookie)                                     
+def start_scrape(scrape_settings, folder_path, number_of_persons, mode_flag="all", ids_mode="all"):
+    cookie = get_cookie(scrape_settings["session_id"])  # The check logic for the existence of "session_id" is on the runner.py and flask_server.py files
+    stories = get_stories_tray(cookie)
     stories_ids = tray_to_ids(stories)
-    extra_ids = settings["extra_ids"]
+    extra_ids = scrape_settings["extra_ids"]
     if number_of_persons < 0: number_of_persons = len(stories_ids)
     ids = get_ids(stories_ids, number_of_persons, extra_ids, ids_mode)
 
-    count_i, count_v, base64_media = download_today_stories(ids, cookie, folder_path, mode_flag) 
+    count_i, count_v, base64_media = download_today_stories(ids, cookie, folder_path, mode_flag)
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
