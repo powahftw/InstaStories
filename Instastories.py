@@ -13,6 +13,8 @@ try:
 except ImportError as e:
     PRINT_TABLE = False
 
+
+DEFAULT_CACHED_IDS_PATH = "cached_ids.json"
 ################# UTILS FUNCTIONS #########################
 
 def login_and_store_session_id(username, password):
@@ -43,6 +45,32 @@ def get_media(url, path, media_type, username):
     with open(path, "rb") as image:
         base64_media = (base64.b64encode(image.read()).decode("utf-8"), media_type, username)
         return base64_media
+
+def save_cached_id(username, new_cached_id):
+    cached_ids = get_cached_ids()
+    cached_ids[username] = new_cached_id
+    with open(DEFAULT_CACHED_IDS_PATH, "w+") as file:
+        json.dump(cached_ids, file)
+
+def get_cached_ids():
+    if not os.path.exists(DEFAULT_CACHED_IDS_PATH):
+        return {}
+    else:
+        with open(DEFAULT_CACHED_IDS_PATH, "r") as file:
+            return json.load(file)
+        
+def check_cached_ids(ids):
+    new_ids = []
+    for element in ids:
+        if element.isdigit(): new_ids.append(element)  # If input is a valid id appends it
+        else:  # Else if input is nickname (not digit)
+            if element in get_cached_ids(): new_ids.append(get_cached_ids()[element]) # If username is in cache appends it
+            else: # If username is not in cache find the id and append it in cache
+                new_id = nick_to_id(element)
+                new_ids.append(new_id)
+                save_cached_id(element, new_id)
+                print("Finding id for ", element)
+    return new_ids
 
 def get_ids(stories_ids, number_of_persons, extra_ids, ids_mode):
     return (stories_ids[:number_of_persons] if ids_mode != "extra_ids_only" else []) + \
@@ -215,7 +243,7 @@ def tray_to_ids(stories):
 
     return ids
 
-def nicks_to_ids(usr_list):
+def nick_to_id(nickname):
     """
     Get corresponding ids from a list of user nicknames.
     Args:
@@ -224,14 +252,11 @@ def nicks_to_ids(usr_list):
         ids (List): A list of users ids
     """
     base_url_info = "https://www.instagram.com/{}/?__a=1"
-    ids = []
-    for user in usr_list:
-        r = requests.get(base_url_info.format(user))
-        d = r.json()
-        print(d["graphql"]["user"]["edge_followed_by"]["count"])
-        print("{} - ID: {}".format(user, d["graphql"]["user"]["id"]))
-        ids.append(d["graphql"]["user"]["id"])
-    return ids
+    r = requests.get(base_url_info.format(nickname))
+    d = r.json()
+    print(d["graphql"]["user"]["edge_followed_by"]["count"])
+    print("{} - ID: {}".format(nickname, d["graphql"]["user"]["id"]))
+    return d["graphql"]["user"]["id"]
 
 #################### START SCRAPING FUNCTIONS ###################
 
@@ -239,7 +264,7 @@ def start_scrape(scrape_settings, folder_path, number_of_persons, mode_flag="all
     cookie = get_cookie(scrape_settings["session_id"])  # The check logic for the existence of "session_id" is on the runner.py and flask_server.py files
     stories = get_stories_tray(cookie)
     stories_ids = tray_to_ids(stories)
-    extra_ids = scrape_settings["extra_ids"]
+    extra_ids = check_cached_ids(scrape_settings["extra_ids"])
     if number_of_persons < 0: number_of_persons = len(stories_ids)
     ids = get_ids(stories_ids, number_of_persons, extra_ids, ids_mode)
 
