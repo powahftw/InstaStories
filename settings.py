@@ -1,5 +1,6 @@
 import copy
 import json
+import os
 
 SETTINGS_FILE_PATH = 'settings.json'
 LOG_FILE_PATH = 'run_history.log'
@@ -11,7 +12,8 @@ DEFAULT_VALUES = {
 }
 
 def get_settings_file():
-    settings = {}
+    if not os.path.exists(SETTINGS_FILE_PATH):	
+        return {}
     with open(SETTINGS_FILE_PATH, 'r') as f:
         settings = json.load(f)
     return copy.deepcopy(settings)
