@@ -6,7 +6,7 @@ import time
 import datetime
 import base64
 import settings
-import random
+from random import randint
 
 try:
     from terminaltables import AsciiTable
@@ -46,34 +46,30 @@ def get_media(url, path, media_type, username):
         base64_media = (base64.b64encode(image.read()).decode("utf-8"), media_type, username)
         return base64_media
 
-def save_cached_id(nickname_id_pair):
-    cached_ids = get_cached_ids()
-    cached_ids.update(nickname_id_pair)
+def save_cached_id(cached_ids):
     with open(settings.get('cached_ids_path'), "w+") as file:
         json.dump(cached_ids, file)
 
 def get_cached_ids():
-    if not os.path.exists(settings.get('cached_ids_path')):
-        return {} 
-    with open(settings.get('cached_ids_path'), "r") as file:
+    cache_ids_path = settings.get('cached_ids_path')
+    if not os.path.exists(cache_ids_path):
+        return {}
+    with open(cache_ids_path, "r") as file:
         return json.load(file)
-        
+
 def normalize_extra_ids(ids):
     numeric_ids = [elem for elem in ids if elem.isdigit()]
     nicknames = [nick for nick in ids if not nick.isdigit()]
     converted_nicknames = []
-    nickname_id_pair = {}
     cached_ids = get_cached_ids()
     for nick in nicknames:
-        if nick in cached_ids: converted_nicknames.append(cached_ids[nick])
-        else:
+        if nick not in cached_ids:
             print(f"Finding id for {nick}")
+            time.sleep(randint(1, 4))  # Random delay to avoid requests spamming
             id_of_nickname = nick_to_id(nick)
-            converted_nicknames.append(id_of_nickname)
-            nickname_id_pair[nick] = id_of_nickname
-            sleep_delay = random.randint(1,4)  # Random delay to avoid requests spamming
-            time.sleep(sleep_delay)
-    save_cached_id(nickname_id_pair)
+            cached_ids[nick] = id_of_nickname
+        converted_nicknames.append(cached_ids[nick])
+    save_cached_id(cached_ids)
     return numeric_ids + converted_nicknames
 
 def get_ids(stories_ids, number_of_persons, extra_ids, ids_mode):
@@ -281,4 +277,3 @@ def start_scrape(scrape_settings, folder_path, number_of_persons, mode_flag="all
         o.write(f"Date: {timestampStr} - {scraped_users} people scraped - {count_i} IMGs - {count_v} VIDEOs \n")
 
     return base64_media
-    
