@@ -4,11 +4,13 @@ import os
 
 SETTINGS_FILE_PATH = 'settings.json'
 LOG_FILE_PATH = 'run_history.log'
+CACHED_IDS_PATH = 'cached_ids.json'
 
 DEFAULT_VALUES = {
     'log_file_path': LOG_FILE_PATH,
     'folder_path': "ig_media",
     'extra_ids': [],
+    'cached_ids_path': CACHED_IDS_PATH
 }
 
 def get_settings_file():
