@@ -79,7 +79,7 @@ def settings_page():
     if request.method == "POST":  # User is updating settings.
         for setting_name in request.form:
             if setting_name == "extra_ids":
-                extra_ids = list(map(int, request.form["extra_ids"].splitlines()))
+                extra_ids = request.form["extra_ids"].splitlines()
                 settings.update("extra_ids", extra_ids)
             elif len(request.form[setting_name]) != 0:  # Updates other non-null settings.
                 settings.update(setting_name, request.form[setting_name])
