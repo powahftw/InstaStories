@@ -4,16 +4,20 @@ import os
 import base64
 import shutil
 import settings
+import logging
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 SKIP_EXTENSIONS = (".json", ".txt")
 
+settings.setup_logger()
+logger = logging.getLogger(__name__)
+
 ################### UTIL FUNCTIONS ###################
 
 def get_log_file_list():
-    with open(settings.get('log_file_path'), "r+") as o:
+    with open(settings.get('scraping_log_file_path'), "r+") as o:
         return [log_lines for log_lines in o.readlines()]
 
 def convert_media_files(base64_media):
@@ -67,15 +71,20 @@ def index():
     if request.method == "POST" and is_user_logged_in:
         amount_to_scrape = int(request.form["amountToScrape"]) if request.form["amountToScrape"].isdecimal() else -1
         mode, ids_mode = request.form["mode_dropdown"], request.form["ids_dropdown"]
+        logger.info(f"Starting scraping in mode: {mode}, ids source: {ids_mode}")
         base64_media = start_scrape(settings.get(), folder_path, amount_to_scrape, mode, ids_mode)
+        logger.info("Finished scraping")
         converted_files = convert_media_files(base64_media)
     logged_in_error = request.method == "POST" and not is_user_logged_in
     log_lines = get_log_file_list()
+    logger.info("Loading index")
     return render_template('index.html', log_lines=log_lines, images=converted_files, disclaimer={"logged_in_error": logged_in_error})
 
 @app.route("/settings/", methods=['GET', 'POST'])
 def settings_page():
-    if not settings.has_setting("session_id"): return redirect("/login")  # Prompt the user to log-in if he's not
+    if not settings.has_setting("session_id"):
+        return redirect("/login")  # Prompt the user to log-in if he's not
+        logger.info("User not logged in, redirected to /login")
     if request.method == "POST":  # User is updating settings.
         for setting_name in request.form:
             if setting_name == "extra_ids":
@@ -83,6 +92,7 @@ def settings_page():
                 settings.update("extra_ids", extra_ids)
             elif len(request.form[setting_name]) != 0:  # Updates other non-null settings.
                 settings.update(setting_name, request.form[setting_name])
+        logger.info("Updated settings")
     folder_path = settings.get("folder_path")
     extra_ids = settings.get("extra_ids")
     return render_template("settings.html", folder_path=folder_path, extra_ids=extra_ids)
@@ -93,6 +103,7 @@ def login_page():
         return render_template("login.html")
     elif request.method == "POST":
         if login_and_store_session_id(request.form["username"], request.form["password"]):
+            logger.info("User {} has logged in".format(request.form["username"]))
             return redirect("/settings")
         else:
             return render_template("login.html", disclaimer={"login_error": True})
@@ -100,6 +111,7 @@ def login_page():
 @app.route("/settings/logout")
 def logout():
     settings.clear_setting("session_id")
+    logger.info("The user has logged out")
     return render_template("login.html", disclaimer={"login_error": False})
 
 @app.route("/settings/delete-media")
@@ -107,6 +119,7 @@ def delete_media_folder_if_present():
     folder_path = settings.get("folder_path")
     if os.path.exists(folder_path):
         shutil.rmtree(folder_path)
+        logger.info(f"Deleted {folder_path} folder")
 
 @app.route("/gallery/", methods=['GET'], defaults={"username": None, "date": None})
 @app.route("/gallery/<username>/", methods=['GET'], defaults={"date": None})
@@ -122,10 +135,10 @@ def gallery(username, date):
         to_render_items = get_folders(user_path, request.url)
     else:
         to_render_items = get_folders(folder_path, request.url)
-
     return render_template("gallery.html", to_render_items=to_render_items)
 
 ################### RUN ###################
+
 
 if __name__ == "__main__":
     app.run()

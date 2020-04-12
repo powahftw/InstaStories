@@ -1,20 +1,22 @@
 import copy
 import json
 import os
+import logging
 
 SETTINGS_FILE_PATH = 'settings.json'
-LOG_FILE_PATH = 'run_history.log'
+SCRAPING_LOG_FILE_PATH = 'run_history.log'
 CACHED_IDS_PATH = 'cached_ids.json'
+LOG_FILE_PATH = 'info.log'
 
 DEFAULT_VALUES = {
-    'log_file_path': LOG_FILE_PATH,
+    'scraping_log_file_path': SCRAPING_LOG_FILE_PATH,
     'folder_path': "ig_media",
     'extra_ids': [],
-    'cached_ids_path': CACHED_IDS_PATH
+    'cached_ids_path': CACHED_IDS_PATH,
 }
 
 def get_settings_file():
-    if not os.path.exists(SETTINGS_FILE_PATH):	
+    if not os.path.exists(SETTINGS_FILE_PATH):
         return {}
     with open(SETTINGS_FILE_PATH, 'r') as f:
         settings = json.load(f)
@@ -50,3 +52,9 @@ def update(setting_name, updated_value):
     settings = get_settings_file()
     settings[setting_name] = updated_value
     update_settings_file(settings)
+
+def setup_logger():
+    logging.getLogger("requests").setLevel(logging.WARNING)
+    logging.getLogger("werkzeug").setLevel(logging.WARNING)
+    logging.basicConfig(filename=LOG_FILE_PATH, level=logging.INFO, 
+                        format='%(asctime)s %(name)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
