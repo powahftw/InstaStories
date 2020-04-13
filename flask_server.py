@@ -65,23 +65,22 @@ def get_stats_from_log_line(log_lines):
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
+    logger.info(f"{request.method} request to /index")
     converted_files = []
     is_user_logged_in = settings.has_setting("session_id")
     folder_path = settings.get("folder_path")
     if request.method == "POST" and is_user_logged_in:
         amount_to_scrape = int(request.form["amountToScrape"]) if request.form["amountToScrape"].isdecimal() else -1
         mode, ids_mode = request.form["mode_dropdown"], request.form["ids_dropdown"]
-        logger.info(f"Starting scraping in mode: {mode}, ids source: {ids_mode}")
         base64_media = start_scrape(settings.get(), folder_path, amount_to_scrape, mode, ids_mode)
-        logger.info("Finished scraping")
         converted_files = convert_media_files(base64_media)
     logged_in_error = request.method == "POST" and not is_user_logged_in
     log_lines = get_log_file_list()
-    logger.info("Loading index")
     return render_template('index.html', log_lines=log_lines, images=converted_files, disclaimer={"logged_in_error": logged_in_error})
 
 @app.route("/settings/", methods=['GET', 'POST'])
 def settings_page():
+    logger.info(f"{request.method} request to /settings")
     if not settings.has_setting("session_id"):
         return redirect("/login")  # Prompt the user to log-in if he's not
         logger.info("User not logged in, redirected to /login")
@@ -99,6 +98,7 @@ def settings_page():
 
 @app.route("/login", methods=['GET', 'POST'])
 def login_page():
+    logger.info(f"{request.method} request to /login")
     if request.method == "GET":
         return render_template("login.html")
     elif request.method == "POST":
@@ -110,12 +110,14 @@ def login_page():
 
 @app.route("/settings/logout")
 def logout():
+    logger.info(f"{request.method} request to /settings/logout")
     settings.clear_setting("session_id")
     logger.info("The user has logged out")
     return render_template("login.html", disclaimer={"login_error": False})
 
 @app.route("/settings/delete-media")
 def delete_media_folder_if_present():
+    logger.info(f"{request.method} request to /settings/delete-media")
     folder_path = settings.get("folder_path")
     if os.path.exists(folder_path):
         shutil.rmtree(folder_path)
@@ -125,6 +127,7 @@ def delete_media_folder_if_present():
 @app.route("/gallery/<username>/", methods=['GET'], defaults={"date": None})
 @app.route("/gallery/<username>/<date>/", methods=['GET'])
 def gallery(username, date):
+    logger.info(f"{request.method} request to /gallery")
     folder_path = settings.get("folder_path")
     # From most to least specific
     if date:

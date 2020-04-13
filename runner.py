@@ -42,4 +42,4 @@ if __name__ == "__main__":
                 delay = base_delay + random.randint(-variance, variance)
                 time.sleep(delay)
     else:
-        logger.info("You have to login into your instagram account int order to use the scraper, use the \"-login\" argument")
+        logger.warning("You have to login into your instagram account int order to use the scraper, use the \"-login\" argument")

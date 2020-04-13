@@ -33,7 +33,7 @@ def login_and_store_session_id(username, password):
         settings.update("session_id", session_id_string)
         return True
     else:
-        logger.info("You have entered invalid credentials, please retry.")
+        logger.warning("You have entered invalid credentials, please retry.")
         return False
 
 def get_cookie(cookie):
@@ -144,8 +144,9 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                 json_stories_seen = set(seen.read().splitlines())
                 json_stories_saved = json.load(saved)
 
+        user_count_i = 0
+        user_count_v = 0
         for element in items:
-
             media_id = element['id']
 
             date = time_from_story(element)
@@ -170,6 +171,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                         video_url = videos[0]['url']
                         logger.debug("Video URL: {}".format(video_url))
                         base64_media.append(get_media(video_url, fn_video, "video/mp4", username))
+                        user_count_i += 1
                         count_v += 1
                     else:
                         logger.debug("Video media already saved")
@@ -181,6 +183,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                         pic_url = pics[0]['url']
                         logger.debug("Photo URL: {}".format(pic_url))
                         base64_media.append(get_media(pic_url, fn_img, "img/png", username))
+                        user_count_v += 1
                         count_i += 1
                     else:
                         logger.debug("Video media already saved")
@@ -190,7 +193,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                     json_stories_seen.add(media_id)
                     json_stories_saved.append(element)
                     new_metadata = True
-        logger.info(f"{len(items)} elements in {username} stories")
+        logger.info(f"{len(items)} element(s) in {username} stories, scraped {user_count_i} images and {user_count_v} videos")
         if new_metadata:
             with open(seen_stories_txt, 'w') as seen, open(saved_stories_json, 'w') as saved:
                 for id in json_stories_seen:
@@ -222,7 +225,7 @@ def print_ids_table(usr, ids):
     table_data = [[x, y] for x, y in zip(usr, ids)]
     table_data = [("Username", "ID")] + table_data
     table = AsciiTable(table_data)
-    logger.info(table.table)
+    logger.debug(table.table)
 
 def tray_to_ids(stories):
     """
@@ -256,7 +259,6 @@ def nick_to_id(nickname):
     base_url_info = "https://www.instagram.com/{}/?__a=1"
     r = requests.get(base_url_info.format(nickname))
     d = r.json()
-    logger.info(d["graphql"]["user"]["edge_followed_by"]["count"])
     logger.info("{} - ID: {}".format(nickname, d["graphql"]["user"]["id"]))
     return d["graphql"]["user"]["id"]
 
@@ -270,7 +272,9 @@ def start_scrape(scrape_settings, folder_path, number_of_persons, mode_flag="all
     if number_of_persons < 0: number_of_persons = len(stories_ids)
     ids = get_ids(stories_ids, number_of_persons, extra_ids, ids_mode)
 
+    logger.info(f"Starting scraping in mode: {mode_flag}, ids source: {ids_mode}")
     count_i, count_v, base64_media = download_today_stories(ids, cookie, folder_path, mode_flag)
+    logger.info("Finished scraping")
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
