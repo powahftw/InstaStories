@@ -105,7 +105,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
         cookie (dict): Instagram Cookie for authentication in the requests.
     """
 
-    count_i, count_v = 0, 0
+    tot_count_img, tot_count_videos = 0, 0
     base64_media = []
 
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
@@ -172,7 +172,6 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                         logger.debug("Video URL: {}".format(video_url))
                         base64_media.append(get_media(video_url, fn_video, "video/mp4", username))
                         user_count_i += 1
-                        count_v += 1
                     else:
                         logger.debug("Video media already saved")
 
@@ -184,7 +183,6 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                         logger.debug("Photo URL: {}".format(pic_url))
                         base64_media.append(get_media(pic_url, fn_img, "img/png", username))
                         user_count_v += 1
-                        count_i += 1
                     else:
                         logger.debug("Video media already saved")
 
@@ -193,14 +191,16 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                     json_stories_seen.add(media_id)
                     json_stories_saved.append(element)
                     new_metadata = True
+        tot_count_img += user_count_i
+        tot_count_videos += user_count_v
         logger.info(f"{len(items)} element(s) in {username} stories, scraped {user_count_i} images and {user_count_v} videos")
         if new_metadata:
             with open(seen_stories_txt, 'w') as seen, open(saved_stories_json, 'w') as saved:
                 for id in json_stories_seen:
                     seen.write(f'{id}\n')
                 json_stories_saved = json.dump(json_stories_saved, saved)
-    logger.info("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), count_i, count_v))
-    return count_i, count_v, base64_media
+    logger.info("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), tot_count_img, tot_count_videos))
+    return tot_count_img, tot_count_videos, base64_media
 
 def get_stories_tray(cookie):
     """
