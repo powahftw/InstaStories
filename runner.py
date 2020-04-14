@@ -4,6 +4,11 @@ import random
 import time
 import settings
 import getpass
+import logging
+
+
+settings.setup_logger()
+logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="TOKEN PATH AND NUMBER OF PEOPLE SCRAPED")
@@ -25,7 +30,7 @@ if __name__ == "__main__":
         password = getpass.getpass()
         login_and_store_session_id(username, password)
     else:
-        print("\n\nYou are already logged in, start scraping\n\n")
+        logger.info("You are already logged in, start scraping")
 
     if is_user_logged_in:
         running = True
@@ -37,4 +42,4 @@ if __name__ == "__main__":
                 delay = base_delay + random.randint(-variance, variance)
                 time.sleep(delay)
     else:
-        print("You have to login into your instagram account int order to use the scraper, use the \"-login\" argument")
+        logger.warning("You have to login into your instagram account int order to use the scraper, use the \"-login\" argument")

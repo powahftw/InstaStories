@@ -11,3 +11,4 @@ cached_ids.json
 __pycache__
 run_history.log
 .vscode
+info.log
