@@ -35,7 +35,7 @@ if __name__ == "__main__":
     if is_user_logged_in:
         running = True
         while running:
-            base64_media = start_scrape(settings.get(), folder_path, number_of_persons, mode_flag, ids_type_flag)
+            start_scrape(settings.get(), folder_path, number_of_persons, mode_flag, ids_type_flag)
             if loop_flag == "single": running = False
             elif loop_flag == "loop":
                 variance = int(base_delay / 100 * variance)

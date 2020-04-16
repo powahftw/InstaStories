@@ -21,7 +21,6 @@
         </ul>
         <ul class="index-settings-btn">
             <li><div class="btn sub-btn" onclick="setPanel('logs')">LOGS</div></li>
-            <li><div class="btn sub-btn" onclick="setPanel('images')">LAST SCRAPED IMAGES</div></li>
             <li><div class="btn sub-btn" onclick="setPanel('advanced')">ADVANCED</div></li>
         </ul>
         <div class="index-logs" id="index-logs">
@@ -31,18 +30,6 @@
                     <li>{{ log_line_element }} </li>
                 {% endfor %}
             </ul>
-        </div>
-
-        <div class="index-images" id="index-images">
-            <h2>LAST SCRAPED IMAGES</h2>
-            {% for image in images %}
-                {% if image["type"] == "media" %}
-                    <{{ image["data"]["content_tag"] }} src="data:{{image["data"]["media_type"]}};base64,{{ image["data"]["base64_data"] }}" class="rendered-stories"></{{ image["data"]["content_tag"] }}>
-                {% elif image["type"] == "username" %}
-                    <hr>
-                    <div class="username">{{image["data"]}}</div><br>
-                {% endif %}
-            {% endfor %}
         </div>
 
         <div class="index-advanced" id="index-advanced">
