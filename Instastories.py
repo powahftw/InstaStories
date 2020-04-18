@@ -41,8 +41,7 @@ def get_cookie(cookie):
              "cache-control": "no-cache"}
     return token
 
-def get_media(url, path, media_type, username):
-    urllib.request.urlretrieve(url, path)
+def get_media(url, path): urllib.request.urlretrieve(url, path)
 
 def save_cached_id(cached_ids):
     with open(settings.get('cached_ids_path'), "w+") as file:
@@ -165,7 +164,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                         videos = element['video_versions']
                         video_url = videos[0]['url']
                         logger.debug("Video URL: {}".format(video_url))
-                        get_media(video_url, fn_video, "video/mp4", username)
+                        get_media(video_url, fn_video)
                         user_count_i += 1
                     else:
                         logger.debug("Video media already saved")
@@ -176,7 +175,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                         pics = element['image_versions2']['candidates']
                         pic_url = pics[0]['url']
                         logger.debug("Photo URL: {}".format(pic_url))
-                        get_media(pic_url, fn_img, "img/png", username)
+                        get_media(pic_url, fn_img)
                         user_count_v += 1
                     else:
                         logger.debug("Video media already saved")

@@ -1,6 +1,7 @@
 import copy
 import json
 import os
+import sys
 import logging
 
 SETTINGS_FILE_PATH = 'settings.json'
@@ -56,13 +57,13 @@ def update(setting_name, updated_value):
 
 def setup_logger():
     handlers = []
-    fh = logging.FileHandler(LOG_FILE_PATH)
-    fh.setLevel(logging.INFO)
-    handlers.append(fh)
+    file_handler = logging.FileHandler(LOG_FILE_PATH)
+    file_handler.setLevel(logging.INFO)
+    handlers.append(file_handler)
     if LOGGING_DEBUG:
-        sh = logging.StreamHandler()
-        sh.setLevel(logging.DEBUG)
-        handlers.append(sh)
+        stream_handler = logging.StreamHandler(stream=sys.stdout)
+        stream_handler.setLevel(logging.DEBUG)
+        handlers.append(stream_handler)
 
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("werkzeug").setLevel(logging.WARNING)
