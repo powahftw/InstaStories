@@ -17,23 +17,11 @@ logger = logging.getLogger(__name__)
 ################### UTIL FUNCTIONS ###################
 
 def get_log_file_list():
-    with open(settings.get('scraping_log_file_path'), "r+") as o:
+    scraping_logs_path = settings.get('scraping_log_file_path')
+    if not os.path.exists(scraping_logs_path):
+        return []
+    with open(scraping_logs_path, "r+") as o:
         return [log_lines for log_lines in o.readlines()]
-
-def convert_media_files(base64_media):
-    converted_files = []
-    last_username = None
-    for base64_data, media_type, username in base64_media:
-        content_tag = "img" if media_type == "img/png" else "video controls"
-        if username != last_username:
-            converted_files.append({"type": "username", "data": username})
-            last_username = username
-        converted_files.append({"type": "media",
-                                "data": {"content_tag": content_tag,
-                                         "media_type": media_type,
-                                         "base64_data": base64_data}
-                                })
-    return converted_files
 
 def get_folders(path, url):
     rendered_folders = []  # List of {type: 'folder', url: X, name: Y}
@@ -66,17 +54,15 @@ def get_stats_from_log_line(log_lines):
 @app.route("/", methods=['GET', 'POST'])
 def index():
     logger.info(f"{request.method} request to /index")
-    converted_files = []
     is_user_logged_in = settings.has_setting("session_id")
     folder_path = settings.get("folder_path")
     if request.method == "POST" and is_user_logged_in:
         amount_to_scrape = int(request.form["amountToScrape"]) if request.form["amountToScrape"].isdecimal() else -1
         mode, ids_mode = request.form["mode_dropdown"], request.form["ids_dropdown"]
-        base64_media = start_scrape(settings.get(), folder_path, amount_to_scrape, mode, ids_mode)
-        converted_files = convert_media_files(base64_media)
+        start_scrape(settings.get(), folder_path, amount_to_scrape, mode, ids_mode)
     logged_in_error = request.method == "POST" and not is_user_logged_in
     log_lines = get_log_file_list()
-    return render_template('index.html', log_lines=log_lines, images=converted_files, disclaimer={"logged_in_error": logged_in_error})
+    return render_template('index.html', log_lines=log_lines, disclaimer={"logged_in_error": logged_in_error})
 
 @app.route("/settings/", methods=['GET', 'POST'])
 def settings_page():
