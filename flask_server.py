@@ -113,7 +113,7 @@ def delete_media_folder_if_present():
 @app.route("/gallery/<username>/", methods=['GET'], defaults={"date": None})
 @app.route("/gallery/<username>/<date>/", methods=['GET'])
 def gallery(username, date):
-    logger.info(f"{request.method} request to /gallery")
+    logger.info(f"GET request to /gallery/{username if username else ''}{'/' + date if date else ''}")
     folder_path = settings.get("folder_path")
     # From most to least specific
     if date:
