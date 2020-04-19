@@ -41,8 +41,6 @@ def get_cookie(cookie):
              "cache-control": "no-cache"}
     return token
 
-def get_media(url, path): urllib.request.urlretrieve(url, path)
-
 def save_cached_id(cached_ids):
     with open(settings.get('cached_ids_path'), "w+") as file:
         json.dump(cached_ids, file)
@@ -164,7 +162,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                         videos = element['video_versions']
                         video_url = videos[0]['url']
                         logger.debug("Video URL: {}".format(video_url))
-                        get_media(video_url, fn_video)
+                        urllib.request.urlretrieve(video_url, fn_video)
                         user_count_i += 1
                     else:
                         logger.debug("Video media already saved")
@@ -175,7 +173,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                         pics = element['image_versions2']['candidates']
                         pic_url = pics[0]['url']
                         logger.debug("Photo URL: {}".format(pic_url))
-                        get_media(pic_url, fn_img)
+                        urllib.request.urlretrieve(pic_url, fn_img)
                         user_count_v += 1
                     else:
                         logger.debug("Video media already saved")
@@ -269,6 +267,7 @@ def start_scrape(scrape_settings, folder_path, number_of_persons, mode_flag="all
     logger.info(f"Starting scraping in mode: {mode_flag}, ids source: {ids_mode}")
     count_i, count_v = download_today_stories(ids, cookie, folder_path, mode_flag)
     logger.info("Finished scraping")
+    settings.completed_scraping()
 
     timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 

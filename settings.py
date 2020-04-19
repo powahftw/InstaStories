@@ -3,12 +3,21 @@ import json
 import os
 import sys
 import logging
+from telegram_handler import TelegramHandler
 
 SETTINGS_FILE_PATH = 'settings.json'
 SCRAPING_LOG_FILE_PATH = 'run_history.log'
 CACHED_IDS_PATH = 'cached_ids.json'
 LOG_FILE_PATH = 'info.log'
-LOGGING_DEBUG = True
+
+LOGGING_TO_STDOUT = True
+stream_handler = None
+
+LOGGING_TO_TELEGRAM = True
+telegram_handler = None
+
+LOGGING_TO_FILE = False
+file_handler = None
 
 DEFAULT_VALUES = {
     'scraping_log_file_path': SCRAPING_LOG_FILE_PATH,
@@ -57,14 +66,23 @@ def update(setting_name, updated_value):
 
 def setup_logger():
     handlers = []
-    file_handler = logging.FileHandler(LOG_FILE_PATH)
-    file_handler.setLevel(logging.INFO)
-    handlers.append(file_handler)
-    if LOGGING_DEBUG:
+    if LOGGING_TO_FILE:
+        global file_handler
+        file_handler = logging.FileHandler(LOG_FILE_PATH)
+        file_handler.setLevel(logging.INFO)
+        handlers.append(file_handler)
+    if LOGGING_TO_STDOUT:
+        global stream_handler
         stream_handler = logging.StreamHandler(stream=sys.stdout)
         stream_handler.setLevel(logging.DEBUG)
         handlers.append(stream_handler)
-
+    if LOGGING_TO_TELEGRAM:
+        global telegram_handler
+        telegram_handler = TelegramHandler(get("telegram_bot_api_key"), get("telegram_chat_id"))
+        telegram_handler.setLevel(logging.INFO)
+        telegram_formatter = logging.Formatter('%(message)s')
+        telegram_handler.setFormatter(telegram_formatter)
+        handlers.append(telegram_handler)
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("werkzeug").setLevel(logging.WARNING)
 
@@ -73,3 +91,7 @@ def setup_logger():
                         datefmt='%Y-%m-%d %H:%M:%S',
                         handlers=handlers
                         )
+
+def completed_scraping():
+    if LOGGING_TO_TELEGRAM and telegram_handler:
+        telegram_handler.send_buffered_data()
