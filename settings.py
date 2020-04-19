@@ -11,7 +11,7 @@ CACHED_IDS_PATH = 'cached_ids.json'
 LOG_FILE_PATH = 'info.log'
 
 LOGGING_TO_STDOUT = True
-stream_handler = False
+stream_handler = None
 
 LOGGING_TO_TELEGRAM = True
 telegram_handler = None
