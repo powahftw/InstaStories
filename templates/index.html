@@ -9,28 +9,19 @@
     <a href="/"><img src="/static/images/logo.png" alt=""></a>
     <h1>InstaStories</h1>
 </div>
+
 <form action="/" method="POST">
     <div class="index-scraping-sect">
+
         {% if disclaimer['logged_in_error'] %}
             <div class="errors">You must login in settings before start scraping</div>
         {% endif %}
+
         <ul>
             <li><h3>Insert the number of people to scrape</h3></li>
             <li><input type="text" name="amountToScrape" class="input"/></li>
             <li><button class="btn" name="scrapeBtn" value="False" type="submit">START SCRAPE</button></li>
         </ul>
-        <ul class="index-settings-btn">
-            <li><div class="btn sub-btn" onclick="setPanel('logs')">LOGS</div></li>
-            <li><div class="btn sub-btn" onclick="setPanel('advanced')">ADVANCED</div></li>
-        </ul>
-        <div class="index-logs" id="index-logs">
-            <h2>LOGS</h2>
-            <ul>
-                {% for log_line_element in log_lines %}
-                    <li>{{ log_line_element }} </li>
-                {% endfor %}
-            </ul>
-        </div>
 
         <div class="index-advanced" id="index-advanced">
             <div class="index-mode">
@@ -47,28 +38,17 @@
             </div>
         </div>
 
+
+        <div class="index-logs" id="index-logs">
+            <h2>LOGS</h2>
+            <ul>
+                {% for log_line_element in log_lines %}
+                    <li>{{ log_line_element }} </li>
+                {% endfor %}
+            </ul>
+        </div>
+
     </div>
 </form>
-
-<script>   
-    function hideById(id) {
-        document.getElementById(id).style.display = "none";
-    }
-
-    function showById(id) {
-        if (id == "index-advanced") {
-        document.getElementById(id).style.display = "flex";
-        } else {
-            document.getElementById(id).style.display = "block";
-        }
-    }
-
-    function setPanel(panelName) {
-        console.log(panelName);
-        for (const id of ["index-logs", "index-advanced", "index-images"]) {
-            id.endsWith(panelName) ? showById(id) : hideById(id);
-        } 
-    }
-</script>
 
 {% endblock %}

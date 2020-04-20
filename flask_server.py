@@ -21,7 +21,8 @@ def get_log_file_list():
     if not os.path.exists(scraping_logs_path):
         return []
     with open(scraping_logs_path, "r+") as o:
-        return [log_lines for log_lines in o.readlines()]
+        logs = [log_lines for log_lines in o.readlines()]
+        return list(reversed(logs))
 
 def get_folders(path, url):
     rendered_folders = []  # List of {type: 'folder', url: X, name: Y}

@@ -138,10 +138,6 @@ textarea {
     text-indent: 10px;
 }
 
-.index-settings-btn {
-    margin: 30px;
-}
-
 .index-logs {
     margin-top: 30px;
     background-color: #131313;
@@ -149,13 +145,6 @@ textarea {
     padding: 20px;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
-}
-
-.index-images {
-    display: none;
-    background-color: #131313;
-    padding: 20px 20%;
-    min-height: 12vh;
 }
 
 .index-mode h2, .index-images h2, .index-logs h2 {
@@ -173,7 +162,7 @@ textarea {
 }
 
 .index-advanced {
-    display: none;
+    display: flex;
     justify-content: space-evenly;
     flex-direction: row;
     margin-top: 30px;
