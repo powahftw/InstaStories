@@ -13,7 +13,7 @@ LOG_FILE_PATH = 'info.log'
 LOGGING_TO_STDOUT = True
 stream_handler = None
 
-LOGGING_TO_TELEGRAM = True
+LOGGING_TO_TELEGRAM = False
 telegram_handler = None
 
 LOGGING_TO_FILE = False

@@ -77,7 +77,15 @@ textarea {
     background-color: #F64343;
 }
 
+.stop-btn {
+    background-color: #F64343;
+}
+
 .delete-btn {
+    background-color: #fff455;
+}
+
+.update-btn {
     background-color: #fff455;
 }
 
@@ -280,4 +288,8 @@ a .gallery-folders {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+}
+
+.info {
+    color: lightblue;
 }
