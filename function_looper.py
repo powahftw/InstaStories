@@ -4,7 +4,7 @@ import threading
 class ThreadRunner():
 
     def __init__(self, func):
-        self.loop_running = True
+        self.UPDATE_FREQUENCY = 1
         self.thread_running = False
         self.once = False
         self.args = {}
@@ -14,8 +14,8 @@ class ThreadRunner():
         self.th.start()
 
     def runLoopedFunction(self):
-        while self.loop_running:
-            time.sleep(1)
+        while True:
+            time.sleep(self.UPDATE_FREQUENCY)
             if self.thread_running:
                 self.output = self.func(**self.args)
                 if self.once:
@@ -34,6 +34,3 @@ class ThreadRunner():
 
     def getOutput(self):
         return self.output
-
-    def stop(self):
-        self.loop_running = False

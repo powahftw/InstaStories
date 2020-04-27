@@ -66,7 +66,7 @@ def index():
         mode, ids_mode, loop_mode = request.form["mode_dropdown"], request.form["ids_dropdown"], request.form["loop_dropdown"]
         scraper_runner_args = {"scrape_settings": user_settings, "folder_path": folder_path, "number_of_persons": amount_to_scrape}
         if status_button == "start":
-            loop_mode = True if loop_mode == "True" else False
+            loop_mode = loop_mode == "True"
             scraper_runner.updateFuncArg(**scraper_runner_args).startFunction(once=loop_mode)
         elif status_button == "stop": scraper_runner.stopFunction()
         elif status_button == "update": scraper_runner.updateFuncArg(**scraper_runner_args)
