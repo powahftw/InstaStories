@@ -5,6 +5,7 @@ import base64
 import shutil
 import settings
 import logging
+from function_looper import ThreadRunner
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -14,8 +15,9 @@ SKIP_EXTENSIONS = (".json", ".txt")
 settings.setup_logger()
 logger = logging.getLogger(__name__)
 
-################### UTIL FUNCTIONS ###################
+scraper_runner = ThreadRunner(start_scrape)
 
+################### UTIL FUNCTIONS ###################
 def get_log_file_list():
     scraping_logs_path = settings.get('scraping_log_file_path')
     if not os.path.exists(scraping_logs_path):
@@ -56,14 +58,21 @@ def get_stats_from_log_line(log_lines):
 def index():
     logger.info(f"{request.method} request to /index")
     is_user_logged_in = settings.has_setting("session_id")
+    user_settings = settings.get()
     folder_path = settings.get("folder_path")
     if request.method == "POST" and is_user_logged_in:
         amount_to_scrape = int(request.form["amountToScrape"]) if request.form["amountToScrape"].isdecimal() else -1
-        mode, ids_mode = request.form["mode_dropdown"], request.form["ids_dropdown"]
-        start_scrape(settings.get(), folder_path, amount_to_scrape, mode, ids_mode)
+        status_button = request.form["controlBtn"]
+        mode, ids_mode, loop_mode = request.form["mode_dropdown"], request.form["ids_dropdown"], request.form["loop_dropdown"]
+        scraper_runner_args = {"scrape_settings": user_settings, "folder_path": folder_path, "number_of_persons": amount_to_scrape}
+        if status_button == "start":
+            loop_mode = loop_mode == "True"
+            scraper_runner.updateFuncArg(**scraper_runner_args).startFunction(once=loop_mode)
+        elif status_button == "stop": scraper_runner.stopFunction()
+        elif status_button == "update": scraper_runner.updateFuncArg(**scraper_runner_args)
     logged_in_error = request.method == "POST" and not is_user_logged_in
     log_lines = get_log_file_list()
-    return render_template('index.html', log_lines=log_lines, disclaimer={"logged_in_error": logged_in_error})
+    return render_template('index.html', log_lines=log_lines, disclaimer={"logged_in_error": logged_in_error}, output=scraper_runner.getOutput())
 
 @app.route("/settings/", methods=['GET', 'POST'])
 def settings_page():

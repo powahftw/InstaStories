@@ -274,3 +274,5 @@ def start_scrape(scrape_settings, folder_path, number_of_persons, mode_flag="all
     with open("run_history.log", "a+") as o:
         scraped_users = len(ids)
         o.write(f"Date: {timestampStr} - {scraped_users} people scraped - {count_i} IMGs - {count_v} VIDEOs \n")
+
+    return {"scraped_media": count_i + count_v}

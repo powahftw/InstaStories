@@ -20,10 +20,19 @@
         <ul>
             <li><h3>Insert the number of people to scrape</h3></li>
             <li><input type="text" name="amountToScrape" class="input"/></li>
-            <li><button class="btn" name="scrapeBtn" value="False" type="submit">START SCRAPE</button></li>
+            <li><button class="btn start-btn" name="controlBtn" value="start" type="submit">START</button></li>
+            <li><button class="btn stop-btn" name="controlBtn" value="stop" type="submit">STOP</button></li>
+            <li><button class="btn update-btn" name="controlBtn" value="update" type="submit">UPDATE</button></li>
         </ul>
 
+        <div class="info"><h3>On the last cycle you scraped {{output["scraped_media"]}} media</h3></div>
+
         <div class="index-advanced" id="index-advanced">
+            <div class="index-mode">
+                <h2>LOOP MODE</h2>
+                <div class="checkgroup"><label for="single">Single cycle</label><input class="radio-btn" name="loop_dropdown" type="radio" value=True id="single" checked /></div>
+                <div class="checkgroup"><label for="loop">Loop cycle</label><input class="radio-btn" name="loop_dropdown" type="radio" value=False id="loop"/></div>
+            </div>
             <div class="index-mode">
                 <h2>SCRAPING MODE</h2>
                 <div class="checkgroup"><label for="all">All</label><input class="radio-btn" name="mode_dropdown" type="radio" value="all" id="all" checked /></div>
@@ -37,7 +46,6 @@
                 <div class="checkgroup"><label for="extra_ids">Extra IDS</label><input class="radio-btn"  name="ids_dropdown" type="radio" value="extra_ids_only" id="extra_ids" /></div>
             </div>
         </div>
-
 
         <div class="index-logs" id="index-logs">
             <h2>LOGS</h2>
