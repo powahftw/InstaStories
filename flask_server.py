@@ -5,7 +5,7 @@ import base64
 import shutil
 import settings
 import logging
-from function_looper import ThreadRunner
+from thread_runner import ThreadRunner
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
