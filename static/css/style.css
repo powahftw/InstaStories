@@ -105,12 +105,11 @@ textarea {
 
 .index-logo {
     text-align: center;
-    padding-top: 17.5vh;
+    padding: 7vh;
 }
 
 .index-logo img {
-    width: 400px;
-    margin: -20px;
+    width: 200px;
 }
 
 .index-logo h1 {

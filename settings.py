@@ -6,6 +6,7 @@ import logging
 from telegram_handler import TelegramHandler
 
 SETTINGS_FILE_PATH = 'settings.json'
+FOLDER_PATH = "ig_media"
 SCRAPING_LOG_FILE_PATH = 'run_history.log'
 CACHED_IDS_PATH = 'cached_ids.json'
 LOG_FILE_PATH = 'info.log'
@@ -21,9 +22,11 @@ file_handler = None
 
 DEFAULT_VALUES = {
     'scraping_log_file_path': SCRAPING_LOG_FILE_PATH,
-    'folder_path': "ig_media",
+    'folder_path': FOLDER_PATH,
     'extra_ids': [],
     'cached_ids_path': CACHED_IDS_PATH,
+    'loop_delay': 8 * 60 * 60,
+    'loop_variation': 20
 }
 
 def get_settings_file():

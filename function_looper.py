@@ -1,13 +1,15 @@
 import time
 import threading
+import random
+import settings
 
 class ThreadRunner():
 
-    def __init__(self, func):
-        self.UPDATE_FREQUENCY = 1
+    def __init__(self, func, default_loop_delay, default_loop_variation):
         self.thread_running = False
         self.once = False
         self.args = {}
+        self.loop_args = {"loop_delay": default_loop_delay, "loop_variation": default_loop_variation}
         self.output = {}
         self.func = func
         self.th = threading.Thread(target=self.runLoopedFunction, daemon=True)
@@ -15,7 +17,9 @@ class ThreadRunner():
 
     def runLoopedFunction(self):
         while True:
-            time.sleep(self.UPDATE_FREQUENCY)
+            loop_variation = int(self.loop_args["loop_delay"] * (self.loop_args["loop_variation"] / 100))
+            time_delay = self.loop_args["loop_delay"] + random.randint(-loop_variation, loop_variation)
+            time.sleep(time_delay)
             if self.thread_running:
                 self.output = self.func(**self.args)
                 if self.once:
@@ -27,6 +31,10 @@ class ThreadRunner():
 
     def stopFunction(self):
         self.thread_running = False
+
+    def updateDelay(self, **kwargs):
+        self.loop_args = kwargs
+        return self
 
     def updateFuncArg(self, **kwargs):
         self.args = kwargs

@@ -7,18 +7,39 @@
             <li>
                 <h2>Settings</h2>
             </li>
-            <li><label for="folder_path">Download folder path: {{folder_path}}</label>
-                <input class="input" id="folder_path" type="text" name="folder_path"></li>
+
+            <li>
+                <label for="folder_path">Download folder path: {{settings["folder_path"]}}</label>
+                <input class="input" id="folder_path" type="text" name="folder_path">
+            </li>
+
+            <li>
+                <label for="folder_path">Delay between loop cycles (insert time in seconds): {{settings["loop_delay"]}} second(s)</label>
+                <input class="input" type="text" name="loop_delay">
+            </li>
+
+            <li>
+                <label for="folder_path">Variation of loop cycles delay (in percentage): {{settings["loop_variation"]}}%</label>
+                <input class="input" type="text" name="loop_variation">
+            </li>
             
             <li>
                 <label for="extra_ids">Extra IDS to scrape (use # to add comments)</label><br>
                 <textarea name="extra_ids" id="extra_ids">{% for extra_id in extra_ids %}{{extra_id}}{{"\n"}}{% endfor %}</textarea>
             </li>
+
             <ul>
-                <li><button type="submit" id="submitBtn" class="btn sub-btn">UPDATE SETTINGS</button></li>
-                <li><button class="btn sub-btn logout-btn" onclick="location.href='/settings/logout'">LOG OUT</button>
+                <li>
+                    <button type="submit" id="submitBtn" class="btn sub-btn">UPDATE SETTINGS</button>
                 </li>
-                <li><button class="btn sub-btn delete-btn" onclick="location.href='/settings/delete-media'">DELETE ALL MEDIA</button></li>
+
+                <li>
+                    <button class="btn sub-btn logout-btn" onclick="location.href='/settings/logout'">LOG OUT</button>
+                </li>
+                
+                <li>
+                    <button class="btn sub-btn delete-btn" onclick="location.href='/settings/delete-media'">DELETE ALL MEDIA</button>
+                </li>
             </ul>
         </ul>
     </div>

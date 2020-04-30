@@ -15,7 +15,7 @@ SKIP_EXTENSIONS = (".json", ".txt")
 settings.setup_logger()
 logger = logging.getLogger(__name__)
 
-scraper_runner = ThreadRunner(start_scrape)
+scraper_runner = ThreadRunner(start_scrape, settings.get("loop_delay"), settings.get("loop_variation"))
 
 ################### UTIL FUNCTIONS ###################
 def get_log_file_list():
@@ -61,10 +61,9 @@ def index():
     user_settings = settings.get()
     folder_path = settings.get("folder_path")
     if request.method == "POST" and is_user_logged_in:
-        amount_to_scrape = int(request.form["amountToScrape"]) if request.form["amountToScrape"].isdecimal() else -1
-        status_button = request.form["controlBtn"]
-        mode, ids_mode, loop_mode = request.form["mode_dropdown"], request.form["ids_dropdown"], request.form["loop_dropdown"]
-        scraper_runner_args = {"scrape_settings": user_settings, "folder_path": folder_path, "number_of_persons": amount_to_scrape}
+        user_limit = int(request.form["user_limit"]) if request.form["user_limit"].isdecimal() else -1
+        mode, ids_mode, loop_mode, status_button = request.form["mode_dropdown"], request.form["ids_dropdown"], request.form["loop_dropdown"], request.form["controlBtn"]
+        scraper_runner_args = {"scrape_settings": user_settings, "folder_path": folder_path, "user_limit": user_limit}
         if status_button == "start":
             loop_mode = loop_mode == "True"
             scraper_runner.updateFuncArg(**scraper_runner_args).startFunction(once=loop_mode)
@@ -85,12 +84,18 @@ def settings_page():
             if setting_name == "extra_ids":
                 extra_ids = request.form["extra_ids"].splitlines()
                 settings.update("extra_ids", extra_ids)
+            elif setting_name in ["loop_delay", "loop_variation"] and len(request.form[setting_name]) != 0:
+                settings.update(setting_name, int(request.form[setting_name]))
             elif len(request.form[setting_name]) != 0:  # Updates other non-null settings.
                 settings.update(setting_name, request.form[setting_name])
+        loop_args = {"loop_delay": settings.get("loop_delay"), "loop_variation": settings.get("loop_variation")}
+        scraper_runner.updateDelay(**loop_args)
         logger.info("Updated settings")
     folder_path = settings.get("folder_path")
+    loop_delay = settings.get("loop_delay")
+    loop_variation = settings.get("loop_variation")
     extra_ids = settings.get("extra_ids")
-    return render_template("settings.html", folder_path=folder_path, extra_ids=extra_ids)
+    return render_template("settings.html", settings={"folder_path": folder_path, "loop_delay": loop_delay, "loop_variation": loop_variation}, extra_ids=extra_ids)
 
 @app.route("/login", methods=['GET', 'POST'])
 def login_page():
