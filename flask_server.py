@@ -15,7 +15,7 @@ SKIP_EXTENSIONS = (".json", ".txt")
 settings.setup_logger()
 logger = logging.getLogger(__name__)
 
-scraper_runner = ThreadRunner(start_scrape, settings.get("loop_delay"), settings.get("loop_variation"))
+scraper_runner = ThreadRunner(start_scrape, settings.get("loop_delay_seconds"), settings.get("loop_variation_percentage"))
 
 ################### UTIL FUNCTIONS ###################
 def get_log_file_list():
@@ -59,7 +59,7 @@ def index():
     logger.info(f"{request.method} request to /index")
     is_user_logged_in = settings.has_setting("session_id")
     user_settings = settings.get()
-    folder_path = settings.get("folder_path")
+    folder_path = user_settings["folder_path"]
     if request.method == "POST" and is_user_logged_in:
         user_limit = int(request.form["user_limit"]) if request.form["user_limit"].isdecimal() else -1
         mode, ids_mode, loop_mode, status_button = request.form["mode_dropdown"], request.form["ids_dropdown"], request.form["loop_dropdown"], request.form["controlBtn"]
@@ -76,6 +76,7 @@ def index():
 @app.route("/settings/", methods=['GET', 'POST'])
 def settings_page():
     logger.info(f"{request.method} request to /settings")
+    user_settings = settings.get()
     if not settings.has_setting("session_id"):
         return redirect("/login")  # Prompt the user to log-in if he's not
         logger.info("User not logged in, redirected to /login")
@@ -83,19 +84,19 @@ def settings_page():
         for setting_name in request.form:
             if setting_name == "extra_ids":
                 extra_ids = request.form["extra_ids"].splitlines()
-                settings.update("extra_ids", extra_ids)
-            elif setting_name in ["loop_delay", "loop_variation"] and len(request.form[setting_name]) != 0:
-                settings.update(setting_name, int(request.form[setting_name]))
+                user_settings["extra_ids"] = extra_ids
+            elif setting_name in ["loop_delay_seconds", "loop_variation_percentage"] and len(request.form[setting_name]) != 0:
+                user_settings[setting_name] = int(request.form[setting_name])
             elif len(request.form[setting_name]) != 0:  # Updates other non-null settings.
-                settings.update(setting_name, request.form[setting_name])
-        loop_args = {"loop_delay": settings.get("loop_delay"), "loop_variation": settings.get("loop_variation")}
-        scraper_runner.updateDelay(**loop_args)
+                user_settings[setting_name] = request.form[setting_name]
+        settings.update_settings_file(user_settings)
         logger.info("Updated settings")
-    folder_path = settings.get("folder_path")
-    loop_delay = settings.get("loop_delay")
-    loop_variation = settings.get("loop_variation")
-    extra_ids = settings.get("extra_ids")
-    return render_template("settings.html", settings={"folder_path": folder_path, "loop_delay": loop_delay, "loop_variation": loop_variation}, extra_ids=extra_ids)
+    folder_path = user_settings["folder_path"]
+    loop_args = {"loop_delay_seconds": user_settings["loop_delay_seconds"],
+                 "loop_variation_percentage": user_settings["loop_variation_percentage"]}
+    extra_ids = user_settings["extra_ids"]
+    if request.method == "POST": scraper_runner.updateDelay(**loop_args)
+    return render_template("settings.html", settings={"extra_ids": extra_ids, "folder_path": folder_path, **loop_args})
 
 @app.route("/login", methods=['GET', 'POST'])
 def login_page():

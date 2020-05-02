@@ -185,7 +185,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                     new_metadata = True
         tot_count_img += user_count_i
         tot_count_videos += user_count_v
-        logger.info(f"{len(items)} element(s) in {username} stories, scraped {user_count_i} images and {user_count_v} videos")
+        logger.info(f"{len(items)} element{'s' if len(items) > 1 else ''} in {username} stories, scraped {user_count_i} images and {user_count_v} videos")
         if new_metadata:
             with open(seen_stories_txt, 'w') as seen, open(saved_stories_json, 'w') as saved:
                 for id in json_stories_seen:
