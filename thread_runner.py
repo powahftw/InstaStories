@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 logger = logging.getLogger(__name__)
 
 class ThreadRunner():
-    
+
     DEFAULT_SLEEP_TIME = 5
 
     def __init__(self, func, default_loop_delay_seconds, default_loop_variation_percentage):
@@ -35,7 +35,9 @@ class ThreadRunner():
                     self.thread_running = False
                 else:
                     time_to_sleep = self.waitFor()
-                    time_next_cycle = (datetime.now() + timedelta(seconds=time_to_sleep) + timedelta(seconds=self.DEFAULT_SLEEP_TIME)).strftime("%d/%m/%Y, %H:%M:%S")
+                    time_next_cycle = (datetime.now() +
+                                       timedelta(seconds=time_to_sleep) +
+                                       timedelta(seconds=self.DEFAULT_SLEEP_TIME)).strftime("%Y/%m/%d, %H:%M:%S")
                     logger.info(f"Loop waiting for {time_to_sleep} seconds, next scrape will happen at {time_next_cycle}")
                     time.sleep(time_to_sleep)
             time.sleep(self.DEFAULT_SLEEP_TIME)
@@ -51,12 +53,12 @@ class ThreadRunner():
 
     def updateDelay(self, **kwargs):
         self.loop_args = kwargs
-        logger.info(f"{kwargs}")
+        logger.info(f"Updated delay: {kwargs}")
         return self
 
     def updateFuncArg(self, **kwargs):
         self.args = kwargs
-        logger.info(f"{kwargs}")
+        logger.info(f"Updated function params: {kwargs}")
         return self
 
     def getOutput(self):
