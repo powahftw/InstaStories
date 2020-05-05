@@ -14,8 +14,9 @@ SKIP_EXTENSIONS = (".json", ".txt")
 
 settings.setup_logger()
 logger = logging.getLogger(__name__)
+user_settings = settings.get()
 
-scraper_runner = ThreadRunner(start_scrape, settings.get("loop_delay_seconds"), settings.get("loop_variation_percentage"))
+scraper_runner = ThreadRunner(start_scrape, user_settings["loop_delay_seconds"], user_settings["loop_variation_percentage"])
 
 ################### UTIL FUNCTIONS ###################
 def get_log_file_list():

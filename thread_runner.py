@@ -31,15 +31,15 @@ class ThreadRunner():
         while True:
             if self.thread_running:
                 self.output = self.func(**self.args)
-                logger.info("Cycle completed")
                 if self.once:
                     self.thread_running = False
-                time_to_sleep = self.waitFor()
-                time_next_cycle = datetime.now() + timedelta(seconds=time_to_sleep)
-                logger.info(f"Loop waiting for {time_to_sleep} seconds, next scrape will happen at {time_next_cycle}")
-                time.sleep(time_to_sleep)
+                else:
+                    time_to_sleep = self.waitFor()
+                    time_next_cycle = (datetime.now() + timedelta(seconds=time_to_sleep) + timedelta(seconds=self.DEFAULT_SLEEP_TIME)).strftime("%d/%m/%Y, %H:%M:%S")
+                    logger.info(f"Loop waiting for {time_to_sleep} seconds, next scrape will happen at {time_next_cycle}")
+                    time.sleep(time_to_sleep)
             time.sleep(self.DEFAULT_SLEEP_TIME)
-            
+
     def startFunction(self, once=False):
         self.once = once
         logger.info(f"Thread function started {'in single mode' if once else 'in loop mode'} ")
@@ -51,12 +51,12 @@ class ThreadRunner():
 
     def updateDelay(self, **kwargs):
         self.loop_args = kwargs
-        logger.info(f"Updated delay params")
+        logger.info(f"{kwargs}")
         return self
 
     def updateFuncArg(self, **kwargs):
         self.args = kwargs
-        logger.info(f"Updated function params")
+        logger.info(f"{kwargs}")
         return self
 
     def getOutput(self):
