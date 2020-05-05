@@ -6,6 +6,7 @@ import logging
 from telegram_handler import TelegramHandler
 
 SETTINGS_FILE_PATH = 'settings.json'
+FOLDER_PATH = "ig_media"
 SCRAPING_LOG_FILE_PATH = 'run_history.log'
 CACHED_IDS_PATH = 'cached_ids.json'
 LOG_FILE_PATH = 'info.log'
@@ -21,9 +22,11 @@ file_handler = None
 
 DEFAULT_VALUES = {
     'scraping_log_file_path': SCRAPING_LOG_FILE_PATH,
-    'folder_path': "ig_media",
+    'folder_path': FOLDER_PATH,
     'extra_ids': [],
     'cached_ids_path': CACHED_IDS_PATH,
+    'loop_delay_seconds': 8 * 60 * 60,
+    'loop_variation_percentage': 20
 }
 
 def get_settings_file():
@@ -42,12 +45,13 @@ def has_setting(setting_name):
 
 def get(setting_name=None):
     settings = get_settings_file()
+    values = {}
+    values.update(DEFAULT_VALUES)
+    values.update(settings)
     if not setting_name:
-        return settings  # If no specific setting value is specified we return all of them.
-    elif setting_name in settings:
-        return settings[setting_name]
-    elif setting_name in DEFAULT_VALUES:
-        return DEFAULT_VALUES[setting_name]
+        return values  # If no specific setting value is specified we return all of them.
+    elif setting_name in values:
+        return values[setting_name]
     else:
         raise KeyError(f'{setting_name} is not in the settings file and does not have a default value')
 

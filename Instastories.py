@@ -67,8 +67,8 @@ def normalize_extra_ids(ids):
     save_cached_id(cached_ids)
     return numeric_ids + converted_nicknames
 
-def get_ids(stories_ids, number_of_persons, extra_ids, ids_mode):
-    return (stories_ids[:number_of_persons] if ids_mode != "extra_ids_only" else []) + \
+def get_ids(stories_ids, user_limit, extra_ids, ids_mode):
+    return (stories_ids[:user_limit] if ids_mode != "extra_ids_only" else []) + \
            (extra_ids if ids_mode != "stories_ids_only" else [])
 
 def curr_date():
@@ -185,7 +185,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                     new_metadata = True
         tot_count_img += user_count_i
         tot_count_videos += user_count_v
-        logger.info(f"{len(items)} element(s) in {username} stories, scraped {user_count_i} images and {user_count_v} videos")
+        logger.info(f"{len(items)} element{'s' if len(items) > 1 else ''} in {username} stories, scraped {user_count_i} images and {user_count_v} videos")
         if new_metadata:
             with open(seen_stories_txt, 'w') as seen, open(saved_stories_json, 'w') as saved:
                 for id in json_stories_seen:
@@ -256,13 +256,13 @@ def nick_to_id(nickname):
 
 #################### START SCRAPING FUNCTIONS ###################
 
-def start_scrape(scrape_settings, folder_path, number_of_persons, mode_flag="all", ids_mode="all"):
+def start_scrape(scrape_settings, folder_path, user_limit, mode_flag="all", ids_mode="all"):
     cookie = get_cookie(scrape_settings["session_id"])  # The check logic for the existence of "session_id" is on the runner.py and flask_server.py files
     stories = get_stories_tray(cookie)
     stories_ids = tray_to_ids(stories)
     extra_ids = normalize_extra_ids(scrape_settings["extra_ids"] if "extra_ids" in scrape_settings else [])
-    if number_of_persons < 0: number_of_persons = len(stories_ids)
-    ids = get_ids(stories_ids, number_of_persons, extra_ids, ids_mode)
+    if user_limit < 0: user_limit = len(stories_ids)
+    ids = get_ids(stories_ids, user_limit, extra_ids, ids_mode)
 
     logger.info(f"Starting scraping in mode: {mode_flag}, ids source: {ids_mode}")
     count_i, count_v = download_today_stories(ids, cookie, folder_path, mode_flag)
