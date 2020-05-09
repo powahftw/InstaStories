@@ -60,7 +60,7 @@ def clear_setting(setting_name):
     if setting_name in new_settings:
         new_settings.pop(setting_name)
     else:
-        raise KeyError(f'{setting_name} is not in the settings file and does not have a default value')
+        raise KeyError(f'{setting_name} is not in the settings file.')
     update_settings_file(new_settings)
 
 def update(setting_name, updated_value):

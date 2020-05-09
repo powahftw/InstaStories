@@ -60,11 +60,11 @@ def index():
     logger.info(f"{request.method} request to /index")
     is_user_logged_in = settings.has_setting("session_id")
     user_settings = settings.get()
-    folder_path = user_settings["folder_path"]
     if request.method == "POST" and is_user_logged_in:
         user_limit = int(request.form["user_limit"]) if request.form["user_limit"].isdecimal() else -1
-        mode, ids_mode, loop_mode, status_button = request.form["mode_dropdown"], request.form["ids_dropdown"], request.form["loop_dropdown"], request.form["controlBtn"]
-        scraper_runner_args = {"scrape_settings": user_settings, "folder_path": folder_path, "user_limit": user_limit}
+        media_mode, ids_source, loop_mode, status_button = request.form["mode_dropdown"], request.form["ids_dropdown"], request.form["loop_dropdown"], request.form["controlBtn"]
+        scraper_runner_args = {"scrape_settings": user_settings, "user_limit": user_limit,
+                               "media_mode": media_mode, "ids_source": ids_source}
         if status_button == "start":
             loop_mode = loop_mode == "True"
             scraper_runner.updateFuncArg(**scraper_runner_args).startFunction(once=loop_mode)

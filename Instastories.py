@@ -3,7 +3,7 @@ import json
 import urllib.request
 import os
 import time
-import datetime
+from datetime import datetime
 import settings
 import logging
 from random import randint
@@ -19,6 +19,11 @@ logger = logging.getLogger(__name__)
 ################# UTILS FUNCTIONS #########################
 
 def login_and_store_session_id(username, password):
+    """
+    Execute a login to instagram with a provided username and password
+    If successful, stores the sessionId cookie in the settings.
+    Does not handle challenges.
+    """
     LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/'
     USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
     session = requests.Session()
@@ -35,17 +40,23 @@ def login_and_store_session_id(username, password):
         logger.warning("You have entered invalid credentials, please retry.")
         return False
 
-def get_cookie(cookie):
-    token = {"cookie": cookie,
-             "user-agent": "Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+",
-             "cache-control": "no-cache"}
-    return token
+def craft_cookie(cookie):
+    return {"cookie": cookie,
+            "user-agent": "Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+",
+            "cache-control": "no-cache"}
 
-def save_cached_id(cached_ids):
+def save_cached_ids(cached_ids):
+    """
+    Dump to file a dictionary with a mapping 'username' -> 'id'
+    Used to prevent unecessary requests.
+    """
     with open(settings.get('cached_ids_path'), "w+") as file:
         json.dump(cached_ids, file)
 
 def get_cached_ids():
+    """
+    Load a file and return a dictionary with a mapping 'username' -> 'id'
+    """
     cache_ids_path = settings.get('cached_ids_path')
     if not os.path.exists(cache_ids_path):
         return {}
@@ -53,6 +64,10 @@ def get_cached_ids():
         return json.load(file)
 
 def normalize_extra_ids(ids):
+    """
+    Given a list of string, containing both nicknames and ids it normalize them to a list of ids.
+    The conversion from a nickname to an id make an IG request, but it's cached for future usage.
+    """
     numeric_ids = [elem for elem in ids if elem.isdigit()]
     nicknames = [nick for nick in ids if not nick.isdigit()]
     converted_nicknames = []
@@ -61,15 +76,25 @@ def normalize_extra_ids(ids):
         if nick not in cached_ids:
             logger.info(f"Finding id for {nick}")
             time.sleep(randint(1, 4))  # Random delay to avoid requests spamming
-            id_of_nickname = nick_to_id(nick)
-            cached_ids[nick] = id_of_nickname
+            cached_ids[nick] = nick_to_id(nick)
         converted_nicknames.append(cached_ids[nick])
-    save_cached_id(cached_ids)
+    save_cached_ids(cached_ids)
     return numeric_ids + converted_nicknames
 
 def get_ids(stories_ids, user_limit, extra_ids, ids_mode):
-    return (stories_ids[:user_limit] if ids_mode != "extra_ids_only" else []) + \
-           (extra_ids if ids_mode != "stories_ids_only" else [])
+    """
+    Handle logic for picking the ids to process.
+    Args:
+        stories_ids (List): List of ids of people we got from the stories tray.
+        number_of_persons (number): Cap on how many people we will use from stories tray.
+        extra_ids (List): List of others ids we want to get the stories from.
+        ids_mode (string): Specify which ids we want to use. extra_ids_only, stories_ids_only or both.
+    """
+    ids = (stories_ids[:user_limit] if ids_mode != "extra_ids_only" else []) + \
+          (extra_ids if ids_mode != "stories_ids_only" else [])
+    return list(dict.fromkeys(ids))  # Remove duplicates ids.
+
+############################## TIME UTILS ######################################
 
 def curr_date():
     year, month, day, _, _ = time.strftime("%Y,%m,%d,%H,%M").split(',')
@@ -80,12 +105,12 @@ def time_from_story(element):
     return posix_conv(unix_ts)
 
 def posix_conv(posix_time):
-    year, month, day, _, _ = datetime.datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
+    year, month, day, _, _ = datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
     return "{}-{}-{}".format(year, month, day)
 
 ############################## DOWNLOAD AND MANAGE STORIES AND JSON ######################################
 
-def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
+def download_stories(arr_ids, cookie, folder_path, mode_flag):
     """
     Download user stories. Create subdirectory for each user based on their username and media timestamp
     Ex:
@@ -97,6 +122,9 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
         arr_ids (List): List of ids of people we want to get the stories.
         cookie (dict): Instagram Cookie for authentication in the requests.
     """
+    class MediaType:
+        IMG = 1
+        VIDEO = 2
 
     tot_count_img, tot_count_videos = 0, 0
 
@@ -136,8 +164,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                 json_stories_seen = set(seen.read().splitlines())
                 json_stories_saved = json.load(saved)
 
-        user_count_i = 0
-        user_count_v = 0
+        user_count_i, user_count_v = 0, 0
         for element in items:
             media_id = element['id']
 
@@ -156,7 +183,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
             """
 
             if mode_flag in ["all", "media"]:
-                if element['media_type'] == 2:
+                if element['media_type'] == MediaType.VIDEO:
                     fn_video = os.path.join(time_directory, str(media_id) + ".mp4")
                     if not os.path.isfile(fn_video):
                         videos = element['video_versions']
@@ -167,7 +194,7 @@ def download_today_stories(arr_ids, cookie, folder_path, mode_flag):
                     else:
                         logger.debug("Video media already saved")
 
-                if element['media_type'] == 1:
+                if element['media_type'] == MediaType.IMG:
                     fn_img = os.path.join(time_directory, str(media_id) + ".jpg")
                     if not os.path.isfile(fn_img):
                         pics = element['image_versions2']['candidates']
@@ -202,9 +229,9 @@ def get_stories_tray(cookie):
     Returns:
         r.json (dict): A dict representation of the instagram response.
     """
-    tray_endpoint = "https://i.instagram.com/api/v1/feed/reels_tray/"  # This Endpoint provide unseen stories
+    TRAY_ENDPOINT = "https://i.instagram.com/api/v1/feed/reels_tray/"  # This Endpoint provide unseen stories
 
-    r = requests.get(tray_endpoint, headers=cookie)
+    r = requests.get(TRAY_ENDPOINT, headers=cookie)
     return r.json()
 
 def print_ids_table(usr, ids):
@@ -242,34 +269,38 @@ def tray_to_ids(stories):
 
 def nick_to_id(nickname):
     """
-    Get corresponding ids from a list of user nicknames.
+    Get corresponding id from a user nicknames.
     Args:
-        usr_list (List): List of username.
+        usr_list (string): Username.
     Returns:
-        ids (List): A list of users ids
+        ids (number): Id
     """
-    base_url_info = "https://www.instagram.com/{}/?__a=1"
-    r = requests.get(base_url_info.format(nickname))
+    BASE_URL_PROFILE_INFO = "https://www.instagram.com/{}/?__a=1"
+    r = requests.get(BASE_URL_PROFILE_INFO.format(nickname))
     d = r.json()
     logger.info("{} - ID: {}".format(nickname, d["graphql"]["user"]["id"]))
     return d["graphql"]["user"]["id"]
 
 #################### START SCRAPING FUNCTIONS ###################
 
-def start_scrape(scrape_settings, folder_path, user_limit, mode_flag="all", ids_mode="all"):
-    cookie = get_cookie(scrape_settings["session_id"])  # The check logic for the existence of "session_id" is on the runner.py and flask_server.py files
-    stories = get_stories_tray(cookie)
-    stories_ids = tray_to_ids(stories)
+def start_scrape(scrape_settings, user_limit, media_mode="all", ids_source="all"):
+    cookie = craft_cookie(scrape_settings["session_id"])  # The check logic for the existence of "session_id" is on the runner.py and flask_server.py files
+    folder_path = scrape_settings["folder_path"]
+
+    stories_ids = []
+    if ids_source != "extra_ids_only":
+        stories = get_stories_tray(cookie)
+        stories_ids = tray_to_ids(stories)
+        if user_limit < 0: user_limit = len(stories_ids)
     extra_ids = normalize_extra_ids(scrape_settings["extra_ids"] if "extra_ids" in scrape_settings else [])
-    if user_limit < 0: user_limit = len(stories_ids)
-    ids = get_ids(stories_ids, user_limit, extra_ids, ids_mode)
+    ids = get_ids(stories_ids, user_limit, extra_ids, ids_source)
 
-    logger.info(f"Starting scraping in mode: {mode_flag}, ids source: {ids_mode}")
-    count_i, count_v = download_today_stories(ids, cookie, folder_path, mode_flag)
+    logger.info(f"Starting scraping in mode: {media_mode}, ids source: {ids_source}")
+    count_i, count_v = download_stories(ids, cookie, folder_path, media_mode)
     logger.info("Finished scraping")
-    settings.completed_scraping()
+    settings.completed_scraping()   # Send the signal that the scraping process finished. Used to flush Telegram logging.
 
-    timestampStr = datetime.datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
+    timestampStr = datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
 
     with open("run_history.log", "a+") as o:
         scraped_users = len(ids)
