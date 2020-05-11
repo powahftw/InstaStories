@@ -1,6 +1,6 @@
 # InstaStories
 Simple web app to get and save users stories from IG.
-It's useful to archive your friends stories!  
+It's useful to archive users stories!  
 
 It saves the images and videos in a subdirectory structure based on username/date/story_id.
 
@@ -14,7 +14,7 @@ To start the web app use just run ```python flask_server.py```.
 
 You can then access the page in your browser at: ```127.0.0.1:5000``` (you can also change the port inside the code)
 
-![Index page screenshot](/screenshots/index.PNG "Index page")
+![Index page screenshot](/screenshots/index.png "Index page")
 
 ## Login
 To start using this tool you have to provide your IG cookie: the easiest way to do this is login in settings page with your IG account
