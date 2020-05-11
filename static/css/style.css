@@ -155,7 +155,6 @@ textarea {
 }
 
 .index-mode h2,
-.index-images h2,
 .index-logs h2 {
     font-size: 16px;
 }
@@ -195,10 +194,15 @@ textarea {
     margin: 5px 40px;
 }
 
-.rendered-stories {
-    width: 200px;
-    margin: 20px;
+.running {
+    color: greenyellow;
 }
+
+.stopped {
+    color: red;
+}
+
+/* LOGIN PAGE */
 
 .settings-login-container {
     text-align: center;
@@ -227,6 +231,9 @@ textarea {
     margin-top: 10px;
     margin-bottom: 30px;
 }
+
+
+/* GALLERY PAGE */
 
 .gallery-container {
     padding: 50px;
@@ -260,11 +267,12 @@ a .gallery-folders {
     flex-wrap: wrap;
 }
 
-.settings-container {
-    background-color: #161616;
-    height: 100vh;
-    margin: 0px 170px;
+.rendered-stories {
+    width: 200px;
+    margin: 20px;
 }
+
+/* S£TTINGS PAGE */
 
 .settings-box ul {
     display: flex;
@@ -289,6 +297,11 @@ a .gallery-folders {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+}
+
+textarea {
+    border-radius: 25px;
+    padding: 10px 20px;
 }
 
 .info {
