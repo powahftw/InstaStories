@@ -55,8 +55,8 @@ def get_stats_from_log_line(log_lines):
 
 ################### ROUTES ###################
 
-@app.route("/", methods=['GET', 'POST'])
-def index():
+@app.route("/", methods=['GET', 'POST'], defaults={"loop_mode": True, "media_mode": "all", "ids_source": "all"})
+def index(loop_mode, media_mode, ids_source):
     logger.info(f"{request.method} request to /index")
     is_user_logged_in = settings.has_setting("session_id")
     user_settings = settings.get()
@@ -72,7 +72,12 @@ def index():
         elif status_button == "update": scraper_runner.updateFuncArg(**scraper_runner_args)
     logged_in_error = request.method == "POST" and not is_user_logged_in
     log_lines = get_log_file_list()
-    return render_template('index.html', log_lines=log_lines, disclaimer={"logged_in_error": logged_in_error}, output=scraper_runner.getOutput())
+    return render_template('index.html',
+                           log_lines=log_lines,
+                           disclaimer={"logged_in_error": logged_in_error},
+                           output=scraper_runner.getOutput(),
+                           checkbox={"loop_mode": loop_mode, "media_mode": media_mode, "ids_source": ids_source},
+                           status=scraper_runner.getStatus())
 
 @app.route("/settings/", methods=['GET', 'POST'])
 def settings_page():

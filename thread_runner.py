@@ -63,3 +63,9 @@ class ThreadRunner():
 
     def getOutput(self):
         return self.output
+
+    def getStatus(self):
+        if self.thread_running:
+            return f"RUNNING - Loop mode: {not self.once}  - Media scraping mode: {self.args['media_mode']} - Ids source: {self.args['ids_source']}"
+        else:
+            return "STOPPED"

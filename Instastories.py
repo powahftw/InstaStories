@@ -76,8 +76,9 @@ def normalize_extra_ids(ids):
         if nick not in cached_ids:
             logger.info(f"Finding id for {nick}")
             time.sleep(randint(1, 4))  # Random delay to avoid requests spamming
-            cached_ids[nick] = nick_to_id(nick)
-        converted_nicknames.append(cached_ids[nick])
+            id_of_nick = nick_to_id(nick)
+            if id_of_nick: cached_ids[nick] = id_of_nick
+        if cached_ids[nick]: converted_nicknames.append(cached_ids[nick])
     save_cached_ids(cached_ids)
     return numeric_ids + converted_nicknames
 
@@ -105,8 +106,20 @@ def time_from_story(element):
     return posix_conv(unix_ts)
 
 def posix_conv(posix_time):
-    year, month, day, _, _ = datetime.utcfromtimestamp(posix_time).strftime("%Y,%m,%d,%H,%M").split(',')
-    return "{}-{}-{}".format(year, month, day)
+    return datetime.utcfromtimestamp(posix_time).strftime("%Y-%m-%d")
+
+def retrieve_media(url, file_path):
+    times_to_try = 2
+    while times_to_try > 0:
+        try:
+            urllib.request.urlretrieve(url, file_path)
+            logger.info("Media download done with no errors")
+            return
+        except TimeoutError as err:
+            logger.info("A timeout error occurred while trying to download the media: \n {err}")
+            logger.info(f"Retrying... {times_to_try}")
+            times_to_try -= 1
+            time.sleep(5)
 
 ############################## DOWNLOAD AND MANAGE STORIES AND JSON ######################################
 
@@ -189,7 +202,7 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
                         videos = element['video_versions']
                         video_url = videos[0]['url']
                         logger.debug("Video URL: {}".format(video_url))
-                        urllib.request.urlretrieve(video_url, fn_video)
+                        retrieve_media(video_url, fn_video)
                         user_count_i += 1
                     else:
                         logger.debug("Video media already saved")
@@ -200,7 +213,7 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
                         pics = element['image_versions2']['candidates']
                         pic_url = pics[0]['url']
                         logger.debug("Photo URL: {}".format(pic_url))
-                        urllib.request.urlretrieve(pic_url, fn_img)
+                        retrieve_media(pic_url, fn_img)
                         user_count_v += 1
                     else:
                         logger.debug("Video media already saved")
@@ -277,9 +290,11 @@ def nick_to_id(nickname):
     """
     BASE_URL_PROFILE_INFO = "https://www.instagram.com/{}/?__a=1"
     r = requests.get(BASE_URL_PROFILE_INFO.format(nickname))
-    d = r.json()
-    logger.info("{} - ID: {}".format(nickname, d["graphql"]["user"]["id"]))
-    return d["graphql"]["user"]["id"]
+    if r.status_code != 404:
+        d = r.json()
+        logger.info("{} - ID: {}".format(nickname, d["graphql"]["user"]["id"]))
+        return d["graphql"]["user"]["id"]
+    logger.info(f"User {nickname} can't be found, please check the nickname in extra_ids")
 
 #################### START SCRAPING FUNCTIONS ###################
 

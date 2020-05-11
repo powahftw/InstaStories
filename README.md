@@ -1,23 +1,46 @@
 # InstaStories
-Simple script to get and save current friends stories from IG.
+Simple web app to get and save users stories from IG.
 It's useful to archive your friends stories!  
 
-It saves the images and videos in subfolder based on username and time-stamp from the stories
+It saves the images and videos in a subdirectory structure based on username/date/story_id.
 
-EDIT: Now work with ISO Date, to convert from the old format i created a small gists [here](https://gist.github.com/powahftw/0a9d4fbb05c698170d6ec0591a721449)
-EDIT2: Now works both with extra users ids and nicknames, to get stories from people you don't follow.
+It also offers a way to visualize them in your browser.
 
 ### Prerequisites
+This script make uses of some libraries, you can install them all using ```pip -r requirements.txt```.
 
-This script make uses of the requests library and terminaltables for pretty printing of some datas
+### Running and testing
+To start the web app use just run ```python flask_server.py```.
 
-### Cookie
+You can then access the page in your browser at: ```127.0.0.1:5000``` (you can also change the port inside the code)
 
-You will need to provide your IG Cookie to make the script authenticate the request to the api.
+![Index page screenshot](/screenshots/index.PNG "Index page")
 
-To get them simply use Chrome Dev Tools while visiting instagram.com and copy the cookie you are sending to them.
+## Login
+To start using this tool you have to provide your IG cookie: the easiest way to do this is login in settings page with your IG account
 
-Add "session_id": "sessionid=YOUR_VALUE"
-To a settings.json file. 
+Alternatively you can put your session_id code manually in a settings file called ```settings.json``` that you have to create inside the root folder and put:
+```{"session_id": "sessionid=<your session id>"}``` inside it
 
-You can also use the Webapp settings page to log in and get the token automatically (your login data is not stored nor sent elsewhere, check out the source code)
+To get it simply use Chrome Dev Tools while visiting [Instagram](instagram.com) and copy the session_id you are sending to them.
+
+## Features
+There are different scraping features you can set before starting: 
+
+You can choose to scrape one single time or keep it looping.
+
+You can download media files, json files or both.
+
+You can choose if you want to scrape only the followed people and/or extra people in ```EXTRA IDS``` tab in settings.
+
+## Changing settings
+In the settings page you can modify some settings:
+
+    - Download Folder path: this path is where your downloaded media will be saved.
+    - Delay between cycles: if you are running in loop mode you can set the interval between every cycle.
+    - Variation of the delay: you can set the variation of the loop interval in percentage
+    - Extra nicknames/IDS: you can put additional nicknames/IDS to be gathered (one per line)
+
+## Built With
+
+* [Flask](https://flask.palletsprojects.com/en/1.1.x/) - The micro web framework used
