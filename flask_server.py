@@ -104,7 +104,7 @@ def settings_page():
     if request.method == "POST": scraper_runner.updateDelay(**loop_args)
     return render_template("settings.html", settings={"extra_ids": extra_ids, "folder_path": folder_path, **loop_args})
 
-@app.route("/login", methods=['GET', 'POST'])
+@app.route("/login/", methods=['GET', 'POST'])
 def login_page():
     logger.info(f"{request.method} request to /login")
     if request.method == "GET":
@@ -112,7 +112,7 @@ def login_page():
     elif request.method == "POST":
         if login_and_store_session_id(request.form["username"], request.form["password"]):
             logger.info("User {} has logged in".format(request.form["username"]))
-            return redirect("/settings")
+            return redirect("/settings/")
         else:
             return render_template("login.html", disclaimer={"login_error": True})
 
@@ -152,4 +152,4 @@ def gallery(username, date):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True, port=80, host='0.0.0.0')

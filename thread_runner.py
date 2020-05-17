@@ -12,7 +12,7 @@ class ThreadRunner():
 
     def __init__(self, func, default_loop_delay_seconds, default_loop_variation_percentage):
         self.thread_running = False
-        self.once = False
+        self.shutting_down = False  # Variable used to mark that after this iteration the Thread will be stopped.
         self.args = {}
         self.loop_args = {"loop_delay_seconds": default_loop_delay_seconds,
                           "loop_variation_percentage": default_loop_variation_percentage}
@@ -31,7 +31,7 @@ class ThreadRunner():
         while True:
             if self.thread_running:
                 self.output = self.func(**self.args)
-                if self.once:
+                if self.shutting_down:
                     self.thread_running = False
                 else:
                     time_to_sleep = self.waitFor()
@@ -43,12 +43,13 @@ class ThreadRunner():
             time.sleep(self.DEFAULT_SLEEP_TIME)
 
     def startFunction(self, once=False):
-        self.once = once
+        self.shutting_down = once
         logger.info(f"Thread function started {'in single mode' if once else 'in loop mode'} ")
         self.thread_running = True
 
     def stopFunction(self):
         self.thread_running = False
+        self.shutting_down = True
         logger.info("Thread function stopped")
 
     def updateDelay(self, **kwargs):
@@ -66,6 +67,8 @@ class ThreadRunner():
 
     def getStatus(self):
         if self.thread_running:
-            return f"RUNNING - Loop mode: {not self.once}  - Media scraping mode: {self.args['media_mode']} - Ids source: {self.args['ids_source']}"
+            return f"""{"SHUTTING DOWN" if {self.shutting_down} else "RUNNING - Loop mode: True"} -
+                        Media scraping mode: {self.args['media_mode']} -
+                        Ids source: {self.args['ids_source']}"""
         else:
             return "STOPPED"
