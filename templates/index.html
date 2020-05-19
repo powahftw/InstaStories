@@ -37,8 +37,8 @@
         <div class="index-advanced" id="index-advanced">
             <div class="index-mode">
                 <h2>LOOP MODE</h2>
-                <div class="checkgroup"><label for="single">Single cycle</label><input class="radio-btn" name="loop_dropdown" type="radio" value=True id="single" {{ 'checked' if checkbox[ "loop_mode"] }} /></div>
-                <div class="checkgroup"><label for="loop">Loop cycle</label><input class="radio-btn" name="loop_dropdown" type="radio" value=False id="loop" {{ 'checked' if not checkbox[ "loop_mode"] }}/></div>
+                <div class="checkgroup"><label for="single">Single cycle</label><input class="radio-btn" name="loop_dropdown" type="radio" value=False id="single" {{ 'checked' if not checkbox[ "loop_mode"] }} /></div>
+                <div class="checkgroup"><label for="loop">Loop cycle</label><input class="radio-btn" name="loop_dropdown" type="radio" value=True id="loop" {{ 'checked' if checkbox[ "loop_mode"] }}/></div>
             </div>
             <div class="index-mode">
                 <h2>SCRAPING MODE</h2>

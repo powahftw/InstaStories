@@ -55,7 +55,7 @@ def get_stats_from_log_line(log_lines):
 
 ################### ROUTES ###################
 
-@app.route("/", methods=['GET', 'POST'], defaults={"loop_mode": True, "media_mode": "all", "ids_source": "all"})
+@app.route("/", methods=['GET', 'POST'], defaults={"loop_mode": False, "media_mode": "all", "ids_source": "all"})
 def index(loop_mode, media_mode, ids_source):
     logger.info(f"{request.method} request to /index")
     is_user_logged_in = settings.has_setting("session_id")
@@ -67,7 +67,7 @@ def index(loop_mode, media_mode, ids_source):
                                "media_mode": media_mode, "ids_source": ids_source}
         if status_button == "start":
             loop_mode = loop_mode == "True"
-            scraper_runner.updateFuncArg(**scraper_runner_args).startFunction(once=loop_mode)
+            scraper_runner.updateFuncArg(**scraper_runner_args).startFunction(keep_running=loop_mode)
         elif status_button == "stop": scraper_runner.stopFunction()
         elif status_button == "update": scraper_runner.updateFuncArg(**scraper_runner_args)
     logged_in_error = request.method == "POST" and not is_user_logged_in

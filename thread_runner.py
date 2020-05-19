@@ -42,13 +42,12 @@ class ThreadRunner():
                     time.sleep(time_to_sleep)
             time.sleep(self.DEFAULT_SLEEP_TIME)
 
-    def startFunction(self, once=False):
-        self.shutting_down = once
-        logger.info(f"Thread function started {'in single mode' if once else 'in loop mode'} ")
+    def startFunction(self, keep_running=False):
+        self.shutting_down = not keep_running
+        logger.info(f"Thread function started {'in loop mode' if keep_running else 'in single mode'} ")
         self.thread_running = True
 
     def stopFunction(self):
-        self.thread_running = False
         self.shutting_down = True
         logger.info("Thread function stopped")
 
@@ -67,7 +66,7 @@ class ThreadRunner():
 
     def getStatus(self):
         if self.thread_running:
-            return f"""{"SHUTTING DOWN" if {self.shutting_down} else "RUNNING - Loop mode: True"} -
+            return f"""{"SHUTTING DOWN" if self.shutting_down else "RUNNING - Loop mode: True"} -
                         Media scraping mode: {self.args['media_mode']} -
                         Ids source: {self.args['ids_source']}"""
         else:
