@@ -1,5 +1,6 @@
+{% set active_page = 'settings' %}
 {% extends 'base.html' %} {% block content %}
-<form action="/settings" method="POST">
+<form action="/settings/" method="POST">
     <div class="settings-box">
         <ul>
             <li>
@@ -7,18 +8,18 @@
             </li>
 
             <li>
-                <label for="folder_path">Download folder path: {{settings["folder_path"]}}</label>
-                <input class="input" id="folder_path" type="text" name="folder_path">
+                <label for="folder_path">Download folder path:</label>
+                <input id="folder_path" type="text" name="folder_path" placeholder="{{settings['folder_path']}}">
             </li>
 
             <li>
-                <label for="loop_delay_seconds">Delay between loop cycles (insert time in seconds): {{settings["loop_delay_seconds"]}} second(s)</label>
-                <input class="input" type="text" id="loop_delay_seconds" name="loop_delay_seconds">
+                <label for="loop_delay_seconds">Delay between loop cycles (insert time in seconds):</label>
+                <input type="number" id="loop_delay_seconds" name="loop_delay_seconds" min="1" placeholder="{{settings['loop_delay_seconds']}}">
             </li>
 
             <li>
-                <label for="loop_variation_percentage">Variation of loop cycles delay (in percentage): {{settings["loop_variation_percentage"]}}%</label>
-                <input class="input" type="text" id="loop_variation_percentage" name="loop_variation_percentage">
+                <label for="loop_variation_percentage">Variation of loop cycles delay (in percentage):</label>
+                <input type="number" id="loop_variation_percentage" name="loop_variation_percentage" min="1" max="100" placeholder="{{settings['loop_variation_percentage']}}">
             </li>
 
             <li>

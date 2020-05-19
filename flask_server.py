@@ -1,4 +1,4 @@
-from Instastories import start_scrape, login_and_store_session_id
+from Instastories import start_scrape
 from flask import Flask, render_template, request, redirect
 import os
 import base64
@@ -55,7 +55,7 @@ def get_stats_from_log_line(log_lines):
 
 ################### ROUTES ###################
 
-@app.route("/", methods=['GET', 'POST'], defaults={"loop_mode": True, "media_mode": "all", "ids_source": "all"})
+@app.route("/", methods=['GET', 'POST'], defaults={"loop_mode": False, "media_mode": "all", "ids_source": "all"})
 def index(loop_mode, media_mode, ids_source):
     logger.info(f"{request.method} request to /index")
     is_user_logged_in = settings.has_setting("session_id")
@@ -67,7 +67,7 @@ def index(loop_mode, media_mode, ids_source):
                                "media_mode": media_mode, "ids_source": ids_source}
         if status_button == "start":
             loop_mode = loop_mode == "True"
-            scraper_runner.updateFuncArg(**scraper_runner_args).startFunction(once=loop_mode)
+            scraper_runner.updateFuncArg(**scraper_runner_args).startFunction(keep_running=loop_mode)
         elif status_button == "stop": scraper_runner.stopFunction()
         elif status_button == "update": scraper_runner.updateFuncArg(**scraper_runner_args)
     logged_in_error = request.method == "POST" and not is_user_logged_in
@@ -104,17 +104,14 @@ def settings_page():
     if request.method == "POST": scraper_runner.updateDelay(**loop_args)
     return render_template("settings.html", settings={"extra_ids": extra_ids, "folder_path": folder_path, **loop_args})
 
-@app.route("/login", methods=['GET', 'POST'])
+@app.route("/login/", methods=['GET', 'POST'])
 def login_page():
     logger.info(f"{request.method} request to /login")
     if request.method == "GET":
         return render_template("login.html")
     elif request.method == "POST":
-        if login_and_store_session_id(request.form["username"], request.form["password"]):
-            logger.info("User {} has logged in".format(request.form["username"]))
-            return redirect("/settings")
-        else:
-            return render_template("login.html", disclaimer={"login_error": True})
+        settings.update("session_id", f"sessionid={request.form['session_id']}")
+        return redirect("/settings/")
 
 @app.route("/settings/logout")
 def logout():
@@ -152,4 +149,4 @@ def gallery(username, date):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True, port=80, host='0.0.0.0')

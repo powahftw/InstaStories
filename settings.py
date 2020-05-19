@@ -3,7 +3,6 @@ import json
 import os
 import sys
 import logging
-from telegram_handler import TelegramHandler
 
 SETTINGS_FILE_PATH = 'settings.json'
 FOLDER_PATH = "ig_media"
@@ -16,6 +15,8 @@ stream_handler = None
 
 LOGGING_TO_TELEGRAM = False
 telegram_handler = None
+if LOGGING_TO_TELEGRAM:
+    from telegram_handler import TelegramHandler
 
 LOGGING_TO_FILE = False
 file_handler = None

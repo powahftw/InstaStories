@@ -50,6 +50,14 @@ textarea {
     width: 50px;
 }
 
+.menu-icon {
+    filter: invert(100%) sepia(0%) saturate(7500%) hue-rotate(51deg) brightness(103%) contrast(103%);
+}
+
+.selected-menu-icon {
+    filter: invert(97%) sepia(35%) saturate(6096%) hue-rotate(83deg) brightness(102%) contrast(104%);
+}
+
 .container {
     height: 100vh;
     padding-left: 70px;
@@ -59,7 +67,7 @@ textarea {
     background-color: #00FFC2;
     padding: 20px 30px;
     border: none;
-    border-radius: 60px;
+    border-radius: 8px;
     color: #212121;
     font-weight: bold;
     font-size: 18px;
@@ -135,13 +143,14 @@ textarea {
     align-items: center;
 }
 
-.input {
+input {
     display: block;
     margin: 0 10px;
     border: none;
-    border-radius: 60px;
+    border-radius: 8px;
     height: 30px;
     width: 120px;
+    margin-top: 12px;
     text-indent: 10px;
 }
 
@@ -202,6 +211,11 @@ textarea {
     color: red;
 }
 
+.shutting_down {
+    color: orange;
+}
+
+
 /* LOGIN PAGE */
 
 .settings-login-container {
@@ -239,7 +253,7 @@ textarea {
     padding: 50px;
     align-items: center;
     background-color: #161616;
-    height: 100vh;
+    height: fit-content;
     margin: 0 170px;
 }
 
@@ -272,6 +286,7 @@ a .gallery-folders {
     margin: 20px;
 }
 
+
 /* S£TTINGS PAGE */
 
 .settings-box ul {
@@ -289,7 +304,7 @@ a .gallery-folders {
     padding-left: 30px;
 }
 
-.settings-box .input {
+.settings-box input {
     width: 50vw;
 }
 

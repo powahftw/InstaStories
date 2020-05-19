@@ -15,13 +15,13 @@
             <a href="/"><img class="logo" src="/static/images/logo.png" alt=""></a>
             <ul>
                 <li>
-                    <a href="/"><img src="/static/images/home_icon.png" alt=""></a> 
+                    <a href="/"><img class="menu-icon {{ 'selected-menu-icon' if active_page == 'index' }}" src="/static/images/home_icon.svg" alt=""></a> 
                 </li>
                 <li>
-                    <a href="/gallery"><img src="/static/images/gallery_icon.png" alt=""></a>
+                    <a href="/gallery"><img class="menu-icon {{ 'selected-menu-icon' if active_page == 'gallery' }}" src="/static/images/gallery_icon.svg" alt=""></a>
                 </li>
                 <li>
-                    <a href="/settings"><img src="/static/images/settings_icon.png" alt=""></a>
+                    <a href="/settings"><img class="menu-icon {{ 'selected-menu-icon' if active_page == 'settings' }}" src="/static/images/settings_icon.svg" alt=""></a>
                 </li>
             </ul>
         </nav>

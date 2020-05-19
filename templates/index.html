@@ -1,3 +1,4 @@
+{% set active_page = 'index' %}
 {% extends 'base.html' %} {% block header %} {% endblock %} {% block content %}
 
 <div class="index-logo">
@@ -26,31 +27,31 @@
         <div class="info">
             <h3>On the last cycle you scraped {{output["scraped_media"]}} media</h3>
         </div>
-        {% endif %}
-        
-        {% if "STOPPED" == status %}
-            <h3 class="stopped">{{ status }}</h3>
-        {% else %}
-            <h3 class="running">{{ status }}</h3>
+        {% endif %} {% if "STOPPED" in status %}
+        <h3 class="stopped">{{ status }}</h3>
+        {% endif %} {% if "SHUTTING DOWN" in status %}
+        <h3 class="shutting_down">{{ status }}</h3>
+        {% endif %} {% if "RUNNING" in status %}
+        <h3 class="running">{{ status }}</h3>
         {% endif %}
 
         <div class="index-advanced" id="index-advanced">
             <div class="index-mode">
                 <h2>LOOP MODE</h2>
-                <div class="checkgroup"><label for="single">Single cycle</label><input class="radio-btn" name="loop_dropdown" type="radio" value=True id="single" {{ 'checked' if checkbox["loop_mode"] }} /></div>
-                <div class="checkgroup"><label for="loop">Loop cycle</label><input class="radio-btn" name="loop_dropdown" type="radio" value=False id="loop" {{ 'checked' if not checkbox["loop_mode"] }}/></div>
+                <div class="checkgroup"><label for="single">Single cycle</label><input class="radio-btn" name="loop_dropdown" type="radio" value=False id="single" {{ 'checked' if not checkbox[ "loop_mode"] }} /></div>
+                <div class="checkgroup"><label for="loop">Loop cycle</label><input class="radio-btn" name="loop_dropdown" type="radio" value=True id="loop" {{ 'checked' if checkbox[ "loop_mode"] }}/></div>
             </div>
             <div class="index-mode">
                 <h2>SCRAPING MODE</h2>
-                <div class="checkgroup"><label for="all">All</label><input class="radio-btn" name="mode_dropdown" type="radio" value="all" id="all" {{ 'checked' if checkbox["media_mode"] == "all" }} /></div>
-                <div class="checkgroup"><label for="media">Media</label><input class="radio-btn" name="mode_dropdown" type="radio" value="media" id="media" {{ 'checked' if checkbox["media_mode"] == "media" }} /></div>
-                <div class="checkgroup"><label for="metadata">Metadata</label><input class="radio-btn" name="mode_dropdown" type="radio" value="metadata" id="metadata" {{ 'checked' if checkbox["media_mode"] == "metadata" }} /></div>
+                <div class="checkgroup"><label for="all">All</label><input class="radio-btn" name="mode_dropdown" type="radio" value="all" id="all" {{ 'checked' if checkbox[ "media_mode"]=="all" }} /></div>
+                <div class="checkgroup"><label for="media">Media</label><input class="radio-btn" name="mode_dropdown" type="radio" value="media" id="media" {{ 'checked' if checkbox[ "media_mode"]=="media" }} /></div>
+                <div class="checkgroup"><label for="metadata">Metadata</label><input class="radio-btn" name="mode_dropdown" type="radio" value="metadata" id="metadata" {{ 'checked' if checkbox[ "media_mode"]=="metadata" }} /></div>
             </div>
             <div class="index-mode">
                 <h2>SOURCE IDS</h2>
-                <div class="checkgroup"><label for="all_stories">All</label><input class="radio-btn" name="ids_dropdown" type="radio" value="all" id="all_stories" {{ 'checked' if checkbox["ids_source"] == "all" }} /></div>
-                <div class="checkgroup"><label for="stories_ids">Stories Tray</label><input class="radio-btn" name="ids_dropdown" type="radio" value="stories_ids_only" id="stories_ids"  {{ 'checked' if checkbox["ids_source"] == "stories_ids_only" }} /></div>
-                <div class="checkgroup"><label for="extra_ids">Extra IDS</label><input class="radio-btn" name="ids_dropdown" type="radio" value="extra_ids_only" id="extra_ids"  {{ 'checked' if checkbox["ids_source"] == "extra_ids_only" }} /></div>
+                <div class="checkgroup"><label for="all_stories">All</label><input class="radio-btn" name="ids_dropdown" type="radio" value="all" id="all_stories" {{ 'checked' if checkbox[ "ids_source"]=="all" }} /></div>
+                <div class="checkgroup"><label for="stories_ids">Stories Tray</label><input class="radio-btn" name="ids_dropdown" type="radio" value="stories_ids_only" id="stories_ids" {{ 'checked' if checkbox[ "ids_source"]=="stories_ids_only" }} /></div>
+                <div class="checkgroup"><label for="extra_ids">Extra IDS</label><input class="radio-btn" name="ids_dropdown" type="radio" value="extra_ids_only" id="extra_ids" {{ 'checked' if checkbox[ "ids_source"]=="extra_ids_only" }} /></div>
             </div>
         </div>
 
