@@ -4,12 +4,8 @@
     <div class="settings-login-container">
         <p>If it's the first time you use this tool, log in.</p>
         <div class="settings-login-box">
-            <h2>Please log in</h2>
-            {% if disclaimer and disclaimer["login_error"] %}
-            <div class="errors">You entered invalid credentials</div>
-            {% endif %}
-            <label for="username">username</label><input type="text" name="username" id="username">
-            <label for="password">password</label><input type="password" name="password" id="password">
+            <h2>Please enter your Session ID</h2>
+            <label for="session_id">Session ID</label><input type="text" name="session_id" id="session_id">
             <button class="btn" type="submit" id="submitBtn">LOG IN</button>
         </div>
 

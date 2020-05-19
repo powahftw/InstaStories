@@ -16,29 +16,9 @@ except ImportError as e:
 
 logger = logging.getLogger(__name__)
 
+DELAY_BETWEEN_USERS = 2
+
 ################# UTILS FUNCTIONS #########################
-
-def login_and_store_session_id(username, password):
-    """
-    Execute a login to instagram with a provided username and password
-    If successful, stores the sessionId cookie in the settings.
-    Does not handle challenges.
-    """
-    LOGIN_URL = 'https://www.instagram.com/accounts/login/ajax/'
-    USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1'
-    session = requests.Session()
-    session.headers = {'User-Agent': USER_AGENT, 'X-CSRFToken': 'OHt97SysLsQy47THlx5czgrPxWegLAaV'}
-
-    login_data = {'username': username, 'password': password}
-    login = session.post(LOGIN_URL, data=login_data, allow_redirects=True)
-    if "sessionid" in login.cookies.get_dict(domain=".instagram.com"):
-        session_id = login.cookies.get_dict(domain=".instagram.com")["sessionid"]
-        session_id_string = f"sessionid={session_id}"
-        settings.update("session_id", session_id_string)
-        return True
-    else:
-        logger.warning("You have entered invalid credentials, please retry.")
-        return False
 
 def craft_cookie(cookie):
     return {"cookie": cookie,
@@ -143,6 +123,7 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
 
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
     for idx, ids in enumerate(arr_ids):
+        time.sleep(DELAY_BETWEEN_USERS)  # Little delay between an user and the next one
         url = userid_endpoint.format(ids)
         r = requests.get(url, headers=cookie)
         d = r.json()

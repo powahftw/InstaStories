@@ -12,7 +12,7 @@ This script make uses of some libraries, you can install them all using ```pip -
 ### Running and testing
 To start the web app use just run ```python flask_server.py```.
 
-You can then access the page in your browser at: ```127.0.0.1:5000``` (you can also change the port inside the code)
+You can then access the page in your browser at the private IP address of machine that is running flask_server (ex: 192.168.0.X) (you can also change the port inside the code)
 
 ![Index page screenshot](/screenshots/index.png "Index page")
 

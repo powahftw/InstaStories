@@ -1,4 +1,4 @@
-from Instastories import start_scrape, login_and_store_session_id
+from Instastories import start_scrape
 from flask import Flask, render_template, request, redirect
 import os
 import base64
@@ -110,11 +110,8 @@ def login_page():
     if request.method == "GET":
         return render_template("login.html")
     elif request.method == "POST":
-        if login_and_store_session_id(request.form["username"], request.form["password"]):
-            logger.info("User {} has logged in".format(request.form["username"]))
-            return redirect("/settings/")
-        else:
-            return render_template("login.html", disclaimer={"login_error": True})
+        settings.update("session_id", f"sessionid={request.form['session_id']}")
+        return redirect("/settings/")
 
 @app.route("/settings/logout")
 def logout():
