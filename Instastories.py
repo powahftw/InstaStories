@@ -57,8 +57,9 @@ def normalize_extra_ids(ids):
             logger.info(f"Finding id for {nick}")
             time.sleep(randint(1, 4))  # Random delay to avoid requests spamming
             id_of_nick = nick_to_id(nick)
-            if id_of_nick: cached_ids[nick] = id_of_nick
-        if cached_ids[nick]: converted_nicknames.append(cached_ids[nick])
+            if id_of_nick is not None:
+                cached_ids[nick] = id_of_nick
+        if nick in cached_ids: converted_nicknames.append(cached_ids[nick])
     save_cached_ids(cached_ids)
     return numeric_ids + converted_nicknames
 
@@ -125,8 +126,18 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
     for idx, ids in enumerate(arr_ids):
         time.sleep(DELAY_BETWEEN_USERS)  # Little delay between an user and the next one
         url = userid_endpoint.format(ids)
-        r = requests.get(url, headers=cookie)
-        d = r.json()
+
+        # Tries to scrape the user, if it fails it will retry untill success
+        completed_scraping = False
+        while not completed_scraping:
+            try:
+                r = requests.get(url, headers=cookie)
+                d = r.json()
+                completed_scraping = True
+            except Exception: # Prevents some request errors
+                logger.warning(f'Request error: something was wrong with converting request to json, skipping this user')
+                time.sleep(5)
+
         if d["status"] == "fail":  # This ensures that bad ids and banned users are skipped
             continue
 
@@ -276,7 +287,7 @@ def nick_to_id(nickname):
         logger.info("{} - ID: {}".format(nickname, d["graphql"]["user"]["id"]))
         return d["graphql"]["user"]["id"]
     logger.info(f"User {nickname} can't be found, please check the nickname in extra_ids")
-
+    return None
 #################### START SCRAPING FUNCTIONS ###################
 
 def start_scrape(scrape_settings, user_limit, media_mode="all", ids_source="all"):

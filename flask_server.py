@@ -63,8 +63,10 @@ def index(loop_mode, media_mode, ids_source):
     if request.method == "POST" and is_user_logged_in:
         user_limit = int(request.form["user_limit"]) if request.form["user_limit"].isdecimal() else -1
         media_mode, ids_source, loop_mode, status_button = request.form["mode_dropdown"], request.form["ids_dropdown"], request.form["loop_dropdown"], request.form["controlBtn"]
-        scraper_runner_args = {"scrape_settings": user_settings, "user_limit": user_limit,
-                               "media_mode": media_mode, "ids_source": ids_source}
+        scraper_runner_args = {"scrape_settings": user_settings, 
+                                "user_limit": user_limit,
+                                "media_mode": media_mode, 
+                                "ids_source": ids_source}
         if status_button == "start":
             loop_mode = loop_mode == "True"
             scraper_runner.updateFuncArg(**scraper_runner_args).startFunction(keep_running=loop_mode)
@@ -102,7 +104,10 @@ def settings_page():
                  "loop_variation_percentage": user_settings["loop_variation_percentage"]}
     extra_ids = user_settings["extra_ids"]
     if request.method == "POST": scraper_runner.updateDelay(**loop_args)
-    return render_template("settings.html", settings={"extra_ids": extra_ids, "folder_path": folder_path, **loop_args})
+    return render_template("settings.html",
+                            settings={"extra_ids": extra_ids, 
+                                      "folder_path": folder_path, 
+                                      **loop_args})
 
 @app.route("/login/", methods=['GET', 'POST'])
 def login_page():
