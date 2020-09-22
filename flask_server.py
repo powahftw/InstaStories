@@ -74,6 +74,12 @@ def index(loop_mode, media_mode, ids_source):
         elif status_button == "update": scraper_runner.updateFuncArg(**scraper_runner_args)
     logged_in_error = request.method == "POST" and not is_user_logged_in
     log_lines = get_log_file_list()
+
+    # Retrieving scraping mode args from thread
+    if scraper_runner.args:
+        loop_mode = not scraper_runner.shutting_down
+        media_mode = scraper_runner.args['media_mode']
+        ids_source = scraper_runner.args['ids_source']
     return render_template('index.html',
                            log_lines=log_lines,
                            disclaimer={"logged_in_error": logged_in_error},
