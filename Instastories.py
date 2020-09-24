@@ -126,18 +126,9 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
     for idx, ids in enumerate(arr_ids):
         time.sleep(DELAY_BETWEEN_USERS)  # Little delay between an user and the next one
         url = userid_endpoint.format(ids)
-
-        # Tries to scrape the user, if it fails it will retry untill success
-        completed_scraping = False
-        while not completed_scraping:
-            try:
-                r = requests.get(url, headers=cookie)
-                d = r.json()
-                completed_scraping = True
-            except Exception: # Prevents some request errors
-                logger.warning(f'Request error: something was wrong with converting request to json, skipping this user')
-                time.sleep(5)
-
+        r = requests.get(url, headers=cookie)
+        d = r.json()
+                
         if d["status"] == "fail":  # This ensures that bad ids and banned users are skipped
             continue
 

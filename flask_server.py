@@ -5,7 +5,9 @@ import base64
 import shutil
 import settings
 import logging
+import shutil
 from thread_runner import ThreadRunner
+
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -53,6 +55,21 @@ def get_stats_from_log_line(log_lines):
     count_u, count_i, count_v = [int(val.strip().split(" ")[0]) for val in [users_count, img_count, video_count]]
     return count_u, count_i, count_v
 
+def get_disk_usage():
+    hdd_usage = shutil.disk_usage("/")
+    total_space, used_space, free_space = map(lambda bytes: bytes // (2**30) , hdd_usage)
+    return f"Used space: {used_space}/{total_space} GiB - Free space: {free_space} GiB"
+
+def get_logs():
+    logs = []
+    log_file_path = settings.get('log_file_path')
+    if not os.path.exists(log_file_path): return []
+    
+    with open(log_file_path, 'r+') as log_file:
+        for i in log_file.readlines():
+            logs.append(i)
+        return logs
+
 ################### ROUTES ###################
 
 @app.route("/", methods=['GET', 'POST'], defaults={"loop_mode": False, "media_mode": "all", "ids_source": "all"})
@@ -89,8 +106,11 @@ def index(loop_mode, media_mode, ids_source):
 
 @app.route("/settings/", methods=['GET', 'POST'])
 def settings_page():
+
     logger.info(f"{request.method} request to /settings")
     user_settings = settings.get()
+    get_disk_usage()
+
     if not settings.has_setting("session_id"):
         return redirect("/login")  # Prompt the user to log-in if he's not
         logger.info("User not logged in, redirected to /login")
@@ -113,7 +133,8 @@ def settings_page():
     return render_template("settings.html",
                             settings={"extra_ids": extra_ids, 
                                       "folder_path": folder_path, 
-                                      **loop_args})
+                                      **loop_args},
+                                      disk_usage = get_disk_usage())
 
 @app.route("/login/", methods=['GET', 'POST'])
 def login_page():
@@ -155,6 +176,11 @@ def gallery(username, date):
     else:
         to_render_items = get_folders(folder_path, request.url)
     return render_template("gallery.html", to_render_items=to_render_items)
+
+
+@app.route("/logs/", methods=['GET'])
+def logs():
+    return render_template('logs.html', logs=get_logs())
 
 ################### RUN ###################
 

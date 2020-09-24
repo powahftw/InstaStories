@@ -18,12 +18,13 @@ telegram_handler = None
 if LOGGING_TO_TELEGRAM:
     from telegram_handler import TelegramHandler
 
-LOGGING_TO_FILE = False
+LOGGING_TO_FILE = True
 file_handler = None
 
 DEFAULT_VALUES = {
     'scraping_log_file_path': SCRAPING_LOG_FILE_PATH,
     'folder_path': FOLDER_PATH,
+    'log_file_path': LOG_FILE_PATH,
     'extra_ids': [],
     'cached_ids_path': CACHED_IDS_PATH,
     'loop_delay_seconds': 8 * 60 * 60,

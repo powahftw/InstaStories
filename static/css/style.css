@@ -46,6 +46,11 @@ textarea {
     height: 200px;
 }
 
+h1 {
+    margin: 0;
+    padding: 20px;
+}
+
 .logo {
     width: 50px;
 }
@@ -59,7 +64,7 @@ textarea {
 }
 
 .container {
-    height: 100vh;
+    height: 100%;
     padding-left: 70px;
 }
 
@@ -107,7 +112,6 @@ textarea {
     color: #F64343;
     padding-bottom: 10px;
 }
-
 
 /* INDEX.HTML */
 
@@ -255,6 +259,7 @@ input {
     background-color: #161616;
     height: fit-content;
     margin: 0 170px;
+    overflow: auto;
 }
 
 .gallery-folders {
@@ -321,4 +326,16 @@ textarea {
 
 .info {
     color: lightblue;
+}
+
+/* LOGS PAGE */
+
+.logs-container {
+    height: 80vh;
+    padding: 2vw;
+    overflow: auto;
+}
+
+.log-element {
+    padding: 10px 0;
 }

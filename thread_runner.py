@@ -27,10 +27,26 @@ class ThreadRunner():
         time_delay = self.loop_args["loop_delay_seconds"] + random.randint(-loop_variation, loop_variation)
         return time_delay
 
+    def exponential_backoff(self):
+        total_tries = 3
+        current_try = 0
+        while current_try < total_tries:
+            try:
+                self.output = self.func(**self.args)
+                return
+            except Exception as err:
+                sleep_time = self.DEFAULT_SLEEP_TIME * (10 ** current_try)
+                logger.warning(f"Error occurred while trying to scrape, retrying after {sleep_time} secs. \
+                                \n Error: {err}")
+                time.sleep(sleep_time)
+                current_try = current_try + 1
+        logger.info("Thread stopped, error in trying to scrape users, please restart it")
+        self.shutting_down = True
+
     def runLoopedFunction(self):
         while True:
             if self.thread_running:
-                self.output = self.func(**self.args)
+                self.exponential_backoff()
                 if self.shutting_down:
                     self.thread_running = False
                 else:
