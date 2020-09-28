@@ -8,7 +8,6 @@ import logging
 import shutil
 from thread_runner import ThreadRunner
 
-
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
@@ -60,9 +59,9 @@ def get_disk_usage():
     total_space, used_space, free_space = map(lambda bytes: bytes // (2**30) , hdd_usage)
     return f"Used space: {used_space}/{total_space} GiB - Free space: {free_space} GiB"
 
-def get_logs():
+def get_system_logs():
     logs = []
-    log_file_path = settings.get('log_file_path')
+    log_file_path = settings.get('system_log_file_path')
     if not os.path.exists(log_file_path): return []
     
     with open(log_file_path, 'r+') as log_file:
@@ -109,7 +108,6 @@ def settings_page():
 
     logger.info(f"{request.method} request to /settings")
     user_settings = settings.get()
-    get_disk_usage()
 
     if not settings.has_setting("session_id"):
         return redirect("/login")  # Prompt the user to log-in if he's not
@@ -177,13 +175,11 @@ def gallery(username, date):
         to_render_items = get_folders(folder_path, request.url)
     return render_template("gallery.html", to_render_items=to_render_items)
 
-
 @app.route("/logs/", methods=['GET'])
 def logs():
-    return render_template('logs.html', logs=get_logs())
+    return render_template('logs.html', logs=get_system_logs())
 
 ################### RUN ###################
-
 
 if __name__ == "__main__":
     app.run(debug=True, port=80, host='0.0.0.0')
