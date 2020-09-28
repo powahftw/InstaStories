@@ -65,9 +65,7 @@ def get_system_logs():
     if not os.path.exists(log_file_path): return []
     
     with open(log_file_path, 'r+') as log_file:
-        for i in log_file.readlines():
-            logs.append(i)
-        return logs
+        return [log for log in log_file.readlines()]
 
 ################### ROUTES ###################
 
@@ -105,7 +103,6 @@ def index(loop_mode, media_mode, ids_source):
 
 @app.route("/settings/", methods=['GET', 'POST'])
 def settings_page():
-
     logger.info(f"{request.method} request to /settings")
     user_settings = settings.get()
 

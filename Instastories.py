@@ -127,7 +127,7 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
         time.sleep(DELAY_BETWEEN_USERS)  # Little delay between an user and the next one
         url = userid_endpoint.format(ids)
         r = requests.get(url, headers=cookie)
-        d = r.json()       
+        d = r.json()
         if d["status"] == "fail":  # This ensures that bad ids and banned users are skipped
             continue
         if 'items' in d and d['items']:
@@ -276,7 +276,7 @@ def nick_to_id(nickname):
         logger.info("{} - ID: {}".format(nickname, d["graphql"]["user"]["id"]))
         return d["graphql"]["user"]["id"]
     logger.info(f"User {nickname} can't be found, please check the nickname in extra_ids")
-    
+
 #################### START SCRAPING FUNCTIONS ###################
 
 def start_scrape(scrape_settings, user_limit, media_mode="all", ids_source="all"):
