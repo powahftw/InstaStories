@@ -5,7 +5,6 @@ import base64
 import shutil
 import settings
 import logging
-import shutil
 from thread_runner import ThreadRunner
 
 app = Flask(__name__)
@@ -56,14 +55,12 @@ def get_stats_from_log_line(log_lines):
 
 def get_disk_usage():
     hdd_usage = shutil.disk_usage("/")
-    total_space, used_space, free_space = map(lambda bytes: bytes // (2**30) , hdd_usage)
+    total_space, used_space, free_space = map(lambda bytes: bytes // (2**30), hdd_usage)
     return f"Used space: {used_space}/{total_space} GiB - Free space: {free_space} GiB"
 
 def get_system_logs():
-    logs = []
     log_file_path = settings.get('system_log_file_path')
     if not os.path.exists(log_file_path): return []
-    
     with open(log_file_path, 'r+') as log_file:
         return [log for log in log_file.readlines()]
 
@@ -77,10 +74,10 @@ def index(loop_mode, media_mode, ids_source):
     if request.method == "POST" and is_user_logged_in:
         user_limit = int(request.form["user_limit"]) if request.form["user_limit"].isdecimal() else -1
         media_mode, ids_source, loop_mode, status_button = request.form["mode_dropdown"], request.form["ids_dropdown"], request.form["loop_dropdown"], request.form["controlBtn"]
-        scraper_runner_args = {"scrape_settings": user_settings, 
-                                "user_limit": user_limit,
-                                "media_mode": media_mode, 
-                                "ids_source": ids_source}
+        scraper_runner_args = {"scrape_settings": user_settings,
+                               "user_limit": user_limit,
+                               "media_mode": media_mode,
+                               "ids_source": ids_source}
         if status_button == "start":
             loop_mode = loop_mode == "True"
             scraper_runner.updateFuncArg(**scraper_runner_args).startFunction(keep_running=loop_mode)
@@ -126,10 +123,10 @@ def settings_page():
     extra_ids = user_settings["extra_ids"]
     if request.method == "POST": scraper_runner.updateDelay(**loop_args)
     return render_template("settings.html",
-                            settings={"extra_ids": extra_ids, 
-                                      "folder_path": folder_path, 
-                                      **loop_args},
-                                      disk_usage = get_disk_usage())
+                           settings={"extra_ids": extra_ids,
+                                     "folder_path": folder_path,
+                                     **loop_args},
+                           disk_usage=get_disk_usage())
 
 @app.route("/login/", methods=['GET', 'POST'])
 def login_page():
@@ -177,6 +174,7 @@ def logs():
     return render_template('logs.html', logs=get_system_logs())
 
 ################### RUN ###################
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=80, host='0.0.0.0')

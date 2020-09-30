@@ -30,19 +30,20 @@ class ThreadRunner():
     def runLoopedFunction(self):
         while True:
             if self.thread_running:
-                total_tries = 3
-                current_try = 0
-                while current_try < total_tries:
+                sleep_counter = 0
+                tries_left = 3
+                while tries_left:
                     try:
                         self.output = self.func(**self.args)
                         break
                     except Exception as err:
-                        sleep_time = self.DEFAULT_SLEEP_TIME * (10 ** current_try)
+                        sleep_time = self.DEFAULT_SLEEP_TIME * (10 ** sleep_counter)
                         logger.warning(f"Error occurred while trying to scrape, retrying after {sleep_time} secs. \
                                         \n Error: {err}")
                         time.sleep(sleep_time)
-                        current_try += 1
-                if current_try == total_tries:
+                        tries_left -= 1
+                        sleep_counter += 1
+                if not tries_left:
                     logger.warning("Thread stopped, error in trying to scrape users, please restart it")
                     self.shutting_down = True
 

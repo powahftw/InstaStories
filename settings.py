@@ -18,7 +18,7 @@ telegram_handler = None
 if LOGGING_TO_TELEGRAM:
     from telegram_handler import TelegramHandler
 
-LOGGING_TO_FILE = True
+LOGGING_TO_FILE = False
 file_handler = None
 
 DEFAULT_VALUES = {

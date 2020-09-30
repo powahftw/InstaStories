@@ -57,8 +57,7 @@ def normalize_extra_ids(ids):
             logger.info(f"Finding id for {nick}")
             time.sleep(randint(1, 4))  # Random delay to avoid requests spamming
             id_of_nick = nick_to_id(nick)
-            if id_of_nick:
-                cached_ids[nick] = id_of_nick
+            if id_of_nick: cached_ids[nick] = id_of_nick
         if nick in cached_ids: converted_nicknames.append(cached_ids[nick])
     save_cached_ids(cached_ids)
     return numeric_ids + converted_nicknames
@@ -130,6 +129,7 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
         d = r.json()
         if d["status"] == "fail":  # This ensures that bad ids and banned users are skipped
             continue
+
         if 'items' in d and d['items']:
             items = d['items']
             username = items[0]['user']['username']
