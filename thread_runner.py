@@ -35,7 +35,7 @@ class ThreadRunner():
                 while tries_left:
                     try:
                         self.output = self.func(**self.args)
-                        break
+                        tries_left = 0
                     except Exception as err:
                         sleep_time = self.DEFAULT_SLEEP_TIME * (10 ** sleep_counter)
                         logger.warning(f"Error occurred while trying to scrape, retrying after {sleep_time} secs. \
