@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 class ThreadRunner():
 
     DEFAULT_SLEEP_TIME = 5
+    DEFAULT_ATTEMPTS = 3
 
     def __init__(self, func, default_loop_delay_seconds, default_loop_variation_percentage):
         self.thread_running = False
@@ -30,20 +31,19 @@ class ThreadRunner():
     def runLoopedFunction(self):
         while True:
             if self.thread_running:
-                sleep_counter = 0
-                tries_left = 3
-                while tries_left:
+                tries_left = self.DEFAULT_ATTEMPTS
+                last_request_completed = False
+                while tries_left > 0 and not last_request_completed:
                     try:
                         self.output = self.func(**self.args)
-                        tries_left = 0
+                        last_request_completed = True
                     except Exception as err:
-                        sleep_time = self.DEFAULT_SLEEP_TIME * (10 ** sleep_counter)
+                        sleep_time = self.DEFAULT_SLEEP_TIME * (10 ** (self.DEFAULT_ATTEMPTS - tries_left))
                         logger.warning(f"Error occurred while trying to scrape, retrying after {sleep_time} secs. \
                                         \n Error: {err}")
                         time.sleep(sleep_time)
                         tries_left -= 1
-                        sleep_counter += 1
-                if not tries_left:
+                if not last_request_completed:
                     logger.warning("Thread stopped, error in trying to scrape users, please restart it")
                     self.shutting_down = True
 
