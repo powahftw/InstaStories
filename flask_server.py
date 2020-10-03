@@ -1,5 +1,5 @@
 from Instastories import start_scrape
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 import os
 import base64
 import shutil
@@ -27,13 +27,12 @@ def get_log_file_list():
         logs = [log_lines for log_lines in o.readlines()]
         return list(reversed(logs))
 
-def get_folders(path, url):
-    rendered_folders = []  # List of {type: 'folder', url: X, name: Y}
+def get_folders(path):
+    rendered_folders = []  # List of {type: 'folder', name: Y}
     if not os.path.exists(path): return []
     for folder in os.listdir(path):
         if folder.endswith(SKIP_EXTENSIONS): continue
         rendered_folders.append({'type': 'folder',
-                                 'url': f"{url}{folder}",
                                  'name': f"{folder}"})
     return rendered_folders
 
@@ -128,11 +127,19 @@ def delete_media_folder_if_present():
         shutil.rmtree(folder_path)
         logger.info(f"Deleted {folder_path} folder")
 
-@app.route("/gallery/", methods=['GET'], defaults={"username": None, "date": None})
-@app.route("/gallery/<username>/", methods=['GET'], defaults={"date": None})
-@app.route("/gallery/<username>/<date>/", methods=['GET'])
-def gallery(username, date):
-    logger.info(f"GET request to /gallery/{username if username else ''}{'/' + date if date else ''}")
+@app.route("/gallery/", methods=['GET'], defaults={"text": ''})
+@app.route("/gallery/<path:text>", methods=['GET'])
+def gallery(text):
+    logger.info(f"GET request to /gallery/")
+    return render_template("gallery.html")
+
+################### API ROUTES ###################
+
+@app.route("/api/gallery/", methods=['GET'], defaults={"username": None, "date": None})
+@app.route("/api/gallery/<username>/", methods=['GET'], defaults={"date": None})
+@app.route("/api/gallery/<username>/<date>/", methods=['GET'])
+def gallery_api(username, date):
+    logger.info(f"API/GET request to /gallery/{username if username else ''}{'/' + date if date else ''}")
     folder_path = settings.get("folder_path")
     # From most to least specific
     if date:
@@ -140,10 +147,10 @@ def gallery(username, date):
         to_render_items = get_media(date_path)
     elif username:
         user_path = os.path.join(folder_path, username)
-        to_render_items = get_folders(user_path, request.url)
+        to_render_items = get_folders(user_path)
     else:
-        to_render_items = get_folders(folder_path, request.url)
-    return render_template("gallery.html", to_render_items=to_render_items)
+        to_render_items = get_folders(folder_path)
+    return jsonify({'items' : to_render_items})
 
 ################### RUN ###################
 

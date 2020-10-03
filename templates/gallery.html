@@ -2,24 +2,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="gallery-container">
-        <ul>
-            {% for item in to_render_items %}
-                {% if item['type'] == 'folder' %}
-                <li>
-                    <a href={{ item['url'] }}>
-                        <div class="gallery-folders">
-                            {{ item['name'] }}
-                        </div>  
-                    </a>  
-                </li>
-                {% elif item['type'] == 'media' %}  
-                        <li>
-                            <{{ item["content_tag"] }} src="data:{{ item["media_type"] }};base64,{{ item["data"] }}" class="rendered-stories"></{{ item["content_tag"] }}>
-                        </li>
-                {% endif %}
-                
-            {% endfor %}
-        </ul>
-    </div>
+    <div class="gallery-container" id="gallery"></div>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/gallery.js') }}"></script>
 {% endblock %}
