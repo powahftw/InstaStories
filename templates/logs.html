@@ -1,8 +1,8 @@
 {% set active_page = 'logs' %}
 {% extends 'base.html' %} {% block content %}
-<div class="container">            
-    <h1>LOGS</h1>
-    <div class="logs-container">   
+<div class="container">       
+    <div class="logs-container">
+        <h2>LOGS</h2>
         <ul>
             {% for log in logs %}
                 <li class="log-element">{{log}}</li>
