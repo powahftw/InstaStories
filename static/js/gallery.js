@@ -5,7 +5,7 @@ const removeTrailingSlash = (string) => {
 const renderFolder = (folder) => {
     const liNode = document.createElement("li");
     liNode.innerHTML = `
-        <a href=${removeTrailingSlash(window.location.href)}/${folder["name"]}>
+        <a href="${removeTrailingSlash(window.location.href)}/${folder["name"]}">
             <div class="gallery-folders">	
                 ${folder["name"]}	
             </div>  	
@@ -15,11 +15,12 @@ const renderFolder = (folder) => {
 
 const renderMedia = (media) => {
     const liNode = document.createElement("li");
+    const tag = (media["media_type"] == "img/png" ? "img": "video");
+
     liNode.innerHTML = `
-        <${media["content_tag"]} 
-            src="data:${media["media_type"]};base64,${media["data"]}" 
+        <${tag} ${tag === "video" ? "controls" : ""} src="data:${media["media_type"]};base64,${media["data"]}" 
             class="rendered-stories">
-        </${media["content_tag"]}>`;
+        </${tag}>`;
     return liNode;
 };
 
@@ -65,7 +66,6 @@ const renderClientSidePage = async () => {
 
     document.getElementById(CONTAINER_ID).appendChild(htmlToAppend);
 };
-
 
 window.onload = () => {
     renderClientSidePage();

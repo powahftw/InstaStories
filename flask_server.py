@@ -41,10 +41,9 @@ def get_media(path):
     for media in os.listdir(path):
         if media.endswith(SKIP_EXTENSIONS): continue
         media_type = "img/png" if media.endswith(".jpg") else "video/mp4"
-        content_tag = "img" if media_type == "img/png" else "video controls"
         with open(os.path.join(path, media), "rb") as media_element:
             base64_media = base64.b64encode(media_element.read()).decode("utf-8")
-        to_render_media.append({'type': 'media', 'content_tag': content_tag, 'media_type': media_type, 'data': base64_media})
+        to_render_media.append({'type': 'media', 'media_type': media_type, 'data': base64_media})      
     return to_render_media
 
 def get_stats_from_log_line(log_lines):
