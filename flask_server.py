@@ -20,9 +20,6 @@ scraper_runner = ThreadRunner(start_scrape, user_settings["loop_delay_seconds"],
 
 ################### UTIL FUNCTIONS ###################
 
-
-
-
 def get_log_file_list():
     scraping_logs_path = settings.get('scraping_log_file_path')
     if not os.path.exists(scraping_logs_path):
