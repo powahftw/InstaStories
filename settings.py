@@ -24,6 +24,7 @@ file_handler = None
 DEFAULT_VALUES = {
     'scraping_log_file_path': SCRAPING_LOG_FILE_PATH,
     'folder_path': FOLDER_PATH,
+    'system_log_file_path': LOG_FILE_PATH,
     'extra_ids': [],
     'cached_ids_path': CACHED_IDS_PATH,
     'loop_delay_seconds': 8 * 60 * 60,

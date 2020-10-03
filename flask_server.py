@@ -53,6 +53,17 @@ def get_stats_from_log_line(log_lines):
     count_u, count_i, count_v = [int(val.strip().split(" ")[0]) for val in [users_count, img_count, video_count]]
     return count_u, count_i, count_v
 
+def get_disk_usage():
+    hdd_usage = shutil.disk_usage("/")
+    total_space, used_space, free_space = map(lambda bytes: bytes // (2**30), hdd_usage)
+    return f"Used space: {used_space}/{total_space} GiB - Free space: {free_space} GiB"
+
+def get_system_logs():
+    log_file_path = settings.get('system_log_file_path')
+    if not os.path.exists(log_file_path): return []
+    with open(log_file_path, 'r+') as log_file:
+        return [log for log in log_file.readlines()]
+
 ################### ROUTES ###################
 
 @app.route("/", methods=['GET', 'POST'], defaults={"loop_mode": False, "media_mode": "all", "ids_source": "all"})
@@ -63,8 +74,10 @@ def index(loop_mode, media_mode, ids_source):
     if request.method == "POST" and is_user_logged_in:
         user_limit = int(request.form["user_limit"]) if request.form["user_limit"].isdecimal() else -1
         media_mode, ids_source, loop_mode, status_button = request.form["mode_dropdown"], request.form["ids_dropdown"], request.form["loop_dropdown"], request.form["controlBtn"]
-        scraper_runner_args = {"scrape_settings": user_settings, "user_limit": user_limit,
-                               "media_mode": media_mode, "ids_source": ids_source}
+        scraper_runner_args = {"scrape_settings": user_settings,
+                               "user_limit": user_limit,
+                               "media_mode": media_mode,
+                               "ids_source": ids_source}
         if status_button == "start":
             loop_mode = loop_mode == "True"
             scraper_runner.updateFuncArg(**scraper_runner_args).startFunction(keep_running=loop_mode)
@@ -72,6 +85,12 @@ def index(loop_mode, media_mode, ids_source):
         elif status_button == "update": scraper_runner.updateFuncArg(**scraper_runner_args)
     logged_in_error = request.method == "POST" and not is_user_logged_in
     log_lines = get_log_file_list()
+
+    # Retrieving scraping mode args from thread
+    if scraper_runner.args:
+        loop_mode = not scraper_runner.shutting_down
+        media_mode = scraper_runner.args['media_mode']
+        ids_source = scraper_runner.args['ids_source']
     return render_template('index.html',
                            log_lines=log_lines,
                            disclaimer={"logged_in_error": logged_in_error},
@@ -83,6 +102,7 @@ def index(loop_mode, media_mode, ids_source):
 def settings_page():
     logger.info(f"{request.method} request to /settings")
     user_settings = settings.get()
+
     if not settings.has_setting("session_id"):
         return redirect("/login")  # Prompt the user to log-in if he's not
         logger.info("User not logged in, redirected to /login")
@@ -102,7 +122,11 @@ def settings_page():
                  "loop_variation_percentage": user_settings["loop_variation_percentage"]}
     extra_ids = user_settings["extra_ids"]
     if request.method == "POST": scraper_runner.updateDelay(**loop_args)
-    return render_template("settings.html", settings={"extra_ids": extra_ids, "folder_path": folder_path, **loop_args})
+    return render_template("settings.html",
+                           settings={"extra_ids": extra_ids,
+                                     "folder_path": folder_path,
+                                     **loop_args},
+                           disk_usage=get_disk_usage())
 
 @app.route("/login/", methods=['GET', 'POST'])
 def login_page():
@@ -144,6 +168,10 @@ def gallery(username, date):
     else:
         to_render_items = get_folders(folder_path, request.url)
     return render_template("gallery.html", to_render_items=to_render_items)
+
+@app.route("/logs/", methods=['GET'])
+def logs():
+    return render_template('logs.html', logs=get_system_logs())
 
 ################### RUN ###################
 

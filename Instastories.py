@@ -58,7 +58,7 @@ def normalize_extra_ids(ids):
             time.sleep(randint(1, 4))  # Random delay to avoid requests spamming
             id_of_nick = nick_to_id(nick)
             if id_of_nick: cached_ids[nick] = id_of_nick
-        if cached_ids[nick]: converted_nicknames.append(cached_ids[nick])
+        if nick in cached_ids: converted_nicknames.append(cached_ids[nick])
     save_cached_ids(cached_ids)
     return numeric_ids + converted_nicknames
 
