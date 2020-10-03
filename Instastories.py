@@ -96,7 +96,7 @@ def retrieve_media(url, file_path):
             logger.info("Media download done with no errors")
             return
         except TimeoutError as err:
-            logger.info("A timeout error occurred while trying to download the media: \n {err}")
+            logger.info(f"A timeout error occurred while trying to download the media: \n {err}")
             logger.info(f"Retrying... {times_to_try}")
             times_to_try -= 1
             time.sleep(5)
@@ -211,7 +211,7 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
             with open(seen_stories_txt, 'w') as seen, open(saved_stories_json, 'w') as saved:
                 for id in json_stories_seen:
                     seen.write(f'{id}\n')
-                json_stories_saved = json.dump(json_stories_saved, saved)
+                json.dump(json_stories_saved, saved)
     logger.info("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), tot_count_img, tot_count_videos))
     return tot_count_img, tot_count_videos
 

@@ -19,6 +19,7 @@ user_settings = settings.get()
 scraper_runner = ThreadRunner(start_scrape, user_settings["loop_delay_seconds"], user_settings["loop_variation_percentage"])
 
 ################### UTIL FUNCTIONS ###################
+
 def get_log_file_list():
     scraping_logs_path = settings.get('scraping_log_file_path')
     if not os.path.exists(scraping_logs_path):
@@ -94,18 +95,17 @@ def index(loop_mode, media_mode, ids_source):
     return render_template('index.html',
                            log_lines=log_lines,
                            disclaimer={"logged_in_error": logged_in_error},
-                           output=scraper_runner.getOutput(),
+                            output=scraper_runner.getOutput(),
                            checkbox={"loop_mode": loop_mode, "media_mode": media_mode, "ids_source": ids_source},
                            status=scraper_runner.getStatus())
 
 @app.route("/settings/", methods=['GET', 'POST'])
-def settings_page():
     logger.info(f"{request.method} request to /settings")
     user_settings = settings.get()
 
     if not settings.has_setting("session_id"):
-        return redirect("/login")  # Prompt the user to log-in if he's not
         logger.info("User not logged in, redirected to /login")
+        return redirect("/login")  # Prompt the user to log-in if he's not
     if request.method == "POST":  # User is updating settings.
         for setting_name in request.form:
             if setting_name == "extra_ids":
@@ -174,7 +174,6 @@ def logs():
     return render_template('logs.html', logs=get_system_logs())
 
 ################### RUN ###################
-
 
 if __name__ == "__main__":
     app.run(debug=True, port=80, host='0.0.0.0')
