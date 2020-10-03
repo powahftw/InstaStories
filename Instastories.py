@@ -95,8 +95,8 @@ def retrieve_media(url, file_path):
             urllib.request.urlretrieve(url, file_path)
             logger.info("Media download done with no errors")
             return
-        except TimeoutError:
-            logger.info("A timeout error occurred while trying to download the media: \n {err}")
+        except TimeoutError as err:
+            logger.info(f"A timeout error occurred while trying to download the media: \n {err}")
             logger.info(f"Retrying... {times_to_try}")
             times_to_try -= 1
             time.sleep(5)

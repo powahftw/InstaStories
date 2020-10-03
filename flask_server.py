@@ -20,6 +20,9 @@ scraper_runner = ThreadRunner(start_scrape, user_settings["loop_delay_seconds"],
 
 ################### UTIL FUNCTIONS ###################
 
+
+
+
 def get_log_file_list():
     scraping_logs_path = settings.get('scraping_log_file_path')
     if not os.path.exists(scraping_logs_path):
@@ -55,14 +58,9 @@ def get_stats_from_log_line(log_lines):
     return count_u, count_i, count_v
 
 def get_disk_usage():
-    print(os.path.abspath("ig_media/"))
-    saved_media_hdd_usage = shutil.disk_usage(os.path.abspath("ig_media/"))
-    _, used_media_space, _ = map(lambda bytes: bytes // (2**30), saved_media_hdd_usage)
-
-    total_hdd_usage = shutil.disk_usage("/")
-    _, _, total_free_space = map(lambda bytes: bytes // (2**30), total_hdd_usage)
-    print(used_media_space, total_free_space)
-    return f"Used space: {used_media_space} GiB - Free space: {total_free_space} GiB"
+    hdd_usage = shutil.disk_usage("/")
+    total_space, used_space, free_space = map(lambda bytes: bytes // (2**30), hdd_usage)
+    return f"Used space: {used_space}/{total_space} GiB - Free space: {free_space} GiB"
 
 def get_system_logs():
     log_file_path = settings.get('system_log_file_path')
@@ -100,12 +98,11 @@ def index(loop_mode, media_mode, ids_source):
     return render_template('index.html',
                            log_lines=log_lines,
                            disclaimer={"logged_in_error": logged_in_error},
-                           output=scraper_runner.getOutput(),
+                            output=scraper_runner.getOutput(),
                            checkbox={"loop_mode": loop_mode, "media_mode": media_mode, "ids_source": ids_source},
                            status=scraper_runner.getStatus())
 
 @app.route("/settings/", methods=['GET', 'POST'])
-def settings_page():
     logger.info(f"{request.method} request to /settings")
     user_settings = settings.get()
 
