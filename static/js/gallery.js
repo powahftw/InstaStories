@@ -34,7 +34,7 @@ const fetchResponseToHtml = async (response) => {
         root.append("ERROR");
         return root;
     }
-    
+
     const responseData = await response.json();
 
     const sortBasedOnName = (x, y) => { return x['name'].localeCompare(y['name']); };  
