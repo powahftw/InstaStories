@@ -34,9 +34,11 @@ const fetchResponseToHtml = async (response) => {
         root.append("ERROR");
         return root;
     }
-
+    
     const responseData = await response.json();
-    const data = responseData['items'];
+
+    const sortBasedOnName = (x, y) => { return x['name'].localeCompare(y['name']); };  
+    const data = responseData['items'].sort(sortBasedOnName);
     const renderedItems = document.createElement("ul");
 
     data.forEach(element => {
