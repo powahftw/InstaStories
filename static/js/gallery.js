@@ -15,10 +15,11 @@ const renderFolder = (folder) => {
 
 const renderMedia = (media) => {
     const liNode = document.createElement("li");
-    const tag = (media["media_type"] == "img/png" ? "img": "video");
+    const tag = media["is_img"] ? "img": "video";
+    const imgUrl = `${removeTrailingSlash(window.location.href)}/${media['name']}`;
 
     liNode.innerHTML = `
-        <${tag} ${tag === "video" ? "controls" : ""} src="data:${media["media_type"]};base64,${media["data"]}" 
+        <${tag} ${tag === "video" ? "controls" : ""} src="${imgUrl}" 
             class="rendered-stories">
         </${tag}>`;
     return liNode;

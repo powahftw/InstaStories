@@ -1,5 +1,5 @@
 from Instastories import start_scrape
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, jsonify, send_from_directory
 import os
 import base64
 import shutil
@@ -37,14 +37,11 @@ def get_folders(path):
                                  'name': f"{folder}"})
     return rendered_folders
 
-def get_media(path):
+def get_media_files(path):
     to_render_media = []
     for media in os.listdir(path):
         if media.endswith(SKIP_EXTENSIONS): continue
-        media_type = "img/png" if media.endswith(".jpg") else "video/mp4"
-        with open(os.path.join(path, media), "rb") as media_element:
-            base64_media = base64.b64encode(media_element.read()).decode("utf-8")
-        to_render_media.append({'type': 'media', 'media_type': media_type, 'data': base64_media})      
+        to_render_media.append({'type': 'media', 'name': media, 'is_img': media.endswith(".jpg")})      
     return to_render_media
 
 def get_stats_from_log_line(log_lines):
@@ -93,11 +90,12 @@ def index(loop_mode, media_mode, ids_source):
     return render_template('index.html',
                            log_lines=log_lines,
                            disclaimer={"logged_in_error": logged_in_error},
-                            output=scraper_runner.getOutput(),
+                           output=scraper_runner.getOutput(),
                            checkbox={"loop_mode": loop_mode, "media_mode": media_mode, "ids_source": ids_source},
                            status=scraper_runner.getStatus())
 
 @app.route("/settings/", methods=['GET', 'POST'])
+def settings_page():
     logger.info(f"{request.method} request to /settings")
     user_settings = settings.get()
 
@@ -167,7 +165,7 @@ def gallery_api(username, date):
     # From most to least specific
     if date:
         date_path = os.path.join(os.path.join(folder_path, username), date)
-        to_render_items = get_media(date_path)
+        to_render_items = get_media_files(date_path)
     elif username:
         user_path = os.path.join(folder_path, username)
         to_render_items = get_folders(user_path)
@@ -178,6 +176,14 @@ def gallery_api(username, date):
 @app.route("/logs/", methods=['GET'])
 def logs():
     return render_template('logs.html', logs=get_system_logs())
+
+################### SERVE MEDIA ###########
+
+@app.route("/gallery/<username>/<date>/<filename>", methods=['GET'])
+def serve_media(username, date, filename):
+    folder_path = settings.get("folder_path")
+    media_folder = os.path.join(os.path.join(folder_path, username), date)
+    return send_from_directory(media_folder, filename)
 
 ################### RUN ###################
 
