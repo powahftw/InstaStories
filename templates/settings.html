@@ -1,50 +1,57 @@
 {% set active_page = 'settings' %}
 {% extends 'base.html' %} {% block content %}
-<form action="/settings/" method="POST">
-    <div class="settings-box">
+    <div class="settings-box" id="settings">
         <ul>
             <li>
                 <h2>Settings</h2>
             </li>
 
+            <li id="login_field">
+                <p>If it's the first time you use this tool, log in.</p>
+                <h2>Please enter your Session ID</h2>
+                <label for="session_id">Session ID</label>
+                <input id="session_id" type="text" name="session_id">
+            </li>
+
             <li>
                 <label for="folder_path">Download folder path:</label>
-                <input id="folder_path" type="text" name="folder_path" placeholder="{{settings['folder_path']}}">
+                <input id="folder_path" type="text" name="folder_path">
             </li>
 
             <li>
                 <label for="loop_delay_seconds">Delay between loop cycles (insert time in seconds):</label>
-                <input type="number" id="loop_delay_seconds" name="loop_delay_seconds" min="1" placeholder="{{settings['loop_delay_seconds']}}">
+                <input type="number" id="loop_delay_seconds" name="loop_delay_seconds" min="1">
             </li>
 
             <li>
                 <label for="loop_variation_percentage">Variation of loop cycles delay (in percentage):</label>
-                <input type="number" id="loop_variation_percentage" name="loop_variation_percentage" min="1" max="100" placeholder="{{settings['loop_variation_percentage']}}">
+                <input type="number" id="loop_variation_percentage" name="loop_variation_percentage" min="1" max="100">
             </li>
 
             <li>
                 <label for="extra_ids">Extra nicknames/IDS to scrape</label><br>
-                <textarea name="extra_ids" id="extra_ids">{% for extra_id in settings["extra_ids"] %}{{extra_id}}{{"\n"}}{% endfor %}</textarea>
+                <textarea name="extra_ids" id="extra_ids"></textarea>
             </li>
 
-            <ul>
-                <li>
-                    <button type="submit" id="submitBtn" class="btn sub-btn">UPDATE SETTINGS</button>
-                </li>
-
-                <li>
-                    <button class="btn sub-btn logout-btn" onclick="location.href='/settings/logout'">LOG OUT</button>
-                </li>
-
-                <li>
-                    <button class="btn sub-btn delete-btn" onclick="location.href='/settings/delete-media'">DELETE ALL MEDIA</button>
-                </li>
-            </ul>
             <li>
-                {{disk_usage}}
+                <ul>
+                    <li>
+                        <button id="submitBtn" class="btn sub-btn">UPDATE SETTINGS</button>
+                    </li>
+    
+                    <li>
+                        <button id="logoutBtn" class="btn sub-btn logout-btn">LOG OUT</button>
+                    </li>
+    
+                    <li>
+                        <button id="deleteMediaBtn" class="btn sub-btn delete-btn">DELETE ALL MEDIA</button>
+                    </li>
+                </ul>
+            </li>
+            <li id="status_bar">
+
             </li>
         </ul>
     </div>
-
-</form>
+<script type="text/javascript" src="{{ url_for('static', filename='js/settings.js') }}"></script>
 {% endblock %}
