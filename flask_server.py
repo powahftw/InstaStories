@@ -110,31 +110,36 @@ def logs():
 
 ################### API ROUTES ###################
 
-@app.route("/api/gallery/", methods=['GET'], defaults={"username": None, "date": None})
+@app.route("/api/gallery/", methods=['GET', 'DELETE'], defaults={"username": None, "date": None})
 @app.route("/api/gallery/<username>/", methods=['GET'], defaults={"date": None})
 @app.route("/api/gallery/<username>/<date>/", methods=['GET'])
 def gallery_api(username, date):
-    logger.info(f"API/GET request to /gallery/{username if username else ''}{'/' + date if date else ''}")
-    folder_path = settings.get("folder_path")
-    # From most to least specific
-    if date:
-        date_path = os.path.join(os.path.join(folder_path, username), date)
-        to_render_items = get_media_files(date_path)
-    elif username:
-        user_path = os.path.join(folder_path, username)
-        to_render_items = get_folders(user_path)
-    else:
-        to_render_items = get_folders(folder_path)
-    return jsonify({'items': to_render_items})
+    logger.info(f"API/{request.method} request to /gallery/{username if username else ''}{'/' + date if date else ''}")
+    if request.method == 'GET':
+        folder_path = settings.get("folder_path")
+        # From most to least specific
+        if date:
+            date_path = os.path.join(os.path.join(folder_path, username), date)
+            to_render_items = get_media_files(date_path)
+        elif username:
+            user_path = os.path.join(folder_path, username)
+            to_render_items = get_folders(user_path)
+        else:
+            to_render_items = get_folders(folder_path)
+        return jsonify({'items': to_render_items})
+    if request.method == 'DELETE':
+        folder_path = settings.get("folder_path")
+        if os.path.exists(folder_path):
+            shutil.rmtree(folder_path)
+            logger.info(f"Deleted {folder_path} folder")
+        return {"response": "200"}
 
 @app.route("/api/settings/", methods=['GET', 'POST'])
 def get_settings_api():
+    logger.info(f"API/{request.method} request to /settings/")
     if request.method == 'GET':
-        logger.info(f"API/GET request to /settings/")
         return jsonify(settings.get())
-
     elif request.method == 'POST':
-        logger.info(f"API/POST request to /settings/")
         user_settings = settings.get()
         res = request.get_json()
         user_settings.update(res)
@@ -144,27 +149,12 @@ def get_settings_api():
         scraper_runner.updateDelay(**loop_args)
         return user_settings
 
-@app.route('/api/loggedin/', methods=["GET"])
-def is_user_logged_in():
-    user_settings = settings.get()
-    if "session_id" in user_settings: return {"logged": 1}
-    else: return {"logged": 0}
-
-@app.route('/api/logout/', methods=["GET"])
+@app.route('/api/settings/logout/', methods=["GET"])
 def logout():
-    logger.info(f"API/GET request to /logout/")
+    logger.info(f"API/{request.method} request to /settings/logout/")
     settings.clear_setting("session_id")
     logger.info("The user has logged out")
-    return {"response": "Deleted session_id"}
-
-@app.route("/api/delete-media/", methods=["GET"])
-def delete_media_folder_if_present():
-    logger.info(f"API/GET request to /delete-media/")
-    folder_path = settings.get("folder_path")
-    if os.path.exists(folder_path):
-        shutil.rmtree(folder_path)
-        logger.info(f"Deleted {folder_path} folder")
-    return {"response": "Deleted media"}
+    return {"response": "200"}
 
 ################### SERVE MEDIA ###########
 
