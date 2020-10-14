@@ -110,29 +110,30 @@ def logs():
 
 ################### API ROUTES ###################
 
-@app.route("/api/gallery/", methods=['GET', 'DELETE'], defaults={"username": None, "date": None})
+@app.route("/api/gallery/", methods=['GET'], defaults={"username": None, "date": None})
 @app.route("/api/gallery/<username>/", methods=['GET'], defaults={"date": None})
 @app.route("/api/gallery/<username>/<date>/", methods=['GET'])
 def gallery_api(username, date):
     logger.info(f"API/{request.method} request to /gallery/{username if username else ''}{'/' + date if date else ''}")
-    if request.method == 'GET':
-        folder_path = settings.get("folder_path")
-        # From most to least specific
-        if date:
-            date_path = os.path.join(os.path.join(folder_path, username), date)
-            to_render_items = get_media_files(date_path)
-        elif username:
-            user_path = os.path.join(folder_path, username)
-            to_render_items = get_folders(user_path)
-        else:
-            to_render_items = get_folders(folder_path)
-        return jsonify({'items': to_render_items})
-    if request.method == 'DELETE':
-        folder_path = settings.get("folder_path")
-        if os.path.exists(folder_path):
-            shutil.rmtree(folder_path)
-            logger.info(f"Deleted {folder_path} folder")
-        return {"response": "200"}
+    folder_path = settings.get("folder_path")
+    # From most to least specific
+    if date:
+        date_path = os.path.join(os.path.join(folder_path, username), date)
+        to_render_items = get_media_files(date_path)
+    elif username:
+        user_path = os.path.join(folder_path, username)
+        to_render_items = get_folders(user_path)
+    else:
+        to_render_items = get_folders(folder_path)
+    return jsonify({'items': to_render_items})
+
+@app.route("/api/gallery/", methods=['DELETE'])
+def delete_media():
+    folder_path = settings.get("folder_path")
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path)
+        logger.info(f"Deleted {folder_path} folder")
+    return jsonify(success=True)
 
 @app.route("/api/settings/", methods=['GET', 'POST'])
 def get_settings_api():
@@ -154,7 +155,7 @@ def logout():
     logger.info(f"API/{request.method} request to /settings/logout/")
     settings.clear_setting("session_id")
     logger.info("The user has logged out")
-    return {"response": "200"}
+    return jsonify(success=True)
 
 ################### SERVE MEDIA ###########
 

@@ -1,18 +1,18 @@
 const API_PREFIX = 'api'
-
 const baseUrl = window.location.origin
-const fields = ["session_id", "folder_path", "loop_delay_seconds", "loop_variation_percentage", "extra_ids"]
-const requestUrl = `${baseUrl}/${API_PREFIX}/settings/`
-const loggedinUrl = `${baseUrl}/${API_PREFIX}/loggedin/`
+
+const jsonToIdFields = new Map([
+      ["session_id", "session-id"],
+      ["folder_path", "folder-path"],
+      ["loop_delay_seconds", "loop-delay-seconds"],
+      ["loop_variation_percentage", "loop-variation-percentage"],
+      ["extra_ids", "extra-ids"]
+    ])
+const idToJsonFields = new Map(Array.from(jsonToIdFields, a => a.reverse()));
 
 const normalizeExtraIds = (extraIds) => (  // Splits a string of names/numbers into a list when it finds "," or "\n"
     extraIds.split(/,|\n/).map(el => (el.trim()))
 )
-
-const checkLogin = (res) => {
-    if (res.session_id) return true
-    else return false
-}
 
 const fetchResponseToHtml = async (response) => {  // Sets the placeholders and values in HTML
     if (response.status !== 200) {
@@ -21,13 +21,17 @@ const fetchResponseToHtml = async (response) => {  // Sets the placeholders and 
     }
 
     const responseData = await response.json()
-    const loginField = document.getElementById('login_field')
-    const isUserLoggedIn = checkLogin(responseData)
-    if (isUserLoggedIn) loginField.style.display = 'none'
-    else loginField.style.display = 'block' 
+    const loginField = document.getElementById('login-field')
+    const isUserLoggedIn = ("session_id" in responseData)
+    if (isUserLoggedIn) {
+        loginField.style.display = 'none'
+    } else {
+        loginField.style.display = 'block'
+    } 
 
-    for (element in responseData) {  // For every element sets its value in HTML
-        const elementField = document.getElementById(element)
+    for (element in responseData) {
+        idField = jsonToIdFields.get(element)
+        const elementField = document.getElementById(idField)
         if (elementField) {
             if (element === "extra_ids") {
                 elementField.value = responseData[element]
@@ -39,27 +43,31 @@ const fetchResponseToHtml = async (response) => {  // Sets the placeholders and 
 }
 
 const renderSettingsPage = async () => {
+    const requestUrl = `${baseUrl}/${API_PREFIX}/settings/`
     const response = await fetch(requestUrl).catch(err => { })
     await fetchResponseToHtml(response);
 }
 
-const updateSettings = () => {  // Creates a JSON with the updated settings, if a setting is not updated fills it with the old one
-    let settings = {}
-    fields.forEach(field => {
-        settings[field] = document.getElementById(field).value || document.getElementById(field).placeholder
+const updateSettings = async () => {
+    const settings = {}
+    idToJsonFields.forEach(field => {
+        jsonField = field
+        idField = jsonToIdFields.get(field)
+        settings[jsonField] = document.getElementById(idField).value || document.getElementById(idField).placeholder
     })
     settings["extra_ids"] = [...normalizeExtraIds(settings["extra_ids"])]
-    postUpdateRequest(settings)
+    await postUpdatedSettings(settings)
     renderSettingsPage()
 }
 
 const updateStatusBar = (res) => {   
-    const statusBar = document.getElementById("status_bar")
+    const statusBar = document.getElementById("status-bar")
     const statusText = res.status === 200 ? "Success!" : "Failure, please try again!"
     statusBar.innerText = statusText
 }
 
-const postUpdateRequest = async (payload) => {  // POSTs the request for updating settings
+const postUpdatedSettings = async (payload) => {  // POSTs the request for updating settings
+    const requestUrl = `${baseUrl}/${API_PREFIX}/settings/`
     const res = await fetch(requestUrl, {
         method: 'POST',
         headers: {
@@ -87,7 +95,7 @@ const logout = async () => {
     renderSettingsPage()
 }
 
-const btnsListener = () => {
+const setUpButtonsListeners = () => {
     const logoutBtn = document.getElementById("logoutBtn") 
     const deleteMediaBtn = document.getElementById("deleteMediaBtn")
     const submitBtn = document.getElementById("submitBtn")
@@ -111,5 +119,5 @@ const btnsListener = () => {
 
 window.onload = () => {
     renderSettingsPage()
-    btnsListener()
+    setUpButtonsListeners()
 }
