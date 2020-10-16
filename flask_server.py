@@ -1,7 +1,6 @@
 from Instastories import start_scrape
-from flask import Flask, render_template, request, redirect, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
-import base64
 import shutil
 import settings
 import logging
@@ -41,7 +40,7 @@ def get_media_files(path):
     to_render_media = []
     for media in os.listdir(path):
         if media.endswith(SKIP_EXTENSIONS): continue
-        to_render_media.append({'type': 'media', 'name': media, 'is_img': media.endswith(".jpg")})      
+        to_render_media.append({'type': 'media', 'name': media, 'is_img': media.endswith(".jpg")})
     return to_render_media
 
 def get_stats_from_log_line(log_lines):
@@ -96,57 +95,8 @@ def index(loop_mode, media_mode, ids_source):
 
 @app.route("/settings/", methods=['GET', 'POST'])
 def settings_page():
-    logger.info(f"{request.method} request to /settings")
-    user_settings = settings.get()
-
-    if not settings.has_setting("session_id"):
-        logger.info("User not logged in, redirected to /login")
-        return redirect("/login")  # Prompt the user to log-in if he's not
-    if request.method == "POST":  # User is updating settings.
-        for setting_name in request.form:
-            if setting_name == "extra_ids":
-                extra_ids = request.form["extra_ids"].splitlines()
-                user_settings["extra_ids"] = extra_ids
-            elif setting_name in ["loop_delay_seconds", "loop_variation_percentage"] and len(request.form[setting_name]) != 0:
-                user_settings[setting_name] = int(request.form[setting_name])
-            elif len(request.form[setting_name]) != 0:  # Updates other non-null settings.
-                user_settings[setting_name] = request.form[setting_name]
-        settings.update_settings_file(user_settings)
-        logger.info("Updated settings")
-    folder_path = user_settings["folder_path"]
-    loop_args = {"loop_delay_seconds": user_settings["loop_delay_seconds"],
-                 "loop_variation_percentage": user_settings["loop_variation_percentage"]}
-    extra_ids = user_settings["extra_ids"]
-    if request.method == "POST": scraper_runner.updateDelay(**loop_args)
-    return render_template("settings.html",
-                           settings={"extra_ids": extra_ids,
-                                     "folder_path": folder_path,
-                                     **loop_args},
-                           disk_usage=get_disk_usage())
-
-@app.route("/login/", methods=['GET', 'POST'])
-def login_page():
-    logger.info(f"{request.method} request to /login")
-    if request.method == "GET":
-        return render_template("login.html")
-    elif request.method == "POST":
-        settings.update("session_id", f"sessionid={request.form['session_id']}")
-        return redirect("/settings/")
-
-@app.route("/settings/logout")
-def logout():
-    logger.info(f"{request.method} request to /settings/logout")
-    settings.clear_setting("session_id")
-    logger.info("The user has logged out")
-    return render_template("login.html", disclaimer={"login_error": False})
-
-@app.route("/settings/delete-media")
-def delete_media_folder_if_present():
-    logger.info(f"{request.method} request to /settings/delete-media")
-    folder_path = settings.get("folder_path")
-    if os.path.exists(folder_path):
-        shutil.rmtree(folder_path)
-        logger.info(f"Deleted {folder_path} folder")
+    logger.info(f"{request.method} request to /settings/")
+    return render_template("settings.html")
 
 @app.route("/gallery/", methods=['GET'], defaults={"text": ''})
 @app.route("/gallery/<path:text>", methods=['GET'])
@@ -154,13 +104,17 @@ def gallery(text):
     logger.info(f"GET request to /gallery/")
     return render_template("gallery.html")
 
+@app.route("/logs/", methods=['GET'])
+def logs():
+    return render_template('logs.html', logs=get_system_logs())
+
 ################### API ROUTES ###################
 
 @app.route("/api/gallery/", methods=['GET'], defaults={"username": None, "date": None})
 @app.route("/api/gallery/<username>/", methods=['GET'], defaults={"date": None})
 @app.route("/api/gallery/<username>/<date>/", methods=['GET'])
 def gallery_api(username, date):
-    logger.info(f"API/GET request to /gallery/{username if username else ''}{'/' + date if date else ''}")
+    logger.info(f"API/{request.method} request to /gallery/{username if username else ''}{'/' + date if date else ''}")
     folder_path = settings.get("folder_path")
     # From most to least specific
     if date:
@@ -171,11 +125,37 @@ def gallery_api(username, date):
         to_render_items = get_folders(user_path)
     else:
         to_render_items = get_folders(folder_path)
-    return jsonify({'items' : to_render_items})
+    return jsonify({'items': to_render_items})
 
-@app.route("/logs/", methods=['GET'])
-def logs():
-    return render_template('logs.html', logs=get_system_logs())
+@app.route("/api/gallery/", methods=['DELETE'])
+def delete_media():
+    folder_path = settings.get("folder_path")
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path)
+        logger.info(f"Deleted {folder_path} folder")
+    return jsonify(success=True)
+
+@app.route("/api/settings/", methods=['GET', 'POST'])
+def get_settings_api():
+    logger.info(f"API/{request.method} request to /settings/")
+    if request.method == 'GET':
+        return jsonify(settings.get())
+    elif request.method == 'POST':
+        user_settings = settings.get()
+        res = request.get_json()
+        user_settings.update(res)
+        settings.update_settings_file(user_settings)
+        loop_args = {"loop_delay_seconds": int(user_settings["loop_delay_seconds"]),
+                     "loop_variation_percentage": int(user_settings["loop_variation_percentage"])}
+        scraper_runner.updateDelay(**loop_args)
+        return user_settings
+
+@app.route('/api/settings/logout/', methods=["GET"])
+def logout():
+    logger.info(f"API/{request.method} request to /settings/logout/")
+    settings.clear_setting("session_id")
+    logger.info("The user has logged out")
+    return jsonify(success=True)
 
 ################### SERVE MEDIA ###########
 
@@ -186,6 +166,7 @@ def serve_media(username, date, filename):
     return send_from_directory(media_folder, filename)
 
 ################### RUN ###################
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=80, host='0.0.0.0')

@@ -21,7 +21,7 @@ DELAY_BETWEEN_USERS = 2
 ################# UTILS FUNCTIONS #########################
 
 def craft_cookie(cookie):
-    return {"cookie": cookie,
+    return {"cookie": f"sessionid={cookie}",
             "user-agent": "Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+",
             "cache-control": "no-cache"}
 
