@@ -2,6 +2,18 @@ const removeTrailingSlash = (string) => {
   return string.endsWith('/') ? string.slice(0, -1) : string;
 };
 
+const showAndUpdateSummary = (folderCount, mediaCount) => {
+  const summaryEl = document.getElementById('summary');
+  let summaryText = 'No results';
+  if (folderCount && mediaCount) {
+    summaryText = `${folderCount} folders - ${mediaCount} medias`;
+  } else if (folderCount || mediaCount) {
+    summaryText = `${folderCount || mediaCount} ${folderCount ? 'folders' : 'medias'}`;
+  }
+  summaryEl.innerText = summaryText;
+  summaryEl.style.display = 'block';
+}
+
 const renderFolder = (folder) => {
   const liNode = document.createElement('li');
   liNode.innerHTML = `
@@ -39,13 +51,20 @@ const fetchResponseToHtml = async (response) => {
   const data = responseData['items'].sort(sortBasedOnName);
   const renderedItems = document.createElement("ul");
 
+  let folderCount = 0
+  let mediaCount = 0;
+
   data.forEach((element) => {
     if (element['type'] === 'folder') {
       renderedItems.appendChild(renderFolder(element));
+      folderCount += 1;
     } else {
       renderedItems.appendChild(renderMedia(element));
+      mediaCount += 1;
     }
   });
+
+  showAndUpdateSummary(folderCount, mediaCount);
 
   root.appendChild(renderedItems);
   return root;

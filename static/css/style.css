@@ -253,8 +253,15 @@ input {
 
 /* GALLERY PAGE */
 
-.center-text {
-    text-align: center;
+.center-content {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+}
+
+#summary {
+    display: none;
+    margin-left: 24px;
 }
 
 .gallery-container {
