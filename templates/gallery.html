@@ -2,6 +2,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <div class="gallery-container" id="gallery"></div>
+<div class="gallery-container">
+    <h2 class="center-text">{{ title }}</h2>
+    <div id="gallery"></div>
     <script type="text/javascript" src="{{ url_for('static', filename='js/gallery.js') }}"></script>
+</div>
 {% endblock %}
