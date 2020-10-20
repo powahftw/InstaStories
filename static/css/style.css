@@ -253,12 +253,22 @@ input {
 
 /* GALLERY PAGE */
 
+.center-content {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+}
+
+#summary {
+    display: none;
+    margin-left: 24px;
+}
+
 .gallery-container {
     padding: 50px;
     align-items: center;
-    background-color: #161616;
     height: fit-content;
-    margin: 0 170px;
+    margin: 0;
     overflow: auto;
 }
 

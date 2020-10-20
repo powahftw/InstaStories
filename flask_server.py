@@ -102,7 +102,7 @@ def settings_page():
 @app.route("/gallery/<path:text>", methods=['GET'])
 def gallery(text):
     logger.info(f"GET request to /gallery/")
-    return render_template("gallery.html")
+    return render_template("gallery.html", title=text if text else "Gallery")
 
 @app.route("/logs/", methods=['GET'])
 def logs():
