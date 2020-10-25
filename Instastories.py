@@ -287,7 +287,7 @@ def start_scrape(scrape_settings, user_limit, media_mode="all", ids_source="all"
     if ids_source != "extra_ids_only":
         stories = get_stories_tray(cookie)
         stories_ids = tray_to_ids(stories)
-        if user_limit < 0: user_limit = len(stories_ids)
+        if user_limit <= 0: user_limit = len(stories_ids)
     extra_ids = normalize_extra_ids(scrape_settings["extra_ids"] if "extra_ids" in scrape_settings else [])
     ids = get_ids(stories_ids, user_limit, extra_ids, ids_source)
 

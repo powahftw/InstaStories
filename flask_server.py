@@ -5,6 +5,7 @@ import shutil
 import settings
 import logging
 from thread_runner import ThreadRunner
+from copy import deepcopy
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -61,37 +62,10 @@ def get_system_logs():
 
 ################### ROUTES ###################
 
-@app.route("/", methods=['GET', 'POST'], defaults={"loop_mode": False, "media_mode": "all", "ids_source": "all"})
-def index(loop_mode, media_mode, ids_source):
+@app.route("/")
+def index():
     logger.info(f"{request.method} request to /index")
-    is_user_logged_in = settings.has_setting("session_id")
-    user_settings = settings.get()
-    if request.method == "POST" and is_user_logged_in:
-        user_limit = int(request.form["user_limit"]) if request.form["user_limit"].isdecimal() else -1
-        media_mode, ids_source, loop_mode, status_button = request.form["mode_dropdown"], request.form["ids_dropdown"], request.form["loop_dropdown"], request.form["controlBtn"]
-        scraper_runner_args = {"scrape_settings": user_settings,
-                               "user_limit": user_limit,
-                               "media_mode": media_mode,
-                               "ids_source": ids_source}
-        if status_button == "start":
-            loop_mode = loop_mode == "True"
-            scraper_runner.updateFuncArg(**scraper_runner_args).startFunction(keep_running=loop_mode)
-        elif status_button == "stop": scraper_runner.stopFunction()
-        elif status_button == "update": scraper_runner.updateFuncArg(**scraper_runner_args)
-    logged_in_error = request.method == "POST" and not is_user_logged_in
-    log_lines = get_log_file_list()
-
-    # Retrieving scraping mode args from thread
-    if scraper_runner.args:
-        loop_mode = not scraper_runner.shutting_down
-        media_mode = scraper_runner.args['media_mode']
-        ids_source = scraper_runner.args['ids_source']
-    return render_template('index.html',
-                           log_lines=log_lines,
-                           disclaimer={"logged_in_error": logged_in_error},
-                           output=scraper_runner.getOutput(),
-                           checkbox={"loop_mode": loop_mode, "media_mode": media_mode, "ids_source": ids_source},
-                           status=scraper_runner.getStatus())
+    return render_template('index.html')
 
 @app.route("/settings/", methods=['GET', 'POST'])
 def settings_page():
@@ -109,6 +83,57 @@ def logs():
     return render_template('logs.html', logs=get_system_logs())
 
 ################### API ROUTES ###################
+
+def get_index_settings(user_settings):
+        if scraper_runner.args:
+            loop_mode = not scraper_runner.shutting_down
+            media_mode = scraper_runner.args['media_mode']
+            ids_source = scraper_runner.args['ids_source']
+        else:
+            loop_mode = False
+            media_mode = "all"
+            ids_source = "all"
+
+        status = {
+            "log_lines": get_log_file_list(),
+            "logged_in": True if "session_id" in user_settings else False,
+            "output": scraper_runner.getOutput(),
+            "scraper_settings": {
+                "loop_mode": loop_mode,
+                "media_mode": media_mode,
+                "ids_source": ids_source
+            },
+            "scraper_status": scraper_runner.getStatus()
+        }
+
+        return jsonify(status)
+
+@app.route("/api/index/", methods=['POST', 'GET'])
+def index_api():
+    logger.info(f"API/{request.method} request to /index/")
+    user_settings = settings.get()
+    if request.method == 'GET':  # Returns the state of the scraper
+        return get_index_settings(user_settings)
+
+    elif request.method == 'POST':  # Starts/stops the scraper
+        res = request.get_json()
+        if not "session_id" in user_settings:
+            return {"status": "not logged in"}
+
+        if res['command'] == "start":
+            scraper_settings = deepcopy(res)
+            scraper_settings.pop('loop_mode')
+            scraper_settings.pop('command')
+            loop_mode = True if res.get('loop_mode') == 'true' else False
+            scraper_settings["scrape_settings"] = user_settings
+            scraper_runner.updateFuncArg(**scraper_settings).startFunction(keep_running=loop_mode)
+        else:
+            scraper_runner.stopFunction()
+        return get_index_settings(user_settings)
+
+@app.route("/api/status/", methods=["GET"])
+def running_status():
+    return jsonify({"status": scraper_runner.getStatus()})
 
 @app.route("/api/gallery/", methods=['GET'], defaults={"username": None, "date": None})
 @app.route("/api/gallery/<username>/", methods=['GET'], defaults={"date": None})
@@ -157,7 +182,7 @@ def logout():
     logger.info("The user has logged out")
     return jsonify(success=True)
 
-################### SERVE MEDIA ###########
+################### SERVE MEDIA ###################
 
 @app.route("/gallery/<username>/<date>/<filename>", methods=['GET'])
 def serve_media(username, date, filename):
