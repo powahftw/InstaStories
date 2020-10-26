@@ -24,8 +24,9 @@ class ThreadRunner():
         logger.info("Thread started")
 
     def waitFor(self):
-        loop_variation = int(self.loop_args["loop_delay_seconds"]) * int(int(self.loop_args["loop_variation_percentage"]) / 100)
-        time_delay = int(self.loop_args["loop_delay_seconds"]) + random.randint(-loop_variation, loop_variation)
+        temp_loop_delay_seconds = int(self.loop_args["loop_delay_seconds"])
+        loop_variation = temp_loop_delay_seconds * (int(self.loop_args["loop_variation_percentage"]) // 100)
+        time_delay = temp_loop_delay_seconds + random.randint(-loop_variation, loop_variation)
         return time_delay
 
     def runLoopedFunction(self):
@@ -78,7 +79,8 @@ class ThreadRunner():
         return self
 
     def getOutput(self):
-        # Output is the number of scraped media
+        # Output is a dict containing the number of scraped media (int)
+        # See the Instastories.py's "start_scrape" func for more details
         return self.output
 
     def getStatus(self):

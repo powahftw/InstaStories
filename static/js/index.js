@@ -3,11 +3,11 @@ const baseUrl = window.location.origin;
 
 const setScrapingLogs = (logs) => {
     const logsNode = document.getElementById('scraping-logs')
-    for (i in logs) {
+    logs.forEach((el) => {
         pNode = document.createElement('p')
-        pNode.innerText = logs[i]
-        logsNode.appendChild(pNode)
-    }
+        pNode.innerText = el
+        logsNode.appendChild(pNode) 
+    });
 }
 
 const setRadioButtons = (scraperSettings) => {
@@ -21,40 +21,38 @@ const setRadioButtons = (scraperSettings) => {
     })
 
     mediaModeNode.forEach((el) => {
-        if (el.value === scraperSettings['media_mode'].toString()) {
+        if (el.value === scraperSettings['media_mode']) {
             el.checked = true
         }
     })
 
     idsModeNode.forEach((el) => {
-        if (el.value === scraperSettings['ids_source'].toString()) {
+        if (el.value === scraperSettings['ids_source']) {
             el.checked = true
         }
     })
 }
 
 const checkShutdown = async () => {
-    const timeInterval = 2000
-    const makeRequest = async () => {
-        const requestUrl = `${baseUrl}/${API_PREFIX}/status/`;
-        const responseData = await (await fetch(requestUrl)).json()
-        return responseData
+    const makeStatusRequest = async () => {
+        const requestUrl = `${baseUrl}/${API_PREFIX}/scraper/status/`;
+        return await (await fetch(requestUrl)).json()
     }
 
+    const checkStatusEveryMs = 2000
     const updatePage = async () => {
         try {
-            const response = await makeRequest()
+            const response = await makeStatusRequest()
             if (response['status'] === "stopped") {
                 location.reload()
             } else {
-                setTimeout(updatePage, timeInterval)
+                setTimeout(updatePage, checkStatusEveryMs)
             }
          } catch {
              location.reload()
          }
     }
-
-    setTimeout(updatePage, timeInterval)
+    setTimeout(updatePage, checkStatusEveryMs)
 }
 
 const updateCommandButton = (buttonStatus) => {
@@ -78,13 +76,15 @@ const updateCommandButton = (buttonStatus) => {
 }
 
 const getScraperStatus = async () => {
-    const requestUrl = `${baseUrl}/${API_PREFIX}/index/`;
-    const responseData =  await (await fetch(requestUrl)).json()
+    const statusUrl = `${baseUrl}/${API_PREFIX}/scraper/status/`;
+    const settingsUrl = `${baseUrl}/${API_PREFIX}/scraper/settings/`;
+    const statusResponseData =  await (await fetch(statusUrl)).json()
+    const settingsResponseData =  await (await fetch(settingsUrl)).json()
     const outputNode = document.getElementById('scraping-results')
-    setScrapingLogs(responseData['log_lines'])
-    setRadioButtons(responseData['scraper_settings'])
-    updateCommandButton(responseData['scraper_status'])
-    outputNode.innerText = `${responseData['output']['scraped_media'] ?? 0} media scraped`
+    setScrapingLogs(statusResponseData['log_lines'])
+    setRadioButtons(settingsResponseData)
+    updateCommandButton(statusResponseData['status'])
+    outputNode.innerText = `${statusResponseData['output']['scraped_media'] ?? 0} media scraped`
 }
 
 const startScraping = async () => {
@@ -93,15 +93,16 @@ const startScraping = async () => {
     const mediaMode = document.querySelector('input[name="media-radio-group"]:checked').value
     const idsMode = document.querySelector('input[name="ids-radio-group"]:checked').value
     const commandType = document.getElementById('command-button').value
-    const errorField = document.getElementById('errors')
     const requestBody = {
         "command": commandType,
-        "user_limit": userLimit,
         "loop_mode": loopMode,
-        "media_mode": mediaMode,
-        "ids_source": idsMode
+        "scraping_args": {
+            "user_limit": userLimit,
+            "media_mode": mediaMode,
+            "ids_source": idsMode
+        }
     }
-    const requestUrl = `${baseUrl}/${API_PREFIX}/index/`
+    const requestUrl = `${baseUrl}/${API_PREFIX}/scraper/status/`
     const response = await fetch(requestUrl, {
         method: 'POST',
         headers: {
@@ -109,8 +110,10 @@ const startScraping = async () => {
         },
         body: JSON.stringify(requestBody)
     })
+
     const responseData = await response.json()
     if (responseData['status'] === "not logged in"){
+        const errorField = document.getElementById('errors')
         errorField.innerText = "Please login in settings page"
         return
     }
@@ -118,7 +121,7 @@ const startScraping = async () => {
 }
 
 const stopScraping = async () => {
-    const requestUrl = `${baseUrl}/${API_PREFIX}/index/`
+    const requestUrl = `${baseUrl}/${API_PREFIX}/scraper/status/`
     const requestBody = {'command': 'stop'}
     const response = await fetch(requestUrl, {
         method: 'POST',
