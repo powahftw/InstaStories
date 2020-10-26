@@ -5,7 +5,6 @@ import shutil
 import settings
 import logging
 from thread_runner import ThreadRunner
-from copy import deepcopy
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -87,7 +86,7 @@ def logs():
 def get_scraper_status():
     return {
             "log_lines": get_log_file_list(),
-            "logged_in": True if "session_id" in user_settings else False,
+            "logged_in": True if "session_id" in user_settings,
             "output": scraper_runner.getOutput(),
             "status": scraper_runner.getStatus()
         }
