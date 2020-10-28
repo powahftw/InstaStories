@@ -106,7 +106,7 @@ def gallery(text):
 
 @app.route("/logs/", methods=['GET'])
 def logs():
-    return render_template('logs.html', logs=get_system_logs())
+    return render_template('logs.html')
 
 ################### API ROUTES ###################
 
@@ -156,6 +156,10 @@ def logout():
     settings.clear_setting("session_id")
     logger.info("The user has logged out")
     return jsonify(success=True)
+
+@app.route('/api/logs/', methods=["GET"])
+def get_logs():
+    return {"logs": get_system_logs()}
 
 ################### SERVE MEDIA ###########
 
