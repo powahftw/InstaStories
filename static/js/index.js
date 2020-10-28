@@ -11,26 +11,9 @@ const setScrapingLogs = (logs) => {
 };
 
 const setRadioButtons = (scraperSettings) => {
-  const loopModeNode = document.querySelectorAll('input[name="loop-radio-group"]');
-  const mediaModeNode = document.querySelectorAll('input[name="media-radio-group"]');
-  const idsModeNode = document.querySelectorAll('input[name="ids-radio-group"]');
-  loopModeNode.forEach((el) => {
-    if (el.value === scraperSettings.loop_mode.toString()) {
-      el.checked = true;
-    }
-  });
-
-  mediaModeNode.forEach((el) => {
-    if (el.value === scraperSettings.media_mode) {
-      el.checked = true;
-    }
-  });
-
-  idsModeNode.forEach((el) => {
-    if (el.value === scraperSettings.ids_source) {
-      el.checked = true;
-    }
-  });
+  document.querySelectorAll(`[name="loop-radio-group"][value="${scraperSettings.loop_mode.toString()}"]`)[0].checked = true;
+  document.querySelectorAll(`input[name="media-radio-group"][value="${scraperSettings.media_mode}"]`)[0].checked = true;
+  document.querySelectorAll(`input[name="ids-radio-group"][value="${scraperSettings.ids_source}"]`)[0].checked = true;
 };
 
 const checkShutdown = async () => {

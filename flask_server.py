@@ -86,14 +86,16 @@ def logs():
 def get_scraper_status():
     return {
             "log_lines": get_log_file_list(),
-            "logged_in": True if "session_id" in user_settings,
+            "logged_in": "session_id" in user_settings,
             "output": scraper_runner.getOutput(),
             "status": scraper_runner.getStatus()
         }
+# TODO: login with this
 
 def get_scraper_settings():
     args = scraper_runner.args
-    loop_mode = not scraper_runner.shutting_down if args else False
+    loop_mode = not scraper_runner.shutting_down and bool(args)
+    print(loop_mode)
     media_mode = scraper_runner.args['media_mode'] if args else "all"
     ids_source = scraper_runner.args['ids_source'] if args else "all"
     return {
