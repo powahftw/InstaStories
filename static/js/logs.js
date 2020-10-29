@@ -16,7 +16,6 @@ const getLogs = async () => {
     const requestUrl = `${baseUrl}/${API_PREFIX}/logs`;
     const responseData = await (await fetch(requestUrl)).json();
     renderLogs(responseData['logs']);
-    console.log(responseData)
 }
 
 window.onload = () => {
