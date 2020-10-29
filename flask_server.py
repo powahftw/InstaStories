@@ -59,6 +59,25 @@ def get_system_logs():
     with open(log_file_path, 'r+') as log_file:
         return [log for log in log_file.readlines()]
 
+def get_scraper_status():
+    return {
+            "log_lines": get_log_file_list(),
+            "logged_in": "session_id" in user_settings,
+            "output": scraper_runner.getOutput(),
+            "status": scraper_runner.getStatus()
+        }
+
+def get_scraper_settings():
+    args = scraper_runner.args
+    loop_mode = not scraper_runner.shutting_down and bool(args)
+    media_mode = scraper_runner.args['media_mode'] if args else "all"
+    ids_source = scraper_runner.args['ids_source'] if args else "all"
+    return {
+            "loop_mode": loop_mode,
+            "media_mode": media_mode,
+            "ids_source": ids_source
+        }
+
 ################### ROUTES ###################
 
 @app.route("/")
@@ -83,34 +102,13 @@ def logs():
 
 ################### API ROUTES ###################
 
-def get_scraper_status():
-    return {
-            "log_lines": get_log_file_list(),
-            "logged_in": "session_id" in user_settings,
-            "output": scraper_runner.getOutput(),
-            "status": scraper_runner.getStatus()
-        }
-# TODO: login with this
-
-def get_scraper_settings():
-    args = scraper_runner.args
-    loop_mode = not scraper_runner.shutting_down and bool(args)
-    print(loop_mode)
-    media_mode = scraper_runner.args['media_mode'] if args else "all"
-    ids_source = scraper_runner.args['ids_source'] if args else "all"
-    return {
-            "loop_mode": loop_mode,
-            "media_mode": media_mode,
-            "ids_source": ids_source
-        }
-
 @app.route("/api/scraper/status/", methods=["GET", "POST"])
 def running_status():
     logger.info(f"API/{request.method} request to /scraper/status")
-    user_settings = settings.get()
 
     if request.method == "POST":
         res = request.get_json()
+        user_settings = settings.get()
         if not "session_id" in user_settings:
             return {"status": "not logged in"}
         
@@ -127,7 +125,6 @@ def running_status():
 @app.route("/api/scraper/settings/", methods=["GET"])
 def scraper_settings():
     logger.info(f"API/{request.method} request to /scraper/settings/")
-    # Returns {"log_lined", "logged_in", "output", "status"}
     return get_scraper_settings()
 
 @app.route("/api/gallery/", methods=['GET'], defaults={"username": None, "date": None})

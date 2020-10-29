@@ -3,17 +3,19 @@ const baseUrl = window.location.origin;
 
 const setScrapingLogs = (logs) => {
   const logsNode = document.getElementById('scraping-logs');
+  const root = document.createElement('div');
   logs.forEach((el) => {
     const pNode = document.createElement('p');
     pNode.innerText = el;
-    logsNode.appendChild(pNode);
+    root.appendChild(pNode);
   });
+  logsNode.appendChild(root)
 };
 
 const setRadioButtons = (scraperSettings) => {
-  document.querySelectorAll(`[name="loop-radio-group"][value="${scraperSettings.loop_mode.toString()}"]`)[0].checked = true;
-  document.querySelectorAll(`input[name="media-radio-group"][value="${scraperSettings.media_mode}"]`)[0].checked = true;
-  document.querySelectorAll(`input[name="ids-radio-group"][value="${scraperSettings.ids_source}"]`)[0].checked = true;
+  document.querySelector(`[name="loop-radio-group"][value="${scraperSettings.loop_mode.toString()}"]`).checked = true;
+  document.querySelector(`input[name="media-radio-group"][value="${scraperSettings.media_mode}"]`).checked = true;
+  document.querySelector(`input[name="ids-radio-group"][value="${scraperSettings.ids_source}"]`).checked = true;
 };
 
 const checkShutdown = async () => {
@@ -22,40 +24,30 @@ const checkShutdown = async () => {
     return await (await fetch(requestUrl)).json();
   };
 
-  const checkStatusEveryMs = 2000;
+  const CHECK_STATUS_EVERY_MS = 2000;
   const updatePage = async () => {
-    try {
-      const response = await makeStatusRequest();
-      if (response.status === 'stopped') {
-        location.reload();
-      } else {
-        setTimeout(updatePage, checkStatusEveryMs);
-      }
-    } catch {
-      location.reload();
-    }
+  const response = await makeStatusRequest();
+  if (response.status === 'stopped') {
+    location.reload();
+  } else {
+    setTimeout(updatePage, CHECK_STATUS_EVERY_MS);
+  }
   };
-  setTimeout(updatePage, checkStatusEveryMs);
+  setTimeout(updatePage, CHECK_STATUS_EVERY_MS);
 };
 
 const updateCommandButton = (buttonStatus) => {
-  const commandButton = document.getElementById('command-button');
-  if (buttonStatus === 'running') {
-    commandButton.disabled = false;
-    commandButton.classList = 'btn stop-btn';
-    commandButton.innerText = 'STOP';
-    commandButton.value = 'stop';
-  } else if (buttonStatus === 'shutdown') {
-    commandButton.disabled = true;
-    commandButton.classList = 'btn update-btn';
-    commandButton.innerText = 'updating...';
-    checkShutdown();
-  } else {
-    commandButton.disabled = false;
-    commandButton.classList = 'btn start-btn';
-    commandButton.innerText = 'START';
-    commandButton.value = 'start';
-  }
+  const buttonNode = document.getElementById('button-container');
+  const commandButton = document.createElement('button')
+  commandButton.id = 'command-button'
+  const isRunning = buttonStatus == 'running'
+  const isShuttingDown = buttonStatus == 'shutdown'
+  commandButton.disabled = isShuttingDown ? true : false;
+  commandButton.classList = isRunning ? 'btn stop-btn' : isShuttingDown ? 'btn update-btn' : 'btn start-btn';
+  commandButton.innerText = isRunning ? 'Stop' : isShuttingDown ? 'updating...' : 'Start';
+  commandButton.value = isRunning ? 'stop' : 'start';
+  buttonNode.appendChild(commandButton)
+  if (isShuttingDown) checkShutdown()
 };
 
 const getScraperStatus = async () => {
@@ -65,8 +57,8 @@ const getScraperStatus = async () => {
   const settingsResponseData = await (await fetch(settingsUrl)).json();
   const outputNode = document.getElementById('scraping-results');
   setScrapingLogs(statusResponseData.log_lines);
-  setRadioButtons(settingsResponseData);
   updateCommandButton(statusResponseData.status);
+  setRadioButtons(settingsResponseData);
   outputNode.innerText = `${statusResponseData.output.scraped_media ?? 0} media scraped`;
 };
 
@@ -85,6 +77,7 @@ const startScraping = async () => {
       ids_source: idsMode
     }
   };
+
   const requestUrl = `${baseUrl}/${API_PREFIX}/scraper/status/`;
   const response = await fetch(requestUrl, {
     method: 'POST',
@@ -98,9 +91,9 @@ const startScraping = async () => {
   if (responseData.status === 'not logged in') {
     const errorField = document.getElementById('errors');
     errorField.innerText = 'Please login in settings page';
-    return;
+  } else {
+    location.reload();
   }
-  location.reload();
 };
 
 const stopScraping = async () => {
@@ -117,9 +110,10 @@ const stopScraping = async () => {
 };
 
 const setUpButtonsHandlers = () => {
-  const commandButton = document.getElementById('command-button');
-  commandButton.addEventListener('click', () => {
-    if (commandButton.value === 'start') {
+  const commandButton = document.getElementById('button-container');
+  commandButton.addEventListener('click', (e) => {
+    console.log(e.target.value)
+    if (e.target.value === 'start') {
       startScraping();
     } else {
       stopScraping();
