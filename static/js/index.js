@@ -1,12 +1,12 @@
 const API_PREFIX = 'api';
 const baseUrl = window.location.origin;
 
-const setScrapingLogs = (logs) => {
+const renderScrapingLogs = (logLines) => {
   const logsNode = document.getElementById('scraping-logs');
   const root = document.createElement('div');
-  logs.forEach((el) => {
+  logLines.forEach((logLine) => {
     const pNode = document.createElement('p');
-    pNode.innerText = el;
+    pNode.innerText = logLine;
     root.appendChild(pNode);
   });
   logsNode.appendChild(root)
@@ -26,28 +26,29 @@ const checkShutdown = async () => {
 
   const CHECK_STATUS_EVERY_MS = 2000;
   const updatePage = async () => {
-  const response = await makeStatusRequest();
-  if (response.status === 'stopped') {
-    location.reload();
-  } else {
-    setTimeout(updatePage, CHECK_STATUS_EVERY_MS);
-  }
+    const response = await makeStatusRequest();
+    if (response.status === 'stopped') {
+      location.reload();
+    } else {
+      setTimeout(updatePage, CHECK_STATUS_EVERY_MS);
+    }
   };
   setTimeout(updatePage, CHECK_STATUS_EVERY_MS);
 };
 
 const updateCommandButton = (buttonStatus) => {
   const buttonNode = document.getElementById('button-container');
-  const commandButton = document.createElement('button')
-  commandButton.id = 'command-button'
-  const isRunning = buttonStatus == 'running'
-  const isShuttingDown = buttonStatus == 'shutdown'
-  commandButton.disabled = isShuttingDown ? true : false;
-  commandButton.classList = isRunning ? 'btn stop-btn' : isShuttingDown ? 'btn update-btn' : 'btn start-btn';
-  commandButton.innerText = isRunning ? 'Stop' : isShuttingDown ? 'updating...' : 'Start';
-  commandButton.value = isRunning ? 'stop' : 'start';
-  buttonNode.appendChild(commandButton)
-  if (isShuttingDown) checkShutdown()
+  const isRunning = buttonStatus == 'running';
+  const isShuttingDown = buttonStatus == 'shutdown';
+  const commandButton = `<button 
+      class="btn ${isRunning ? 'stop-btn' : isShuttingDown ? 'update-btn' : 'start-btn'}" 
+      id="command-button"
+      ${isShuttingDown ? 'disabled' : ''}
+      value="${isRunning ? 'stop' : 'start'}"
+      >${isRunning ? 'Stop' : isShuttingDown ? 'updating...' : 'Start'}
+      </button>`;
+  buttonNode.innerHTML = commandButton;
+  if (isShuttingDown) { checkShutdown() }
 };
 
 const getScraperStatus = async () => {
@@ -56,7 +57,7 @@ const getScraperStatus = async () => {
   const statusResponseData = await (await fetch(statusUrl)).json();
   const settingsResponseData = await (await fetch(settingsUrl)).json();
   const outputNode = document.getElementById('scraping-results');
-  setScrapingLogs(statusResponseData.log_lines);
+  renderScrapingLogs(statusResponseData.log_lines);
   updateCommandButton(statusResponseData.status);
   setRadioButtons(settingsResponseData);
   outputNode.innerText = `${statusResponseData.output.scraped_media ?? 0} media scraped`;
@@ -112,7 +113,6 @@ const stopScraping = async () => {
 const setUpButtonsHandlers = () => {
   const commandButton = document.getElementById('button-container');
   commandButton.addEventListener('click', (e) => {
-    console.log(e.target.value)
     if (e.target.value === 'start') {
       startScraping();
     } else {

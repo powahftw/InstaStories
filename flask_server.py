@@ -69,7 +69,7 @@ def get_scraper_status():
 
 def get_scraper_settings():
     args = scraper_runner.args
-    loop_mode = not scraper_runner.shutting_down and bool(args)
+    loop_mode = bool(args) and not scraper_runner.shutting_down
     media_mode = scraper_runner.args['media_mode'] if args else "all"
     ids_source = scraper_runner.args['ids_source'] if args else "all"
     return {
