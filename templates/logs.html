@@ -1,13 +1,12 @@
 {% set active_page = 'logs' %}
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} 
+
+{% block content %}
 <div class="container">       
     <div class="logs-container">
         <h2>LOGS</h2>
-        <ul>
-            {% for log in logs %}
-                <li class="log-element">{{log}}</li>
-            {% endfor %}
-        </ul>    
-    </div>    
+        <ul id="logs"></ul>    
+    </div>  
 </div>
+<script type="text/javascript" src="{{ url_for('static', filename='js/logs.js') }}"></script>
 {% endblock %}
