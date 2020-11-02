@@ -61,22 +61,22 @@ def get_system_logs():
 
 def get_scraper_status():
     return {
-            "log_lines": get_log_file_list(),
-            "logged_in": "session_id" in user_settings,
-            "output": scraper_runner.getOutput(),
-            "status": scraper_runner.getStatus()
-        }
+        "log_lines": get_log_file_list(),
+        "logged_in": "session_id" in user_settings,
+        "output": scraper_runner.getOutput(),
+        "status": scraper_runner.getStatus()
+    }
 
 def get_scraper_settings():
     args = scraper_runner.args
-    loop_mode = bool(args) and not scraper_runner.shutting_down
+    loop_mode = len(args) != 0 and not scraper_runner.shutting_down
     media_mode = scraper_runner.args['media_mode'] if args else "all"
     ids_source = scraper_runner.args['ids_source'] if args else "all"
     return {
-            "loop_mode": loop_mode,
-            "media_mode": media_mode,
-            "ids_source": ids_source
-        }
+        "loop_mode": loop_mode,
+        "media_mode": media_mode,
+        "ids_source": ids_source
+    }
 
 ################### ROUTES ###################
 
@@ -109,9 +109,9 @@ def running_status():
     if request.method == "POST":
         res = request.get_json()
         user_settings = settings.get()
-        if not "session_id" in user_settings:
+        if "session_id" not in user_settings:
             return {"status": "not logged in"}
-        
+
         if res['command'] == "start":
             scraping_args = res['scraping_args']
             loop_mode = res['loop_mode'] == 'true'
@@ -119,7 +119,7 @@ def running_status():
             scraper_runner.updateFuncArg(**scraping_args).startFunction(keep_running=loop_mode)
         else:
             scraper_runner.stopFunction()
-        
+
     return get_scraper_status()
 
 @app.route("/api/scraper/settings/", methods=["GET"])

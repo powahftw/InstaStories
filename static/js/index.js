@@ -9,7 +9,7 @@ const renderScrapingLogs = (logLines) => {
     pNode.innerText = logLine;
     root.appendChild(pNode);
   });
-  logsNode.appendChild(root)
+  logsNode.appendChild(root);
 };
 
 const setRadioButtons = (scraperSettings) => {
@@ -38,17 +38,25 @@ const checkShutdown = async () => {
 
 const updateCommandButton = (buttonStatus) => {
   const buttonNode = document.getElementById('button-container');
+  const root = document.createElement('div');
   const isRunning = buttonStatus == 'running';
   const isShuttingDown = buttonStatus == 'shutdown';
-  const commandButton = `<button 
-      class="btn ${isRunning ? 'stop-btn' : isShuttingDown ? 'update-btn' : 'start-btn'}" 
-      id="command-button"
-      ${isShuttingDown ? 'disabled' : ''}
-      value="${isRunning ? 'stop' : 'start'}"
-      >${isRunning ? 'Stop' : isShuttingDown ? 'updating...' : 'Start'}
-      </button>`;
-  buttonNode.innerHTML = commandButton;
-  if (isShuttingDown) { checkShutdown() }
+  const commandButton = '<button class="btn" id="command-button"></button>';
+  root.innerHTML = commandButton;
+  if (isShuttingDown) {
+    root.firstChild.classList.add('update-btn');
+    root.firstChild.disabled = 'true';
+    root.firstChild.innerText = 'updating...';
+    checkShutdown();
+  } else if (isRunning) {
+    root.firstChild.classList.add('stop-btn');
+    root.firstChild.value = 'stop';
+    root.firstChild.innerText = 'Stop';
+  } else {
+    root.firstChild.value = 'start';
+    root.firstChild.innerText = 'Start';
+  }
+  buttonNode.appendChild(root);
 };
 
 const getScraperStatus = async () => {
@@ -75,17 +83,17 @@ const startScraping = async () => {
     scraping_args: {
       user_limit: userLimit,
       media_mode: mediaMode,
-      ids_source: idsMode
-    }
+      ids_source: idsMode,
+    },
   };
 
   const requestUrl = `${baseUrl}/${API_PREFIX}/scraper/status/`;
   const response = await fetch(requestUrl, {
     method: 'POST',
     headers: {
-      'content-type': 'application/json'
+      'content-type': 'application/json',
     },
-    body: JSON.stringify(requestBody)
+    body: JSON.stringify(requestBody),
   });
 
   const responseData = await response.json();
@@ -99,13 +107,13 @@ const startScraping = async () => {
 
 const stopScraping = async () => {
   const requestUrl = `${baseUrl}/${API_PREFIX}/scraper/status/`;
-  const requestBody = { command: 'stop' };
+  const requestBody = {command: 'stop'};
   await fetch(requestUrl, {
     method: 'POST',
     headers: {
-      'content-type': 'application/json'
+      'content-type': 'application/json',
     },
-    body: JSON.stringify(requestBody)
+    body: JSON.stringify(requestBody),
   });
   location.reload();
 };
