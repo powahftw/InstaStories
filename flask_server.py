@@ -59,39 +59,31 @@ def get_system_logs():
     with open(log_file_path, 'r+') as log_file:
         return [log for log in log_file.readlines()]
 
+def get_scraper_status():
+    return {
+        "log_lines": get_log_file_list(),
+        "logged_in": "session_id" in user_settings,
+        "output": scraper_runner.getOutput(),
+        "status": scraper_runner.getStatus()
+    }
+
+def get_scraper_settings():
+    args = scraper_runner.args
+    loop_mode = len(args) != 0 and not scraper_runner.shutting_down
+    media_mode = scraper_runner.args['media_mode'] if args else "all"
+    ids_source = scraper_runner.args['ids_source'] if args else "all"
+    return {
+        "loop_mode": loop_mode,
+        "media_mode": media_mode,
+        "ids_source": ids_source
+    }
+
 ################### ROUTES ###################
 
-@app.route("/", methods=['GET', 'POST'], defaults={"loop_mode": False, "media_mode": "all", "ids_source": "all"})
-def index(loop_mode, media_mode, ids_source):
+@app.route("/")
+def index():
     logger.info(f"{request.method} request to /index")
-    is_user_logged_in = settings.has_setting("session_id")
-    user_settings = settings.get()
-    if request.method == "POST" and is_user_logged_in:
-        user_limit = int(request.form["user_limit"]) if request.form["user_limit"].isdecimal() else -1
-        media_mode, ids_source, loop_mode, status_button = request.form["mode_dropdown"], request.form["ids_dropdown"], request.form["loop_dropdown"], request.form["controlBtn"]
-        scraper_runner_args = {"scrape_settings": user_settings,
-                               "user_limit": user_limit,
-                               "media_mode": media_mode,
-                               "ids_source": ids_source}
-        if status_button == "start":
-            loop_mode = loop_mode == "True"
-            scraper_runner.updateFuncArg(**scraper_runner_args).startFunction(keep_running=loop_mode)
-        elif status_button == "stop": scraper_runner.stopFunction()
-        elif status_button == "update": scraper_runner.updateFuncArg(**scraper_runner_args)
-    logged_in_error = request.method == "POST" and not is_user_logged_in
-    log_lines = get_log_file_list()
-
-    # Retrieving scraping mode args from thread
-    if scraper_runner.args:
-        loop_mode = not scraper_runner.shutting_down
-        media_mode = scraper_runner.args['media_mode']
-        ids_source = scraper_runner.args['ids_source']
-    return render_template('index.html',
-                           log_lines=log_lines,
-                           disclaimer={"logged_in_error": logged_in_error},
-                           output=scraper_runner.getOutput(),
-                           checkbox={"loop_mode": loop_mode, "media_mode": media_mode, "ids_source": ids_source},
-                           status=scraper_runner.getStatus())
+    return render_template('index.html')
 
 @app.route("/settings/", methods=['GET', 'POST'])
 def settings_page():
@@ -109,6 +101,31 @@ def logs():
     return render_template('logs.html')
 
 ################### API ROUTES ###################
+
+@app.route("/api/scraper/status/", methods=["GET", "POST"])
+def running_status():
+    logger.info(f"API/{request.method} request to /scraper/status")
+
+    if request.method == "POST":
+        res = request.get_json()
+        user_settings = settings.get()
+        if "session_id" not in user_settings:
+            return {"status": "not logged in"}
+
+        if res['command'] == "start":
+            scraping_args = res['scraping_args']
+            loop_mode = res['loop_mode'] == 'true'
+            scraping_args['scrape_settings'] = user_settings
+            scraper_runner.updateFuncArg(**scraping_args).startFunction(keep_running=loop_mode)
+        else:
+            scraper_runner.stopFunction()
+
+    return get_scraper_status()
+
+@app.route("/api/scraper/settings/", methods=["GET"])
+def scraper_settings():
+    logger.info(f"API/{request.method} request to /scraper/settings/")
+    return get_scraper_settings()
 
 @app.route("/api/gallery/", methods=['GET'], defaults={"username": None, "date": None})
 @app.route("/api/gallery/<username>/", methods=['GET'], defaults={"date": None})
@@ -161,7 +178,7 @@ def logout():
 def get_logs():
     return {"logs": get_system_logs()}
 
-################### SERVE MEDIA ###########
+################### SERVE MEDIA ###################
 
 @app.route("/gallery/<username>/<date>/<filename>", methods=['GET'])
 def serve_media(username, date, filename):

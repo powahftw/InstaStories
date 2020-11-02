@@ -24,8 +24,9 @@ class ThreadRunner():
         logger.info("Thread started")
 
     def waitFor(self):
-        loop_variation = int(self.loop_args["loop_delay_seconds"] * (self.loop_args["loop_variation_percentage"] / 100))
-        time_delay = self.loop_args["loop_delay_seconds"] + random.randint(-loop_variation, loop_variation)
+        temp_loop_delay_seconds = int(self.loop_args["loop_delay_seconds"])
+        loop_variation = temp_loop_delay_seconds * (int(self.loop_args["loop_variation_percentage"]) // 100)
+        time_delay = temp_loop_delay_seconds + random.randint(-loop_variation, loop_variation)
         return time_delay
 
     def runLoopedFunction(self):
@@ -78,12 +79,13 @@ class ThreadRunner():
         return self
 
     def getOutput(self):
+        # Output is a dict containing the number of scraped media (int)
+        # See the Instastories.py's "start_scrape" func for more details
         return self.output
 
     def getStatus(self):
+        # Statuses: running, shutdown, stopped
         if self.thread_running:
-            return f"""{"SHUTTING DOWN" if self.shutting_down else "RUNNING - Loop mode: True"} -
-                        Media scraping mode: {self.args['media_mode']} -
-                        Ids source: {self.args['ids_source']}"""
+            return "shutdown" if self.shutting_down else "running"
         else:
-            return "STOPPED"
+            return "stopped"
