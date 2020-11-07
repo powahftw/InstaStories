@@ -27,13 +27,18 @@ def get_log_file_list():
         logs = [log_lines for log_lines in o.readlines()]
         return list(reversed(logs))
 
-def get_folders(path):
+def get_folders(path, ids_to_names = {}):
     rendered_folders = []  # List of {type: 'folder', name: Y}
     if not os.path.exists(path): return []
     for folder in os.listdir(path):
         if folder.endswith(SKIP_EXTENSIONS): continue
+
+        # In the user names page we convert the ids to more usable displayed name.
+        displayed_name = ids_to_names.get(folder, folder) 
+
         rendered_folders.append({'type': 'folder',
-                                 'name': f"{folder}"})
+                                 'name': f'{displayed_name}',
+                                 'id': f'{folder}'})
     return rendered_folders
 
 def get_media_files(path):
@@ -94,7 +99,7 @@ def settings_page():
 @app.route("/gallery/<path:text>", methods=['GET'])
 def gallery(text):
     logger.info(f"GET request to /gallery/")
-    return render_template("gallery.html", title=text if text else "Gallery")
+    return render_template("gallery.html")
 
 @app.route("/logs/", methods=['GET'])
 def logs():
@@ -127,26 +132,46 @@ def scraper_settings():
     logger.info(f"API/{request.method} request to /scraper/settings/")
     return get_scraper_settings()
 
-@app.route("/api/gallery/", methods=['GET'], defaults={"username": None, "date": None})
-@app.route("/api/gallery/<username>/", methods=['GET'], defaults={"date": None})
-@app.route("/api/gallery/<username>/<date>/", methods=['GET'])
-def gallery_api(username, date):
-    logger.info(f"API/{request.method} request to /gallery/{username if username else ''}{'/' + date if date else ''}")
-    folder_path = settings.get("folder_path")
+class PageType:
+    USERS_VIEW = 1
+    DATES_VIEW = 2
+    MEDIA_VIEW = 3
+
+@app.route("/api/gallery/", methods=['GET'], defaults={"user_id": None, "date": None})
+@app.route("/api/gallery/<user_id>/", methods=['GET'], defaults={"date": None})
+@app.route("/api/gallery/<user_id>/<date>/", methods=['GET'])
+def gallery_api(user_id, date):
+    logger.info(f"API/{request.method} request to /gallery/{user_id if user_id else ''}{'/' + date if date else ''}")
+    folder_path = settings.get("media_folder_path")
+
     # From most to least specific
     if date:
-        date_path = os.path.join(os.path.join(folder_path, username), date)
-        to_render_items = get_media_files(date_path)
-    elif username:
-        user_path = os.path.join(folder_path, username)
-        to_render_items = get_folders(user_path)
+        view = PageType.MEDIA_VIEW
+    elif user_id:
+        view = PageType.DATES_VIEW
     else:
-        to_render_items = get_folders(folder_path)
-    return jsonify({'items': to_render_items})
+        view = PageType.USERS_VIEW
+
+    ids_to_names = settings.get_ids_to_names_file()
+    page_title = 'gallery'
+    if user_id:
+        page_title = f"{ids_to_names.get(user_id, user_id)}"
+        if date:
+            page_title += f"/{date}"
+
+    if view == PageType.MEDIA_VIEW:
+        date_path = os.path.join(os.path.join(folder_path, user_id), date)
+        to_render_items = get_media_files(date_path)
+    elif view == PageType.DATES_VIEW:
+        user_path = os.path.join(folder_path, user_id)
+        to_render_items = get_folders(user_path, ids_to_names = ids_to_names)
+    else:
+        to_render_items = get_folders(folder_path, ids_to_names = ids_to_names)
+    return jsonify({'title': page_title, 'items': to_render_items})
 
 @app.route("/api/gallery/", methods=['DELETE'])
 def delete_media():
-    folder_path = settings.get("folder_path")
+    folder_path = settings.get("media_folder_path")
     if os.path.exists(folder_path):
         shutil.rmtree(folder_path)
         logger.info(f"Deleted {folder_path} folder")
@@ -182,7 +207,7 @@ def get_logs():
 
 @app.route("/gallery/<username>/<date>/<filename>", methods=['GET'])
 def serve_media(username, date, filename):
-    folder_path = settings.get("folder_path")
+    folder_path = settings.get("media_folder_path")
     media_folder = os.path.join(os.path.join(folder_path, username), date)
     return send_from_directory(media_folder, filename)
 

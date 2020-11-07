@@ -2,7 +2,7 @@
 Simple web app to get and save users stories from IG.
 It's useful to archive users stories!  
 
-It saves the images and videos in a subdirectory structure based on username/date/story_id.
+It saves the images and videos in a subdirectory structure based on user_id/date/story_id.
 
 It also offers a way to visualize them in your browser.
 
@@ -29,7 +29,7 @@ There are different scraping features you can set before starting:
 
 You can choose to scrape one single time or keep it looping.
 
-You can download media files, json files or both.
+You can download media files, related data as .json files or both.
 
 You can choose if you want to scrape only the followed people and/or extra people in ```EXTRA IDS``` tab in settings.
 

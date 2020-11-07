@@ -105,7 +105,7 @@ def retrieve_media(url, file_path):
 
 def download_stories(arr_ids, cookie, folder_path, mode_flag):
     """
-    Download user stories. Create subdirectory for each user based on their username and media timestamp
+    Download user stories. Create subdirectory for each user based on their user id and media timestamp
     Ex:
     ig_media/user1/25-08-17
                   /26-08-17
@@ -122,6 +122,12 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
     tot_count_img, tot_count_videos = 0, 0
 
     userid_endpoint = "https://i.instagram.com/api/v1/feed/user/{}/reel_media/"
+
+    # Contains a mapping with the latest nickname associated to a user id.
+    # eg: [ID1 -> nickname1, ID2 -> nickname2]
+    ids_to_names_mapping = settings.get_ids_to_names_file()
+    ids_mapping_need_update = False
+
     for idx, ids in enumerate(arr_ids):
         time.sleep(DELAY_BETWEEN_USERS)  # Little delay between an user and the next one
         url = userid_endpoint.format(ids)
@@ -133,12 +139,18 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
         if 'items' in d and d['items']:
             items = d['items']
             username = items[0]['user']['username']
+            user_id = str(items[0]['user']['pk'])
         else:
             logger.info("Empty stories for url {}".format(url))
             continue
 
         logger.info("{}/{} Username: -| {} |-".format(idx + 1, len(arr_ids), username))
-        usr_directory = os.path.join(folder_path, username)
+        usr_directory = os.path.join(folder_path, user_id)
+
+        # Update ids to names mapping
+        if user_id not in ids_to_names_mapping or ids_to_names_mapping[user_id] != username:
+            ids_to_names_mapping[user_id] = username
+            ids_mapping_need_update = True
 
         #####
 
@@ -150,7 +162,7 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
 
         new_metadata = False  # Used to update the .txt and .json metadata file only if necessary.
         seen_stories_txt = os.path.join(usr_directory, "saved.txt")
-        saved_stories_json = os.path.join(usr_directory, f"{username}.json")
+        saved_stories_json = os.path.join(usr_directory, f"{user_id}.json")
         if not os.path.exists(seen_stories_txt) or not os.path.exists(saved_stories_json):
             json_stories_seen, json_stories_saved = set(), []
         else:
@@ -212,6 +224,10 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
                 for id in json_stories_seen:
                     seen.write(f'{id}\n')
                 json.dump(json_stories_saved, saved)
+
+    if ids_mapping_need_update:
+        settings.update_ids_to_names_file(ids_to_names_mapping)
+
     logger.info("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), tot_count_img, tot_count_videos))
     return tot_count_img, tot_count_videos
 
@@ -281,7 +297,7 @@ def nick_to_id(nickname):
 
 def start_scrape(scrape_settings, user_limit, media_mode="all", ids_source="all"):
     cookie = craft_cookie(scrape_settings["session_id"])  # The check logic for the existence of "session_id" is on the runner.py and flask_server.py files
-    folder_path = scrape_settings["folder_path"]
+    folder_path = scrape_settings["media_folder_path"]
 
     stories_ids = []
     if ids_source != "extra_ids_only":

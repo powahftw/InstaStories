@@ -17,7 +17,7 @@ const showAndUpdateSummary = (folderCount, mediaCount) => {
 const renderFolder = (folder) => {
   const liNode = document.createElement('li');
   liNode.innerHTML = `
-    <a href="${removeTrailingSlash(window.location.href)}/${folder['name']}">
+    <a href="${removeTrailingSlash(window.location.href)}/${folder['id']}">
         <div class="gallery-folders">
             ${folder['name']}
         </div>
@@ -47,7 +47,12 @@ const fetchResponseToHtml = async (response) => {
   }
 
   const responseData = await response.json();
-  const sortBasedOnName = (x, y) => { return x['name'].localeCompare(y['name']); };  
+
+  if (responseData['title']) {
+    document.getElementById('title').innerText = responseData['title'];
+  }
+
+  const sortBasedOnName = (x, y) => { return x['displayed_name'].localeCompare(y['displayed_name']); };  
   const data = responseData['items'].sort(sortBasedOnName);
   const renderedItems = document.createElement("ul");
 

@@ -5,10 +5,11 @@ import sys
 import logging
 
 SETTINGS_FILE_PATH = 'settings.json'
-FOLDER_PATH = "ig_media"
+MEDIA_FOLDER_PATH = "ig_media"
 SCRAPING_LOG_FILE_PATH = 'run_history.log'
 CACHED_IDS_PATH = 'cached_ids.json'
 LOG_FILE_PATH = 'info.log'
+IDS_TO_NICKNAME_PATH = 'ids_to_nick.json'
 
 LOGGING_TO_STDOUT = True
 stream_handler = None
@@ -23,12 +24,12 @@ file_handler = None
 
 DEFAULT_VALUES = {
     'scraping_log_file_path': SCRAPING_LOG_FILE_PATH,
-    'folder_path': FOLDER_PATH,
+    'media_folder_path': MEDIA_FOLDER_PATH,
     'system_log_file_path': LOG_FILE_PATH,
     'extra_ids': [],
     'cached_ids_path': CACHED_IDS_PATH,
     'loop_delay_seconds': 8 * 60 * 60,
-    'loop_variation_percentage': 20
+    'loop_variation_percentage': 20,
 }
 
 def get_settings_file():
@@ -41,6 +42,17 @@ def get_settings_file():
 def update_settings_file(new_settings):
     with open(SETTINGS_FILE_PATH, 'w') as f:
         json.dump(new_settings, f)
+
+def get_ids_to_names_file():
+    if not os.path.exists(IDS_TO_NICKNAME_PATH):
+        return {}
+    with open(IDS_TO_NICKNAME_PATH, 'r') as f:
+        ids_mapping = json.load(f)
+    return copy.deepcopy(ids_mapping)
+
+def update_ids_to_names_file(new_ids_mapping):
+    with open(IDS_TO_NICKNAME_PATH, 'w') as f:
+        json.dump(new_ids_mapping, f)
 
 def has_setting(setting_name):
     return setting_name in get_settings_file()
