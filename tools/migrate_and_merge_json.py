@@ -14,7 +14,7 @@ def convert_metadata_file(fake_json):
         if opening_parenthesis == 0: # Top level, well parenthesized json.
             stories.append(json_buffer)
             json_buffer = ""
-    return [json.loads(chunk) for chunk in stories                                                                ]  
+    return [json.loads(chunk) for chunk in stories]  
 
 def convert_user_json(username_folder_path):
     stories_json, stories_id = [], []
