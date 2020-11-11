@@ -52,6 +52,14 @@ const renderSettingsPage = async () => {
   await fetchResponseToHtml(response);
 };
 
+const renderDiskUsage = async () => {
+  const requestUrl = `${baseUrl}/${API_PREFIX}/settings/diskusage`;
+  const diskUsageNode = document.getElementById('disk-usage');
+  const response = await fetch(requestUrl);
+  const responseData = await response.json();
+  diskUsageNode.innerText = responseData.disk_usage;
+};
+
 const updateSettings = async () => {
   const settings = {};
   idToJsonFields.forEach((field) => {
@@ -123,5 +131,6 @@ const setUpButtonsListeners = () => {
 
 window.onload = () => {
   renderSettingsPage();
+  renderDiskUsage();
   setUpButtonsListeners();
 };

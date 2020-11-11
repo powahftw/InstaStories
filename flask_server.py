@@ -120,12 +120,12 @@ def running_status():
         else:
             scraper_runner.stopFunction()
 
-    return get_scraper_status()
+    return jsonify(get_scraper_status())
 
 @app.route("/api/scraper/settings/", methods=["GET"])
 def scraper_settings():
     logger.info(f"API/{request.method} request to /scraper/settings/")
-    return get_scraper_settings()
+    return jsonify(get_scraper_settings())
 
 @app.route("/api/gallery/", methods=['GET'], defaults={"username": None, "date": None})
 @app.route("/api/gallery/<username>/", methods=['GET'], defaults={"date": None})
@@ -165,7 +165,7 @@ def get_settings_api():
         loop_args = {"loop_delay_seconds": int(user_settings["loop_delay_seconds"]),
                      "loop_variation_percentage": int(user_settings["loop_variation_percentage"])}
         scraper_runner.updateDelay(**loop_args)
-        return user_settings
+        return jsonify(user_settings)
 
 @app.route('/api/settings/logout/', methods=["GET"])
 def logout():
@@ -174,9 +174,13 @@ def logout():
     logger.info("The user has logged out")
     return jsonify(success=True)
 
+@app.route('/api/settings/diskusage')
+def disk_usage():
+    return jsonify({"disk_usage": get_disk_usage()})
+
 @app.route('/api/logs/', methods=["GET"])
 def get_logs():
-    return {"logs": get_system_logs()}
+    return jsonify({"logs": get_system_logs()})
 
 ################### SERVE MEDIA ###################
 
