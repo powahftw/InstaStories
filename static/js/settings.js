@@ -11,9 +11,13 @@ const jsonToIdFields = new Map([
 const idToJsonFields = new Map(Array.from(jsonToIdFields, (a) => a.reverse()));
 
 // Splits a string of names/numbers into a list when it finds "," or "\n"
-const normalizeExtraIds = (extraIds) => (
-  extraIds.split(/,|\n/).map((el) => (el.trim()))
-);
+const normalizeExtraIds = (extraIds) => {
+  if (!extraIds) {
+    return [];
+  };
+
+  return extraIds.split(/,|\n/).map((el) => (el.trim()));
+};
 
 // Sets the placeholders and values in HTML
 const fetchResponseToHtml = async (response) => {
@@ -52,12 +56,17 @@ const renderSettingsPage = async () => {
   await fetchResponseToHtml(response);
 };
 
-const renderDiskUsage = async () => {
+const getAndRenderDiskUsage = async () => {
   const requestUrl = `${baseUrl}/${API_PREFIX}/settings/diskusage`;
   const diskUsageNode = document.getElementById('disk-usage');
+
   const response = await fetch(requestUrl);
   const responseData = await response.json();
-  diskUsageNode.innerText = responseData.disk_usage;
+
+  const pNode = `<p>Disk used space: ${responseData.used_space}/${responseData.total_space} <br>
+                 Disk Free space: ${responseData.free_space}/${responseData.total_space}
+                 </p>`;
+  diskUsageNode.innerHTML = pNode;
 };
 
 const updateSettings = async () => {
@@ -131,6 +140,6 @@ const setUpButtonsListeners = () => {
 
 window.onload = () => {
   renderSettingsPage();
-  renderDiskUsage();
+  getAndRenderDiskUsage();
   setUpButtonsListeners();
 };

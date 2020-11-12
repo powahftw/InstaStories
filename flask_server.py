@@ -1,6 +1,7 @@
 from Instastories import start_scrape
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import os
+import math
 import shutil
 import settings
 import logging
@@ -18,6 +19,15 @@ user_settings = settings.get()
 scraper_runner = ThreadRunner(start_scrape, user_settings["loop_delay_seconds"], user_settings["loop_variation_percentage"])
 
 ################### UTIL FUNCTIONS ###################
+
+def convert_bytes_size(size_bytes):
+    if size_bytes == 0:
+        return "0B"
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size_bytes, 1024)))
+    p = math.pow(1024, i)
+    s = round(size_bytes / p, 2)
+    return "%s %s" % (s, size_name[i])
 
 def get_log_file_list():
     scraping_logs_path = settings.get('scraping_log_file_path')
@@ -50,8 +60,12 @@ def get_stats_from_log_line(log_lines):
 
 def get_disk_usage():
     hdd_usage = shutil.disk_usage("/")
-    total_space, used_space, free_space = map(lambda bytes: bytes // (2**30), hdd_usage)
-    return f"Used space: {used_space}/{total_space} GiB - Free space: {free_space} GiB"
+    total_disk_size, used_disk_size, free_disk_size = map(convert_bytes_size, hdd_usage)
+    return {
+        "used_space": used_disk_size,
+        "free_space": free_disk_size,
+        "total_space": total_disk_size,
+    }
 
 def get_system_logs():
     log_file_path = settings.get('system_log_file_path')
@@ -176,7 +190,7 @@ def logout():
 
 @app.route('/api/settings/diskusage')
 def disk_usage():
-    return jsonify({"disk_usage": get_disk_usage()})
+    return jsonify(get_disk_usage())
 
 @app.route('/api/logs/', methods=["GET"])
 def get_logs():
