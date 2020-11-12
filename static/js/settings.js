@@ -50,23 +50,31 @@ const fetchResponseToHtml = async (response) => {
   }
 };
 
-const renderSettingsPage = async () => {
-  const requestUrl = `${baseUrl}/${API_PREFIX}/settings/`;
-  const response = await fetch(requestUrl).catch((err) => { });
-  await fetchResponseToHtml(response);
+const getAndRenderSettingsPage = async () => {
+  const settingsRequestUrl = `${baseUrl}/${API_PREFIX}/settings/`;
+  const diskUsageRequestUrl = `${baseUrl}/${API_PREFIX}/settings/diskusage`;
+  const [
+    settingsResponse,
+    diskUsageResponse,
+  ] = await Promise.all([
+    fetch(settingsRequestUrl),
+    fetch(diskUsageRequestUrl),
+  ]);
+
+  await Promise.all([
+    fetchResponseToHtml(settingsResponse),
+    renderDiskUsage(diskUsageResponse),
+  ]);
 };
 
-const getAndRenderDiskUsage = async () => {
-  const requestUrl = `${baseUrl}/${API_PREFIX}/settings/diskusage`;
-  const diskUsageNode = document.getElementById('disk-usage');
+const renderDiskUsage = async (res) => {
+  const responseData = await res.json();
+  const rootNode = document.getElementById('disk-usage');
 
-  const response = await fetch(requestUrl);
-  const responseData = await response.json();
-
-  const pNode = `<p>Disk used space: ${responseData.used_space}/${responseData.total_space} <br>
-                 Disk Free space: ${responseData.free_space}/${responseData.total_space}
+  const diskUsageNode = `<p>Disk used space: ${responseData.used_space}/${responseData.total_space} GiB <br>
+                 Disk Free space: ${responseData.free_space}/${responseData.total_space} GiB
                  </p>`;
-  diskUsageNode.innerHTML = pNode;
+  rootNode.innerHTML = diskUsageNode;
 };
 
 const updateSettings = async () => {
@@ -78,7 +86,7 @@ const updateSettings = async () => {
   });
   settings['extra_ids'] = [...normalizeExtraIds(settings['extra_ids'])];
   await postUpdatedSettings(settings);
-  renderSettingsPage();
+  getAndRenderSettingsPage();
 };
 
 const updateStatusBar = (res) => {
@@ -97,7 +105,7 @@ const postUpdatedSettings = async (payload) => { // POSTs the request for updati
     body: JSON.stringify(payload),
   });
   updateStatusBar(res);
-  renderSettingsPage();
+  getAndRenderSettingsPage();
 };
 
 const deleteMedia = async () => {
@@ -106,14 +114,14 @@ const deleteMedia = async () => {
     method: 'DELETE',
   });
   updateStatusBar(res);
-  renderSettingsPage();
+  getAndRenderSettingsPage();
 };
 
 const logout = async () => {
   const logoutUrl = `${baseUrl}/${API_PREFIX}/settings/logout/`;
   const res = await fetch(logoutUrl);
   updateStatusBar(res);
-  renderSettingsPage();
+  getAndRenderSettingsPage();
 };
 
 const setUpButtonsListeners = () => {
@@ -139,7 +147,6 @@ const setUpButtonsListeners = () => {
 };
 
 window.onload = () => {
-  renderSettingsPage();
-  getAndRenderDiskUsage();
+  getAndRenderSettingsPage();
   setUpButtonsListeners();
 };

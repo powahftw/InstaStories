@@ -20,15 +20,6 @@ scraper_runner = ThreadRunner(start_scrape, user_settings["loop_delay_seconds"],
 
 ################### UTIL FUNCTIONS ###################
 
-def convert_bytes_size(size_bytes):
-    if size_bytes == 0:
-        return "0B"
-    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-    i = int(math.floor(math.log(size_bytes, 1024)))
-    p = math.pow(1024, i)
-    s = round(size_bytes / p, 2)
-    return "%s %s" % (s, size_name[i])
-
 def get_log_file_list():
     scraping_logs_path = settings.get('scraping_log_file_path')
     if not os.path.exists(scraping_logs_path):
@@ -60,7 +51,7 @@ def get_stats_from_log_line(log_lines):
 
 def get_disk_usage():
     hdd_usage = shutil.disk_usage("/")
-    total_disk_size, used_disk_size, free_disk_size = map(convert_bytes_size, hdd_usage)
+    total_disk_size, used_disk_size, free_disk_size = map(lambda bytes: bytes // (2**30), hdd_usage)
     return {
         "used_space": used_disk_size,
         "free_space": free_disk_size,
