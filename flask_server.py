@@ -50,8 +50,12 @@ def get_stats_from_log_line(log_lines):
 
 def get_disk_usage():
     hdd_usage = shutil.disk_usage("/")
-    total_space, used_space, free_space = map(lambda bytes: bytes // (2**30), hdd_usage)
-    return f"Used space: {used_space}/{total_space} GiB - Free space: {free_space} GiB"
+    total_disk_size, used_disk_size, free_disk_size = map(lambda bytes: bytes // (2**30), hdd_usage)
+    return {
+        "used_space": used_disk_size,
+        "free_space": free_disk_size,
+        "total_space": total_disk_size,
+    }
 
 def get_system_logs():
     log_file_path = settings.get('system_log_file_path')
@@ -120,12 +124,12 @@ def running_status():
         else:
             scraper_runner.stopFunction()
 
-    return get_scraper_status()
+    return jsonify(get_scraper_status())
 
 @app.route("/api/scraper/settings/", methods=["GET"])
 def scraper_settings():
     logger.info(f"API/{request.method} request to /scraper/settings/")
-    return get_scraper_settings()
+    return jsonify(get_scraper_settings())
 
 @app.route("/api/gallery/", methods=['GET'], defaults={"username": None, "date": None})
 @app.route("/api/gallery/<username>/", methods=['GET'], defaults={"date": None})
@@ -165,7 +169,7 @@ def get_settings_api():
         loop_args = {"loop_delay_seconds": int(user_settings["loop_delay_seconds"]),
                      "loop_variation_percentage": int(user_settings["loop_variation_percentage"])}
         scraper_runner.updateDelay(**loop_args)
-        return user_settings
+        return jsonify(user_settings)
 
 @app.route('/api/settings/logout/', methods=["GET"])
 def logout():
@@ -174,9 +178,13 @@ def logout():
     logger.info("The user has logged out")
     return jsonify(success=True)
 
+@app.route('/api/settings/diskusage')
+def disk_usage():
+    return jsonify(get_disk_usage())
+
 @app.route('/api/logs/', methods=["GET"])
 def get_logs():
-    return {"logs": get_system_logs()}
+    return jsonify({"logs": get_system_logs()})
 
 ################### SERVE MEDIA ###################
 
