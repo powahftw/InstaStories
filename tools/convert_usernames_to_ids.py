@@ -22,8 +22,8 @@ def get_user_id_and_nickname(username_folder_path):
 
 def create_id_folder_mapping(base_folder):
     id_to_path_mapping = defaultdict(list)
-    for username_folder in os.listdir(BASE_FOLDER):
-        username_folder_path = os.path.join(BASE_FOLDER, username_folder)
+    for username_folder in os.listdir(base_folder):
+        username_folder_path = os.path.join(base_folder, username_folder)
         user_id, _ = get_user_id_and_nickname(username_folder_path)
         if user_id:
             id_to_path_mapping[user_id].append(username_folder_path)
@@ -36,8 +36,17 @@ def move_all_subfolders(source, destination):
         destination_path = os.path.join(destination, file)
         if os.path.isfile(source_path):
             continue
-        else:
+        elif not os.path.exists(destination_path):
             shutil.move(source_path, destination_path)
+        else:
+            # If the date folder already exists then just move the subfiles, avoid duplicate files by checking the id.
+            for source_file in os.listdir(source_path):
+                source_file_path = os.path.join(source_path, source_file)
+                destination_file_path = os.path.join(
+                    destination_path, source_file)
+                if os.path.exists(destination_file_path):
+                    continue
+                shutil.move(source_file_path, destination_file_path)
 
 
 def rename_existing_files_and_folder(username_folder_path, username, id_folder_path, user_id):
@@ -56,6 +65,7 @@ def create_and_merge_files_in_new_folder(username_folder_paths, id_folder_path, 
 
     saved_files = set()
     json_files = []
+    json_files_seen = set()
 
     for username_folder_path in username_folder_paths:
 
@@ -71,7 +81,13 @@ def create_and_merge_files_in_new_folder(username_folder_paths, id_folder_path, 
 
         if os.path.isfile(json_file_path):
             with open(json_file_path, 'r') as f:
-                json_files.extend(json.load(f))
+                json_stories = json.load(f)
+                for json_story in json_stories:
+                    story_id = json_story['id']
+                    if story_id in json_files_seen:
+                        continue
+                    json_files_seen.add(story_id)
+                    json_files.append(json_story)
 
     with open(os.path.join(id_folder_path, "saved.txt"), "w") as f:
         for saved_file in sorted(list(saved_files)):
