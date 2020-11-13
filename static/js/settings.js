@@ -61,20 +61,16 @@ const getAndRenderSettingsPage = async () => {
     fetch(diskUsageRequestUrl),
   ]);
 
-  await Promise.all([
-    fetchResponseToHtml(settingsResponse),
-    renderDiskUsage(diskUsageResponse),
-  ]);
+  await fetchResponseToHtml(settingsResponse);
+  await renderDiskUsage(diskUsageResponse);
 };
 
 const renderDiskUsage = async (res) => {
   const responseData = await res.json();
   const rootNode = document.getElementById('disk-usage');
-
-  const diskUsageNode = `<p>Disk used space: ${responseData.used_space}/${responseData.total_space} GiB <br>
+  rootNode.innerHTML = `<p>Disk used space: ${responseData.used_space}/${responseData.total_space} GiB <br>
                  Disk Free space: ${responseData.free_space}/${responseData.total_space} GiB
                  </p>`;
-  rootNode.innerHTML = diskUsageNode;
 };
 
 const updateSettings = async () => {
