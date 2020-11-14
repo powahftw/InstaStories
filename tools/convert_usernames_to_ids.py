@@ -98,6 +98,10 @@ def create_and_merge_files_in_new_folder(username_folder_paths, id_folder_path, 
 
     for username_folder_path in username_folder_paths:
 
+        # Handle cases where the user already had already an id folder with data inside.
+        if username_folder_path == id_folder_path:
+            continue
+
         try:
             move_all_subfolders(username_folder_path, id_folder_path)
             shutil.rmtree(username_folder_path)
