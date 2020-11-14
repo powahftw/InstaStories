@@ -22,6 +22,7 @@ def get_user_id_and_nickname(username_folder_path):
 
 def create_id_folder_mapping(base_folder):
     id_to_path_mapping = defaultdict(list)
+    
     for username_folder in os.listdir(base_folder):
         username_folder_path = os.path.join(base_folder, username_folder)
         user_id, _ = get_user_id_and_nickname(username_folder_path)
@@ -98,9 +99,13 @@ def create_and_merge_files_in_new_folder(username_folder_paths, id_folder_path, 
 
     for username_folder_path in username_folder_paths:
 
+        # Handle cases where the user already had already an id folder with data inside.
+        if username_folder_path == id_folder_path:
+            continue
+
         try:
             move_all_subfolders(username_folder_path, id_folder_path)
-            shutil.rmtree(username_folder_path)
+            shutil.rmtree(username_folder_path) #ERROR
         except Exception as e:
             print(f"Error while processing {username_folder_path}")
             print(e)
@@ -126,7 +131,7 @@ def extract_and_update_id_to_nickname_mapping(ids_to_nickname_path, base_folder_
 
 
 if __name__ == '__main__':
-    BASE_FOLDER = "ig_media"
+    BASE_FOLDER = "ig"
     IDS_TO_NICKNAME_PATH = 'ids_to_nick.json'
 
     id_to_path_mapping = create_id_folder_mapping(BASE_FOLDER)
