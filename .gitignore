@@ -6,6 +6,7 @@ ig_media
 */*.json
 */saved.txt
 # Settings and log files
+ids_to_nick.json
 settings.json
 cached_ids.json
 __pycache__
