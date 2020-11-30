@@ -4,36 +4,46 @@
     <title>Insta scraper</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     {% block header %}
     {% endblock %}
 </head>
     <body>
+        <div class="navbar">
+            <div class="navbar-icon-container">
+                <img class="navbar-display-button desktop-hidden" onclick="toggleNavbarLinks()" src="/static/images/menu_icon.png" alt="">
+                <img class="navbar-logo" src="/static/images/logo.png">
+            </div>
+            <div class="navbar-links" id="navbar-links">
+                <a href="/" class="navbar-link {{ 'navbar-link-active' if active_page == 'index' }}">
+                    <img class="navbar-icon" src="/static/images/home_icon.svg">
+                    <p class="navbar-text">Home</p>
+                </a>
 
-        <!-- NAVBAR -->
-        <nav>
-            <a href="/"><img class="logo" src="/static/images/logo.png" alt=""></a>
-            <ul>
-                <li>
-                    <a href="/"><img class="menu-icon {{ 'selected-menu-icon' if active_page == 'index' }}" src="/static/images/home_icon.svg" alt=""></a> 
-                </li>
-                <li>
-                    <a href="/gallery"><img class="menu-icon {{ 'selected-menu-icon' if active_page == 'gallery' }}" src="/static/images/gallery_icon.svg" alt=""></a>
-                </li>
-                <li>
-                    <a href="/settings"><img class="menu-icon {{ 'selected-menu-icon' if active_page == 'settings' }}" src="/static/images/settings_icon.svg" alt=""></a>
-                </li>
-                <li>
-                    <a href="/logs"><img class="menu-icon {{ 'selected-menu-icon' if active_page == 'logs' }}" src="/static/images/logs_icon.svg" alt=""></a>
-                </li>
-            </ul>
-        </nav>
-        <!-- END OF NAVBAR -->
+                <a href="/gallery" class="navbar-link {{ 'navbar-link-active' if active_page == 'gallery' }}">
+                    <img class="navbar-icon" src="/static/images/gallery_icon.svg">
+                    <p class="navbar-text">Gallery</p>
+                </a>
 
-        <div class="container">
-            {% block content %}
-            {% endblock %}
+                <a href="/settings" class="navbar-link {{ 'navbar-link-active' if active_page == 'settings' }}">
+                    <img class="navbar-icon" src="/static/images/settings_icon.svg">
+                    <p class="navbar-text">Settings</p>
+                </a>
+
+                <a href="/logs" class="navbar-link {{ 'navbar-link-active' if active_page == 'logs' }}">
+                    <img class="navbar-icon" src="/static/images/logs_icon.svg">
+                    <p class="navbar-text">Logs</p>
+                </a>
+            </div>
         </div>
+    {% block content %}
+    {% endblock %}
+</body>
 
-    </body>
+    <script>
+        const toggleNavbarLinks = () => {
+            const navLinks = document.getElementById('navbar-links');
+            navLinks.classList.toggle('display-navbar-links');
+        }
+    </script>
 </html>

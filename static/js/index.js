@@ -12,10 +12,10 @@ const renderScrapingLogs = (logLines) => {
   logsNode.appendChild(root);
 };
 
-const setRadioButtons = (scraperSettings) => {
-  document.querySelector(`[name="loop-radio-group"][value="${scraperSettings.loop_mode.toString()}"]`).checked = true;
-  document.querySelector(`input[name="media-radio-group"][value="${scraperSettings.media_mode}"]`).checked = true;
-  document.querySelector(`input[name="ids-radio-group"][value="${scraperSettings.ids_source}"]`).checked = true;
+const setDropdown = (scraperSettings) => {
+  document.querySelector(`select[id="loop-mode"]`).value = scraperSettings.loop_mode;
+  document.querySelector(`select[id="scraping-mode"]`).value = scraperSettings.media_mode;
+  document.querySelector(`select[id="ids-source"]`).value = scraperSettings.ids_source;
 };
 
 const checkShutdown = async () => {
@@ -41,15 +41,15 @@ const updateCommandButton = (buttonStatus) => {
   const root = document.createElement('div');
   const isRunning = buttonStatus == 'running';
   const isShuttingDown = buttonStatus == 'shutdown';
-  const commandButton = '<button class="btn" id="command-button"></button>';
+  const commandButton = '<button class="button" id="command-button"></button>';
   root.innerHTML = commandButton;
   if (isShuttingDown) {
-    root.firstChild.classList.add('update-btn');
+    root.firstChild.classList.add('update-button');
     root.firstChild.disabled = 'true';
     root.firstChild.innerText = 'updating...';
     checkShutdown();
   } else if (isRunning) {
-    root.firstChild.classList.add('stop-btn');
+    root.firstChild.classList.add('stop-button');
     root.firstChild.value = 'stop';
     root.firstChild.innerText = 'Stop';
   } else {
@@ -64,18 +64,20 @@ const getScraperStatus = async () => {
   const settingsUrl = `${baseUrl}/${API_PREFIX}/scraper/settings/`;
   const statusResponseData = await (await fetch(statusUrl)).json();
   const settingsResponseData = await (await fetch(settingsUrl)).json();
-  const outputNode = document.getElementById('scraping-results');
+  const imageOutputNode = document.getElementById('image-scraping-results');
+  const videoOutputNode = document.getElementById('video-scraping-results');
   renderScrapingLogs(statusResponseData.log_lines);
   updateCommandButton(statusResponseData.status);
-  setRadioButtons(settingsResponseData);
-  outputNode.innerText = `${statusResponseData.output.scraped_media ?? 0} media scraped`;
+  setDropdown(settingsResponseData);
+  imageOutputNode.innerText = `${statusResponseData.output.scraped_images ?? 0}`;
+  videoOutputNode.innerText = `${statusResponseData.output.scraped_videos ?? 0}`;
 };
 
 const startScraping = async () => {
   const userLimit = Number(document.getElementById('user-limit').value);
-  const loopMode = document.querySelector('input[name="loop-radio-group"]:checked').value;
-  const mediaMode = document.querySelector('input[name="media-radio-group"]:checked').value;
-  const idsMode = document.querySelector('input[name="ids-radio-group"]:checked').value;
+  const loopMode = document.querySelector(`select[id="loop-mode"]`).value;
+  const mediaMode = document.querySelector(`select[id="scraping-mode"]`).value;
+  const idsMode = document.querySelector(`select[id="ids-source"]`).value;
   const commandType = document.getElementById('command-button').value;
   const requestBody = {
     command: commandType,

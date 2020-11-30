@@ -25,16 +25,16 @@ def get_log_file_list():
         return []
     with open(scraping_logs_path, "r+") as o:
         logs = [log_lines for log_lines in o.readlines()]
-        return list(reversed(logs))
+        return logs[::-1]
 
-def get_folders(path, ids_to_names = {}):
+def get_folders(path, ids_to_names={}):
     rendered_folders = []  # List of {type: 'folder', name: Y}
     if not os.path.exists(path): return []
     for folder in os.listdir(path):
         if folder.endswith(SKIP_EXTENSIONS): continue
 
         # In the user names page we convert the ids to more usable displayed name.
-        displayed_name = ids_to_names.get(folder, folder) 
+        displayed_name = ids_to_names.get(folder, folder)
 
         rendered_folders.append({'type': 'folder',
                                  'name': f'{displayed_name}',
@@ -66,7 +66,7 @@ def get_system_logs():
     log_file_path = settings.get('system_log_file_path')
     if not os.path.exists(log_file_path): return []
     with open(log_file_path, 'r+') as log_file:
-        return [log for log in log_file.readlines()]
+        return [log for log in log_file.readlines()[::-1]]
 
 def get_scraper_status():
     return {
@@ -104,6 +104,7 @@ def settings_page():
 def gallery(text):
     logger.info(f"GET request to /gallery/")
     return render_template("gallery.html")
+
 
 @app.route("/logs/", methods=['GET'])
 def logs():
@@ -157,9 +158,9 @@ def gallery_api(user_id, date):
         view = PageType.USERS_VIEW
 
     ids_to_names = settings.get_ids_to_names_file()
-    page_title = 'gallery'
+    page_title = 'Gallery'
     if user_id:
-        page_title = f"{ids_to_names.get(user_id, user_id)}"
+        page_title += f"/{ids_to_names.get(user_id, user_id)}"
         if date:
             page_title += f"/{date}"
 
@@ -168,9 +169,9 @@ def gallery_api(user_id, date):
         to_render_items = get_media_files(date_path)
     elif view == PageType.DATES_VIEW:
         user_path = os.path.join(folder_path, user_id)
-        to_render_items = get_folders(user_path, ids_to_names = ids_to_names)
+        to_render_items = get_folders(user_path, ids_to_names=ids_to_names)
     else:
-        to_render_items = get_folders(folder_path, ids_to_names = ids_to_names)
+        to_render_items = get_folders(folder_path, ids_to_names=ids_to_names)
     return jsonify({'title': page_title, 'items': to_render_items})
 
 @app.route("/api/gallery/", methods=['DELETE'])

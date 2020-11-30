@@ -12,13 +12,13 @@ const showAndUpdateSummary = (folderCount, mediaCount) => {
   }
   summaryEl.innerText = summaryText;
   summaryEl.style.display = 'block';
-}
+};
 
 const renderFolder = (folder) => {
   const liNode = document.createElement('li');
   liNode.innerHTML = `
     <a href="${removeTrailingSlash(window.location.href)}/${folder['id']}">
-        <div class="gallery-folders">
+        <div class="gallery-folder">
             ${folder['name']}
         </div>
     </a>`;
@@ -47,16 +47,15 @@ const fetchResponseToHtml = async (response) => {
   }
 
   const responseData = await response.json();
-
   if (responseData['title']) {
     document.getElementById('title').innerText = responseData['title'];
   }
 
   const sortBasedOnName = (x, y) => { return x['name'].localeCompare(y['name']); };  
   const data = responseData['items'].sort(sortBasedOnName);
-  const renderedItems = document.createElement("ul");
+  const renderedItems = document.createElement('ul');
 
-  let folderCount = 0
+  let folderCount = 0;
   let mediaCount = 0;
 
   data.forEach((element) => {

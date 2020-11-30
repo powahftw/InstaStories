@@ -1,55 +1,73 @@
 {% set active_page = 'index' %}
-{% extends 'base.html' %} {% block header %} {% endblock %} {% block content %}
+{% extends 'base.html' %}
 
-<div class="index-logo">
-    <a href="/"><img src="/static/images/logo.png" alt=""></a>
-    <h1>InstaStories</h1>
+{% block header %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <p class="breadcrumb">Home</p>
+    <div class="content">
+        <div class="errors" id="errors"></div>
+        <div class="settings-row">
+            <div class="scraper-setting">
+                <label class="setting-label" for="scraping-mode">Scraping mode</label>
+                <select class="dropdown-input" id="scraping-mode">
+                    <option value="all">Both</option>
+                    <option value="media">Media</option>
+                    <option value="metadata">Metadata</option>
+                </select>
+            </div>
+
+            <div class="scraper-setting">
+                <label class="setting-label" for="ids-source">IDs source</label>
+                <select class="dropdown-input" id="ids-source">
+                    <option value="all">Both</option>
+                    <option value="stories_ids_only">Stories tray</option>
+                    <option value="extra_ids_only">Extra IDs</option>
+                </select>
+            </div>
+
+            <div class="scraper-setting">
+                <label class="setting-label" for="loop-mode">Loop mode</label>
+                <select class="dropdown-input" id="loop-mode">
+                    <option value="false">Single</option>
+                    <option value="true">Loop</option>
+                </select>
+            </div>
+
+            <div class="scraper-setting">
+                <label class="setting-label" for="user-limit">User limit</label>
+                <div class="input-group">
+                    <input type="number" id="user-limit" class="text-input" />
+                    <div class="input-unit">
+                        <p>users</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="button-container"></div>
+
+        <div class="results-container">
+            <div class="results-content">
+                <img class="results-icon" src="/static/images/image_icon.png" alt="">
+                <p id="image-scraping-results"></p>
+            </div>
+            <div class="results-content">
+                <img class="results-icon" src="/static/images/video_icon.png" alt="">
+                <p id="video-scraping-results"></p>
+            </div>
+        </div>
+
+
+        <label class="setting-label" for="logs-container">Scraping history</label>
+        <div id="logs-container">
+            <ul class="logs-container" id="scraping-logs"></ul>
+        </div>
+    </div>
 </div>
-<div class="index-scraping-sect">
-    <div id="errors" class="errors"></div>
-    <ul>
-        <li>
-            <h3>Insert the number of people to scrape</h3>
-        </li>
-        <li><input type="text" id="user-limit" class="input"/></li>
-        <li><div id="button-container"></div></li>
-    </ul>
-    <div class="info">
-        <h3 id="scraping-results"></h3>
-    </div>
-    <div id="scraping-status"></div>
-    <div class="index-advanced" id="index-advanced">
-        <div class="index-mode">
-            <h2>LOOP MODE</h2>
-            <div class="checkgroup"><label for="single">Single cycle</label><input class="radio-btn"
-                    name="loop-radio-group" type="radio" value=false id="single" /></div>
-            <div class="checkgroup"><label for="loop">Loop cycle</label><input class="radio-btn" name="loop-radio-group"
-                    type="radio" value=true id="loop" /></div>
-        </div>
-        <div class="index-mode">
-            <h2>SCRAPING MODE</h2>
-            <div class="checkgroup"><label for="all">All</label><input class="radio-btn" name="media-radio-group"
-                    type="radio" value="all" id="all" /></div>
-            <div class="checkgroup"><label for="media">Media</label><input class="radio-btn" name="media-radio-group"
-                    type="radio" value="media" id="media" /></div>
-            <div class="checkgroup"><label for="metadata">Metadata</label><input class="radio-btn"
-                    name="media-radio-group" type="radio" value="metadata" id="metadata" /></div>
-        </div>
-        <div class="index-mode">
-            <h2>SOURCE IDS</h2>
-            <div class="checkgroup"><label for="all_stories">All</label><input class="radio-btn" name="ids-radio-group"
-                    type="radio" value="all" id="all_stories" /></div>
-            <div class="checkgroup"><label for="stories_ids">Stories Tray</label><input class="radio-btn"
-                    name="ids-radio-group" type="radio" value="stories_ids_only" id="stories_ids" /></div>
-            <div class="checkgroup"><label for="extra_ids">Extra IDS</label><input class="radio-btn"
-                    name="ids-radio-group" type="radio" value="extra_ids_only" id="extra_ids" /></div>
-        </div>
-    </div>
-    <div class="index-logs" id="index-logs">
-        <h2>LOGS</h2>
-        <ul id="scraping-logs">
-        </ul>
-    </div>
-</div>
+
 <script type="text/javascript" src="{{ url_for('static', filename='js/index.js') }}"></script>
 {% endblock %}

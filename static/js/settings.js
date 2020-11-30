@@ -32,7 +32,7 @@ const fetchResponseToHtml = async (response) => {
   if (isUserLoggedIn) {
     loginField.style.display = 'none';
   } else {
-    loginField.style.display = 'block';
+    loginField.style.display = 'flex';
   }
 
   for (element in responseData) {

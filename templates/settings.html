@@ -1,56 +1,49 @@
 {% set active_page = 'settings' %}
 {% extends 'base.html' %} {% block content %}
-    <div class="settings-box" id="settings">
-        <ul>
-            <li>
-                <h2>Settings</h2>
-            </li>
-
-            <li id="login-field">
-                <p>If it's the first time you use this tool, log in.</p>
-                <h2>Please enter your Session ID</h2>
-                <label for="session-id">Session ID</label>
-                <input id="session-id" type="text" name="session-id">
-            </li>
-
-            <li>
-                <label for="folder-path">Download folder path:</label>
-                <input id="folder-path" type="text" name="folder-path">
-            </li>
-
-            <li>
-                <label for="loop-delay-seconds">Delay between loop cycles (insert time in seconds):</label>
-                <input type="number" id="loop-delay-seconds" name="loop-delay-seconds" min="1">
-            </li>
-
-            <li>
-                <label for="loop-variation-percentage">Variation of loop cycles delay (in percentage):</label>
-                <input type="number" id="loop-variation-percentage" name="loop-variation-percentage" min="1" max="100">
-            </li>
-
-            <li>
-                <label for="extra-ids">Extra nicknames/IDS to scrape</label><br>
-                <textarea name="extra-ids" id="extra-ids"></textarea>
-            </li>
-            <li id="disk-usage"></li>
-            <li>
-                <ul>
-                    <li>
-                        <button id="submitBtn" class="btn sub-btn">UPDATE SETTINGS</button>
-                    </li>
+    <div class="container" id="settings">
+        <p class="breadcrumb">Settings</p>
+        <div class="content">
+            <p>Please enter your Session ID</p>
+            <div class="setting-field" id="login-field">
+                <label class="setting-label" for="session-id">Session ID</label>
+                <input class="text-input settings-text-input" id="session-id" type="text">
+            </div>
     
-                    <li>
-                        <button id="logoutBtn" class="btn sub-btn logout-btn">LOG OUT</button>
-                    </li>
+            <div class="setting-field">
+                <label class="setting-label" for="folder-path">Download folder path:</label>
+                <input class="text-input settings-text-input" id="folder-path" type="text">
+            </div>
     
-                    <li>
-                        <button id="deleteMediaBtn" class="btn sub-btn delete-btn">DELETE ALL MEDIA</button>
-                    </li>
-                </ul>
-            </li>
-            <li id="status-bar">
-            </li>
-        </ul>
+            <div class="row">
+                <div class="setting-field">
+                    <label class="setting-label" for="loop-delay-seconds">Loop delay:</label>
+                    <div class="input-group">
+                        <input class="text-input" type="number" id="loop-delay-seconds" min="1">
+                        <div class="input-unit"><p>secs</p></div>
+                    </div>
+                </div>
+        
+                <div class="setting-field">
+                    <label class="setting-label" for="loop-variation-percentage">Variation:</label>
+                    <div class="input-group">
+                        <input class="text-input" type="number" id="loop-variation-percentage" min="1" max="100">
+                        <div class="input-unit"><p>%</p></div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="setting-field">
+                <label class="setting-label" for="extra-ids">Extra nicknames/IDS to scrape</label>
+                <textarea class="text-input textarea-input" id="extra-ids"></textarea>
+            </div>
+            <div class="setting-field" id="disk-usage"></div>
+            <div class="setting-field buttons-field">
+                <button id="submitBtn" class="button">Update settings</button>
+                <button id="logoutBtn" class="button">Logout</button>
+                <button id="deleteMediaBtn" class="button">Delete all media</button>
+            </div>
+            <div id="status-bar"></div>
+        </div>
     </div>
 <script type="text/javascript" src="{{ url_for('static', filename='js/settings.js') }}"></script>
 {% endblock %}

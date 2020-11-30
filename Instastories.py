@@ -318,4 +318,5 @@ def start_scrape(scrape_settings, user_limit, media_mode="all", ids_source="all"
         scraped_users = len(ids)
         o.write(f"Date: {timestampStr} - {scraped_users} people scraped - {count_i} IMGs - {count_v} VIDEOs \n")
 
-    return {"scraped_media": count_i + count_v}
+    return {"scraped_images": count_i,
+            "scraped_videos": count_v}

@@ -2,12 +2,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="gallery-container">
-    <div class="center-content">
-        <h2 id="title"></h2>
-        <div id="summary"></div>
-    </div>
-    <div id="gallery"></div>
+<div class="container">
+    <p class="breadcrumb" id="title">{{ title }}</p>
+    <div class="content">
+    <div id="summary"></div>
+    <div class="gallery-container" id="gallery"></div>
+
     <script type="text/javascript" src="{{ url_for('static', filename='js/gallery.js') }}"></script>
+    </div>
 </div>
 {% endblock %}
