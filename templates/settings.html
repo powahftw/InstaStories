@@ -1,7 +1,13 @@
 {% set active_page = 'settings' %}
 {% extends 'base.html' %} {% block content %}
     <div class="container" id="settings">
-        <p class="breadcrumb">Settings</p>
+        <div class="header">
+            <p class="breadcrumb">Settings</p>
+            <div class="header-settings">
+                <button id="logoutBtn" class="button header-button">Logout</button>
+                <button id="deleteMediaBtn" class="button header-button">Delete all media</button>
+            </div>
+        </div>
         <div class="content">
             <p>Please enter your Session ID</p>
             <div class="setting-field" id="login-field">
@@ -33,14 +39,17 @@
             </div>
     
             <div class="setting-field">
-                <label class="setting-label" for="extra-ids">Extra nicknames/IDS to scrape</label>
-                <textarea class="text-input textarea-input" id="extra-ids"></textarea>
+                <label class="setting-label" for="add-extra-id">Extra nicknames/IDS to scrape</label>
+                <div id="extra-ids"></div>
+                <div class="errors" id="errors"></div>
+                <div class="settings-row">
+                    <input class="text-input extra-ids-text-input" type="text" id="new-extra-id"/>
+                    <button class="button" id="add-extra-id">Add extra ID</button>
+                </div>
             </div>
-            <div class="setting-field" id="disk-usage"></div>
+            <div class="setting-field disk-usage" id="disk-usage"></div>
             <div class="setting-field buttons-field">
                 <button id="submitBtn" class="button">Update settings</button>
-                <button id="logoutBtn" class="button">Logout</button>
-                <button id="deleteMediaBtn" class="button">Delete all media</button>
             </div>
             <div id="status-bar"></div>
         </div>

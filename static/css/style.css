@@ -72,6 +72,12 @@ ul {
     margin: 0;
 }
 
+.errors {
+  color: var(--red-complementary-color);
+  padding-bottom: 20px;
+  font-size: 12px;
+}
+
 /* Mobile devices */    
 
 .navbar {
@@ -151,6 +157,14 @@ ul {
   align-items: center;
 }
 
+.header {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .content {
   height: 100%;
   width: 90%;
@@ -171,7 +185,11 @@ ul {
 }
 
 .settings-row {
+  display: flex;
+  flex-direction: column;
   width: 100%;
+  justify-content: center;
+  align-items: center;
 }
 
 .scraper-setting {
@@ -240,7 +258,13 @@ ul {
   border: none;
   border-radius: 7px;
   color: white;
-  margin: 0 20px 20px
+  margin: 0 20px 20px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.button:hover {
+  background-color: #483ccc;
 }
 
 .stop-button {
@@ -249,6 +273,13 @@ ul {
 
 .update-button {
   background-color: var(--yellow-complementary-color);
+}
+
+.header-button {
+  font-size: 12px;
+  height: 24px;
+  width: 104px;
+  margin: 20px 4px;
 }
 
 .results-container {
@@ -322,6 +353,11 @@ ul {
   z-index: 2;
 }
 
+.header-settings {
+  display: flex;
+  flex-direction: row;
+}
+
 .setting-field {
   width: 100%;
   display: flex;
@@ -336,11 +372,58 @@ ul {
   text-indent: 10px;
 }
 
-.textarea-input {
-  height: 200px;
-  width: 70vw;
-  padding: 5px;
-  resize: none;
+.extra-ids-text-input {
+  min-width: 120px;
+  width: 100%;
+  max-width: 250px;
+}
+
+.extra-ids-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.extra-id-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 5px;
+  width: min-content;
+  max-width: 80vw;
+  height: 32px;
+  padding: 0 20px;
+  border-radius: 7px;
+  background-color: var(--yellow-complementary-color);
+  color: #000000;
+}
+
+.extra-id-name {
+  padding: 0 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.delete-extra-id {
+  cursor: pointer;
+}
+
+.delete-extra-id:hover {
+  font-size: 22px;
+  transition: 0.2s;
+}
+
+.disk-usage {
+  border: 1px solid var(--primary-color-lighter);
+  border-radius: 8px;
+  width: min-content;
+  min-width: 400px;
+  margin: 20px;
+  font-size: 14px;
 }
 
 .logs-field {
@@ -374,6 +457,10 @@ ul {
     display: flex;
     flex-direction: row;
     justify-content: center;
+  }
+
+  .extra-ids-list {
+    flex-direction: row;
   }
 
 }
@@ -420,11 +507,6 @@ ul {
     font-size: 12px;
   }
 
-  .errors {
-    color: var(--red-complementary-color);
-    padding: 0 0 20px;
-  }
-
   .container {
     margin-left: var(--desktop-navbar-width);
   }
@@ -438,7 +520,6 @@ ul {
   }
 
   .settings-row {
-    display: flex;
     flex-direction: row;
   }
 
