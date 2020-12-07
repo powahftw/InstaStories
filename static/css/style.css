@@ -197,6 +197,7 @@ ul {
   flex-direction: column;
   align-items: center;
   height: min-content;
+  width: 100%;
 }
 
 .setting-label {

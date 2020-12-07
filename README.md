@@ -14,15 +14,9 @@ To start the web app use just run ```python flask_server.py```.
 
 You can then access the page in your browser at the private IP address of machine that is running flask_server (ex: 192.168.0.X) (you can also change the port inside the code)
 
-![Index page screenshot](/screenshots/index.png "Index page")
-
+![Index page desktop screenshot](/screenshots/index_desktop.jpg "Index page")
 ## Login
-To start using this tool you have to provide your IG cookie: the easiest way to do this is login in settings page with your IG account
-
-Alternatively you can put your session_id code manually in a settings file called ```settings.json``` that you have to create inside the root folder and put:
-```{"session_id": "sessionid=<your session id>"}``` inside it
-
-To get it simply use Chrome Dev Tools while visiting [Instagram](instagram.com) and copy the session_id you are sending to them.
+To start using this tool you have to provide your IG cookie: the easiest way to do this is login in settings page with your SESSION ID, that you can retrieve from Instagram itself: to get it simply use Chrome Dev Tools while visiting [Instagram](instagram.com) and copy the session_id you are sending to them.
 
 ## Features
 There are different scraping features you can set before starting: 
