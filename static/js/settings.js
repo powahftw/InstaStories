@@ -104,7 +104,7 @@ const renderDiskUsage = async (res) => {
   const responseData = await res.json();
   const rootNode = document.getElementById('disk-usage');
   rootNode.innerHTML = `<p>Disk used space: ${responseData.used_space}/${responseData.total_space} GiB <br>
-                 Disk Free space: ${responseData.free_space}/${responseData.total_space} GiB
+                 Disk free space: ${responseData.free_space}/${responseData.total_space} GiB
                  </p>`;
 };
 
@@ -125,6 +125,12 @@ const updateStatusBar = (res) => {
   const statusBar = document.getElementById('status-bar');
   const statusText = res.status === 200 ? 'Success!' : 'Failure, please try again!';
   statusBar.innerText = statusText;
+
+  const hideStatusBar = (statusBar) => {
+    statusBar.innerText = '';
+  };
+
+  setTimeout(() => hideStatusBar(statusBar), 5000);
 };
 
 const postUpdatedSettings = async (payload) => { // POSTs the request for updating settings

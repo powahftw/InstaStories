@@ -45,7 +45,8 @@
     --primary-color-lighter: #3e4155;
     --secondary-color: #5A4BFE;
     --red-complementary-color: #f72823;
-    --yellow-complementary-color: #4be0fe;
+    --blue-complementary-color: #4be0fe;
+    --green-complementary-color: #23f751;
     
     --desktop-navbar-width: 96px;
     --mobile-navbar-height: 72px;
@@ -218,7 +219,7 @@ ul {
 }
 
 .text-input {
-  width: 50px;
+  width: 70px;
   height: 32px;
   background-color: var(--primary-color-light);
   border: none;
@@ -273,14 +274,14 @@ ul {
 }
 
 .update-button {
-  background-color: var(--yellow-complementary-color);
+  background-color: var(--blue-complementary-color);
 }
 
 .header-button {
   font-size: 12px;
   height: 24px;
   width: 104px;
-  margin: 20px 4px;
+  margin: 0 4px;
 }
 
 .results-container {
@@ -399,7 +400,7 @@ ul {
   height: 32px;
   padding: 0 20px;
   border-radius: 7px;
-  background-color: var(--yellow-complementary-color);
+  background-color: var(--blue-complementary-color);
   color: #000000;
 }
 
@@ -425,6 +426,10 @@ ul {
   min-width: 400px;
   margin: 20px;
   font-size: 14px;
+}
+
+.status-bar {
+  color: var(--green-complementary-color);
 }
 
 .logs-field {
@@ -462,6 +467,10 @@ ul {
 
   .extra-ids-list {
     flex-direction: row;
+  }
+
+  .text-input {
+    min-width: fit-content;
   }
 
 }
