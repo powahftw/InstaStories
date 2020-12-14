@@ -7,7 +7,6 @@ import logging
 SETTINGS_FILE_PATH = 'settings.json'
 MEDIA_FOLDER_PATH = "ig_media"
 SCRAPING_LOG_FILE_PATH = 'run_history.log'
-CACHED_IDS_PATH = 'cached_ids.json'
 LOG_FILE_PATH = 'info.log'
 IDS_TO_NICKNAME_PATH = 'ids_to_nick.json'
 
@@ -27,7 +26,7 @@ DEFAULT_VALUES = {
     'media_folder_path': MEDIA_FOLDER_PATH,
     'system_log_file_path': LOG_FILE_PATH,
     'extra_ids': [],
-    'cached_ids_path': CACHED_IDS_PATH,
+    'ids_to_nickname_path': IDS_TO_NICKNAME_PATH,
     'loop_delay_seconds': 8 * 60 * 60,
     'loop_variation_percentage': 20,
 }

@@ -25,19 +25,19 @@ def craft_cookie(cookie):
             "user-agent": "Instagram 10.3.2 (iPhone7,2; iPhone OS 9_3_3; en_US; en-US; scale=2.00; 750x1334) AppleWebKit/420+",
             "cache-control": "no-cache"}
 
-def save_cached_ids(cached_ids):
+def save_cached_ids_to_nick(cached_ids):
     """
-    Dump to file a dictionary with a mapping 'username' -> 'id'
+    Dump to file a dictionary with a mapping 'id' -> 'username'
     Used to prevent unecessary requests.
     """
-    with open(settings.get('cached_ids_path'), "w+") as file:
+    with open(settings.get('ids_to_nickname_path'), "w+") as file:
         json.dump(cached_ids, file)
 
-def get_cached_ids():
+def get_cached_ids_to_nick():
     """
-    Load a file and return a dictionary with a mapping 'username' -> 'id'
+    Load a file and return a dictionary with a mapping 'id' -> 'username'
     """
-    cache_ids_path = settings.get('cached_ids_path')
+    cache_ids_path = settings.get('ids_to_nickname_path')
     if not os.path.exists(cache_ids_path):
         return {}
     with open(cache_ids_path, "r") as file:
@@ -51,15 +51,18 @@ def normalize_extra_ids(ids):
     numeric_ids = [elem for elem in ids if elem.isdigit()]
     nicknames = [nick for nick in ids if not nick.isdigit()]
     converted_nicknames = []
-    cached_ids = get_cached_ids()
+    cached_ids_to_nick = get_cached_ids_to_nick()
+    nicks_to_ids = {nick: ids for ids, nick in cached_ids_to_nick.items()}
     for nick in nicknames:
-        if nick not in cached_ids:
+        if nick not in nicks_to_ids:
             logger.info(f"Finding id for {nick}")
             time.sleep(randint(1, 4))  # Random delay to avoid requests spamming
             id_of_nick = nick_to_id(nick)
-            if id_of_nick: cached_ids[nick] = id_of_nick
-        if nick in cached_ids: converted_nicknames.append(cached_ids[nick])
-    save_cached_ids(cached_ids)
+            if id_of_nick:
+                cached_ids_to_nick[id_of_nick] = nick
+                nicks_to_ids[nick] = id_of_nick
+        if nick in nicks_to_ids: converted_nicknames.append(nicks_to_ids[nick])
+    save_cached_ids_to_nick(cached_ids_to_nick)
     return numeric_ids + converted_nicknames
 
 def get_ids(stories_ids, user_limit, extra_ids, ids_mode):
