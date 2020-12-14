@@ -50,17 +50,20 @@
 
         <div id="button-container"></div>
 
-        <div class="results-container">
-            <div class="results-content">
-                <img class="results-icon" src="/static/images/image_icon.png" alt="">
+        <div id="progress-container" class="hidden">
+            <div class="progress-content">
+                <img class="users-icon" src="/static/images/users_icon.png" alt="">
+                <p id="users-progress-results"></p>
+            </div>
+            <div class="progress-content">
+                <img class="image-icon" src="/static/images/image_icon.png" alt="">
                 <p id="image-scraping-results"></p>
             </div>
-            <div class="results-content">
-                <img class="results-icon" src="/static/images/video_icon.png" alt="">
+            <div class="progress-content">
+                <img class="video-icon" src="/static/images/video_icon.png" alt="">
                 <p id="video-scraping-results"></p>
             </div>
         </div>
-
 
         <label class="setting-label" for="logs-container">Scraping history</label>
         <div id="logs-container">

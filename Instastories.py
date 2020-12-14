@@ -219,8 +219,12 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
                     json_stories_seen.add(media_id)
                     json_stories_saved.append(element)
                     new_metadata = True
+
         tot_count_img += user_count_i
         tot_count_videos += user_count_v
+
+        yield idx + 1, tot_count_img, tot_count_videos
+
         logger.info(f"{len(items)} element{'s' if len(items) > 1 else ''} in {username} stories, scraped {user_count_i} images and {user_count_v} videos")
         if new_metadata:
             with open(seen_stories_txt, 'w') as seen, open(saved_stories_json, 'w') as saved:
@@ -232,7 +236,7 @@ def download_stories(arr_ids, cookie, folder_path, mode_flag):
         settings.update_ids_to_names_file(ids_to_names_mapping)
 
     logger.info("We finished processing {} users, we downloaded {} IMGs and {} VIDEOs".format(len(arr_ids), tot_count_img, tot_count_videos))
-    return tot_count_img, tot_count_videos
+    return len(arr_ids), tot_count_img, tot_count_videos
 
 def get_stories_tray(cookie):
     """
@@ -311,7 +315,13 @@ def start_scrape(scrape_settings, user_limit, media_mode="all", ids_source="all"
     ids = get_ids(stories_ids, user_limit, extra_ids, ids_source)
 
     logger.info(f"Starting scraping in mode: {media_mode}, ids source: {ids_source}")
-    count_i, count_v = download_stories(ids, cookie, folder_path, media_mode)
+    for processed_users, scraped_images, scraped_videos in download_stories(ids, cookie, folder_path, media_mode):
+        yield  {"done": False, 
+                "user_processed_so_far": processed_users,
+                "total_user_to_process": len(ids), 
+                "tot_scraped_images": scraped_images,
+                "tot_scraped_videos": scraped_videos}
+        count_i, count_v = scraped_images, scraped_videos
     logger.info("Finished scraping")
     settings.completed_scraping()   # Send the signal that the scraping process finished. Used to flush Telegram logging.
 
@@ -321,5 +331,9 @@ def start_scrape(scrape_settings, user_limit, media_mode="all", ids_source="all"
         scraped_users = len(ids)
         o.write(f"Date: {timestampStr} - {scraped_users} people scraped - {count_i} IMGs - {count_v} VIDEOs \n")
 
-    return {"scraped_images": count_i,
+    yield {"done": True, 
+            "user_processed_so_far": len(ids),
+            "total_user_to_process": len(ids), 
+            "scraped_images": count_i,
             "scraped_videos": count_v}
+    return None

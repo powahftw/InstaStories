@@ -36,7 +36,8 @@ class ThreadRunner():
                 last_request_completed = False
                 while tries_left > 0 and not last_request_completed:
                     try:
-                        self.output = self.func(**self.args)
+                        for output in self.func(**self.args):
+                            self.output = output
                         last_request_completed = True
                     except Exception as err:
                         sleep_time = self.DEFAULT_SLEEP_TIME * (10 ** (self.DEFAULT_ATTEMPTS - tries_left))
@@ -79,7 +80,6 @@ class ThreadRunner():
         return self
 
     def getOutput(self):
-        # Output is a dict containing the number of scraped media (int)
         # See the Instastories.py's "start_scrape" func for more details
         return self.output
 

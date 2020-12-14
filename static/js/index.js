@@ -18,7 +18,12 @@ const setDropdown = (scraperSettings) => {
   document.querySelector(`select[id="ids-source"]`).value = scraperSettings.ids_source;
 };
 
-const checkShutdown = async () => {
+const updatePageFromStatusOutput = async () => {
+  const progressContainer = document.getElementById('progress-container');
+  const currentProgress = document.getElementById('users-progress-results');
+  const imageOutputNode = document.getElementById('image-scraping-results');
+  const videoOutputNode = document.getElementById('video-scraping-results');
+
   const makeStatusRequest = async () => {
     const requestUrl = `${baseUrl}/${API_PREFIX}/scraper/status/`;
     return await (await fetch(requestUrl)).json();
@@ -26,10 +31,21 @@ const checkShutdown = async () => {
 
   const CHECK_STATUS_EVERY_MS = 2000;
   const updatePage = async () => {
-    const response = await makeStatusRequest();
-    if (response.status === 'stopped') {
+    const statusResponseData = await makeStatusRequest();
+    if (statusResponseData.status === 'stopped') {
       location.reload();
     } else {
+      const output = statusResponseData.output;
+      if (!output.done) {
+        progressContainer.classList.remove('hidden');
+        currentProgress.innerText = `${output.user_processed_so_far ?? 0}/${output.total_user_to_process ?? 0}`;
+        imageOutputNode.innerText = `${output.tot_scraped_images ?? 0}`;
+        videoOutputNode.innerText = `${output.tot_scraped_videos ?? 0}`;
+      } else {
+        // Hide progress status after at the end of an execution. Update log lines.
+        progressContainer.classList.add('hidden');
+        renderScrapingLogs(statusResponseData.log_lines);
+      } 
       setTimeout(updatePage, CHECK_STATUS_EVERY_MS);
     }
   };
@@ -47,11 +63,12 @@ const updateCommandButton = (buttonStatus) => {
     root.firstChild.classList.add('update-button');
     root.firstChild.disabled = 'true';
     root.firstChild.innerText = 'updating...';
-    checkShutdown();
+    updatePageFromStatusOutput();
   } else if (isRunning) {
     root.firstChild.classList.add('stop-button');
     root.firstChild.value = 'stop';
     root.firstChild.innerText = 'Stop';
+    updatePageFromStatusOutput();
   } else {
     root.firstChild.value = 'start';
     root.firstChild.innerText = 'Start';
@@ -64,13 +81,9 @@ const getScraperStatus = async () => {
   const settingsUrl = `${baseUrl}/${API_PREFIX}/scraper/settings/`;
   const statusResponseData = await (await fetch(statusUrl)).json();
   const settingsResponseData = await (await fetch(settingsUrl)).json();
-  const imageOutputNode = document.getElementById('image-scraping-results');
-  const videoOutputNode = document.getElementById('video-scraping-results');
   renderScrapingLogs(statusResponseData.log_lines);
   updateCommandButton(statusResponseData.status);
   setDropdown(settingsResponseData);
-  imageOutputNode.innerText = `${statusResponseData.output.scraped_images ?? 0}`;
-  videoOutputNode.innerText = `${statusResponseData.output.scraped_videos ?? 0}`;
 };
 
 const startScraping = async () => {
