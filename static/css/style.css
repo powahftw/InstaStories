@@ -414,6 +414,20 @@ ul {
   color: #000000;
 }
 
+.blacklisted-id-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 5px;
+  width: min-content;
+  max-width: 80vw;
+  height: 32px;
+  padding: 0 20px;
+  border-radius: 7px;
+  background-color: var(--red-complementary-color);
+  color: #ffffff;
+}
+
 .extra-id-name {
   padding: 0 20px;
   overflow: hidden;
@@ -440,6 +454,11 @@ ul {
 
 .status-bar {
   color: var(--green-complementary-color);
+}
+
+.version {
+  width: max-content;
+  margin: auto 20px;
 }
 
 .logs-field {

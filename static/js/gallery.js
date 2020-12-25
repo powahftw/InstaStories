@@ -51,7 +51,9 @@ const fetchResponseToHtml = async (response) => {
     document.getElementById('title').innerText = responseData['title'];
   }
 
-  const sortBasedOnName = (x, y) => { return x['name'].localeCompare(y['name']); };  
+  const sortBasedOnName = (x, y) => {
+    return x['name'].localeCompare(y['name']);
+  };
   const data = responseData['items'].sort(sortBasedOnName);
   const renderedItems = document.createElement('ul');
 

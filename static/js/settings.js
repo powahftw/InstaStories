@@ -2,6 +2,7 @@ const API_PREFIX = 'api';
 const baseUrl = window.location.origin;
 
 const extraIDs = new Set();
+const blacklistedIDs = new Set();
 
 const jsonToIdFields = new Map([
   ['session_id', 'session-id'],
@@ -9,6 +10,7 @@ const jsonToIdFields = new Map([
   ['loop_delay_seconds', 'loop-delay-seconds'],
   ['loop_variation_percentage', 'loop-variation-percentage'],
   ['extra_ids', 'extra-ids'],
+  ['blacklisted_ids', 'blacklisted-ids'],
 ]);
 const idToJsonFields = new Map(Array.from(jsonToIdFields, (a) => a.reverse()));
 
@@ -21,36 +23,50 @@ const displayWarningUnsavedChanges = (isActive) => {
   }
 };
 
-const deleteExtraID = (extraID) => {
-  if (extraIDs.delete(extraID)) {
+const deleteID = (id, listType) => {
+  const IDs = (listType == 'extraIDs') ? extraIDs : blacklistedIDs;
+
+  if (IDs.delete(id)) {
     displayWarningUnsavedChanges(true);
-    renderExtraIDs();
-  };
+    renderIDs(listType);
+  }
 };
 
-const addExtraID = (extraID) => {
-  if ((extraID.trim().length > 0) && !extraIDs.has(extraID)) {
-    extraIDs.add(extraID);
+const addID = (id, listType) => {
+  const IDs = (listType == 'extraIDs') ? extraIDs : blacklistedIDs;
+
+  if ((id.trim().length > 0) && (!IDs.has(id))) {
+    IDs.add(id);
     displayWarningUnsavedChanges(true);
-    renderExtraIDs();
-  };
+    renderIDs(listType);
+  }
 };
 
-const renderExtraIDs = () => {
-  const root = document.getElementById('extra-ids');
-  const extraIDsNode = document.createElement('div');
+const renderIDs = (listType) => {
+  if (listType === 'extraIDs') {
+    var IDs = extraIDs;
+    var nodeName = 'extra-ids';
+    var containerName = 'extra-id-container';
+  } else if (listType === 'blacklistedIDs') {
+    var IDs = blacklistedIDs;
+    var nodeName = 'blacklisted-ids';
+    var containerName = 'blacklisted-id-container';
+  };
+
+  const root = document.getElementById(nodeName);
+  const IDsNode = document.createElement('div');
   root.innerHTML = '';
-  extraIDsNode.classList.add('extra-ids-list');
-  extraIDs.forEach((id) => {
-    extraIDsNode.innerHTML += `
-            <div class="extra-id-container">
+  IDsNode.classList.add('extra-ids-list');
+  IDs.forEach((id) => {
+    IDsNode.innerHTML += `
+            <div class="${containerName}">
               <div class="extra-id-name">
                 ${id}
               </div>
-              <div class="delete-extra-id" onclick="deleteExtraID('${id}')">X</div>
+              <div class="delete-extra-id" onclick="deleteID('${id}', '${listType}')">X</div>
             </div>`;
   });
-  root.appendChild(extraIDsNode);
+  root.appendChild(IDsNode);
 };
 
 // Sets the placeholders and values in HTML
@@ -76,7 +92,10 @@ const fetchResponseToHtml = async (response) => {
       if (elementField) {
         if (element === 'extra_ids') {
           responseData[element].forEach((id) => extraIDs.add(id));
-          renderExtraIDs();
+          renderIDs('extraIDs');
+        } else if (element === 'blacklisted_ids') {
+          responseData[element].forEach((id) => blacklistedIDs.add(id));
+          renderIDs('blacklistedIDs');
         } else {
           elementField.placeholder = responseData[element];
         }
@@ -116,12 +135,14 @@ const updateSettings = async () => {
     settings[jsonField] = document.getElementById(idField).value || document.getElementById(idField).placeholder;
   });
   settings['extra_ids'] = Array.from(extraIDs);
+  settings['blacklisted_ids'] = Array.from(blacklistedIDs);
   await postUpdatedSettings(settings);
   getAndRenderSettingsPage();
   displayWarningUnsavedChanges(false);
 };
 
 const updateStatusBar = (res) => {
+  const HIDE_STATUS_AFTER_MS = 2000;
   const statusBar = document.getElementById('status-bar');
   const statusText = res.status === 200 ? 'Success!' : 'Failure, please try again!';
   statusBar.innerText = statusText;
@@ -130,7 +151,7 @@ const updateStatusBar = (res) => {
     statusBar.innerText = '';
   };
 
-  setTimeout(() => hideStatusBar(statusBar), 5000);
+  setTimeout(() => hideStatusBar(statusBar), HIDE_STATUS_AFTER_MS);
 };
 
 const postUpdatedSettings = async (payload) => { // POSTs the request for updating settings
@@ -167,6 +188,7 @@ const setUpButtonsListeners = () => {
   const deleteMediaBtn = document.getElementById('deleteMediaBtn');
   const submitBtn = document.getElementById('submitBtn');
   const addExtraIDBtn = document.getElementById('add-extra-id');
+  const addBlacklistedIDBtn = document.getElementById('add-blacklisted-id');
 
   logoutBtn.addEventListener('click', () => {
     if (confirm('Are you sure you want to logout?')) {
@@ -186,7 +208,12 @@ const setUpButtonsListeners = () => {
 
   addExtraIDBtn.addEventListener('click', () => {
     const extraID = document.getElementById('new-extra-id').value;
-    addExtraID(extraID);
+    addID(extraID, 'extraIDs');
+  });
+
+  addBlacklistedIDBtn.addEventListener('click', () => {
+    const blacklistedID = document.getElementById('blacklist-id').value;
+    addID(blacklistedID, 'blacklistedIDs');
   });
 };
 

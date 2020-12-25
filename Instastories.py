@@ -43,7 +43,7 @@ def get_cached_ids_to_nick():
     with open(cache_ids_path, "r") as file:
         return json.load(file)
 
-def normalize_extra_ids(ids):
+def normalize_ids(ids):
     """
     Given a list of string, containing both nicknames and ids it normalize them to a list of ids.
     The conversion from a nickname to an id make an IG request, but it's cached for future usage.
@@ -61,11 +61,11 @@ def normalize_extra_ids(ids):
             if id_of_nick:
                 cached_ids_to_nick[id_of_nick] = nick
                 nicks_to_ids[nick] = id_of_nick
-        if nick in nicks_to_ids: converted_nicknames.append(nicks_to_ids[nick])
+        if nick in nicks_to_ids: converted_nicknames.append(int(nicks_to_ids[nick]))
     save_cached_ids_to_nick(cached_ids_to_nick)
     return numeric_ids + converted_nicknames
 
-def get_ids(stories_ids, user_limit, extra_ids, ids_mode):
+def get_ids(stories_ids, user_limit, ids_mode, extra_ids, blacklisted_ids):
     """
     Handle logic for picking the ids to process.
     Args:
@@ -76,6 +76,8 @@ def get_ids(stories_ids, user_limit, extra_ids, ids_mode):
     """
     ids = (stories_ids[:user_limit] if ids_mode != "extra_ids_only" else []) + \
           (extra_ids if ids_mode != "stories_ids_only" else [])
+
+    ids = [id for id in ids if id not in blacklisted_ids]
     return list(dict.fromkeys(ids))  # Remove duplicates ids.
 
 ############################## TIME UTILS ######################################
@@ -290,14 +292,11 @@ def nick_to_id(nickname):
     Args:
         usr_list (string): Username.
     Returns:
-        ids (number): Id
+        ids (number|None): Id if nickname is valid, else return none
     """
     user_settings = settings.get()
-    if "session_id" in user_settings:
-        cookie = user_settings["session_id"]
-    else:
-        logger.info("Can't find session id, make sure you're logged in")
-        return
+    cookie = user_settings["session_id"]
+
 
     BASE_URL_PROFILE_INFO = "https://www.instagram.com/{}/?__a=1"
     r = requests.get(BASE_URL_PROFILE_INFO.format(nickname), headers=craft_cookie(cookie))
@@ -309,8 +308,9 @@ def nick_to_id(nickname):
 
 #################### START SCRAPING FUNCTIONS ###################
 
-def start_scrape(scrape_settings, user_limit, media_mode="all", ids_source="all"):
-    cookie = craft_cookie(scrape_settings["session_id"])  # The check logic for the existence of "session_id" is on the runner.py and flask_server.py files
+def start_scrape(user_limit, media_mode="all", ids_source="all"):
+    scrape_settings = settings.get()
+    cookie = craft_cookie(scrape_settings["session_id"])  # The check logic for the existence of "session_id" is in flask_server.py file
     folder_path = scrape_settings["media_folder_path"]
 
     stories_ids = []
@@ -318,16 +318,17 @@ def start_scrape(scrape_settings, user_limit, media_mode="all", ids_source="all"
         stories = get_stories_tray(cookie)
         stories_ids = tray_to_ids(stories)
         if user_limit <= 0: user_limit = len(stories_ids)
-    extra_ids = normalize_extra_ids(scrape_settings["extra_ids"] if "extra_ids" in scrape_settings else [])
-    ids = get_ids(stories_ids, user_limit, extra_ids, ids_source)
+    extra_ids = normalize_ids(scrape_settings["extra_ids"] if "extra_ids" in scrape_settings else [])
+    blacklisted_ids = normalize_ids(scrape_settings['blacklisted_ids'])
+    ids = get_ids(stories_ids, user_limit, ids_source, extra_ids, blacklisted_ids)
 
     logger.info(f"Starting scraping in mode: {media_mode}, ids source: {ids_source}")
     for processed_users, scraped_images, scraped_videos in download_stories(ids, cookie, folder_path, media_mode):
-        yield  {"done": False, 
-                "user_processed_so_far": processed_users,
-                "total_user_to_process": len(ids), 
-                "tot_scraped_images": scraped_images,
-                "tot_scraped_videos": scraped_videos}
+        yield {"done": False,
+               "user_processed_so_far": processed_users,
+               "total_user_to_process": len(ids),
+               "tot_scraped_images": scraped_images,
+               "tot_scraped_videos": scraped_videos}
         count_i, count_v = scraped_images, scraped_videos
     logger.info("Finished scraping")
     settings.completed_scraping()   # Send the signal that the scraping process finished. Used to flush Telegram logging.
@@ -338,9 +339,9 @@ def start_scrape(scrape_settings, user_limit, media_mode="all", ids_source="all"
         scraped_users = len(ids)
         o.write(f"Date: {timestampStr} - {scraped_users} people scraped - {count_i} IMGs - {count_v} VIDEOs \n")
 
-    yield {"done": True, 
-            "user_processed_so_far": len(ids),
-            "total_user_to_process": len(ids), 
-            "scraped_images": count_i,
-            "scraped_videos": count_v}
+    yield {"done": True,
+           "user_processed_so_far": len(ids),
+           "total_user_to_process": len(ids),
+           "scraped_images": count_i,
+           "scraped_videos": count_v}
     return None

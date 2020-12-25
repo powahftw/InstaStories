@@ -45,11 +45,11 @@ const updatePageFromStatusOutput = async () => {
         // Hide progress status after at the end of an execution. Update log lines.
         progressContainer.classList.add('hidden');
         renderScrapingLogs(statusResponseData.log_lines);
-      } 
+      };
       setTimeout(updatePage, CHECK_STATUS_EVERY_MS);
     }
   };
-  setTimeout(updatePage, CHECK_STATUS_EVERY_MS);
+  updatePage();
 };
 
 const updateCommandButton = (buttonStatus) => {
