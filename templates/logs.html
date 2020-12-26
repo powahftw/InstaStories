@@ -1,0 +1,12 @@
+{% set active_page = 'logs' %}
+{% extends 'base.html' %} 
+
+{% block content %}
+<div class="container">  
+    <p class="breadcrumb">Logs</p>     
+    <div class="content">
+        <div class="logs-field" id="logs"></div>    
+    </div>  
+</div>
+<script type="text/javascript" src="{{ url_for('static', filename='js/logs.js') }}"></script>
+{% endblock %}

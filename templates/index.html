@@ -1,0 +1,76 @@
+{% set active_page = 'index' %}
+{% extends 'base.html' %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <p class="breadcrumb">Home</p>
+    <div class="content">
+        <div class="errors" id="errors"></div>
+        <div class="settings-row">
+            <div class="scraper-setting">
+                <label class="setting-label" for="scraping-mode">Scraping mode</label>
+                <select class="dropdown-input" id="scraping-mode">
+                    <option value="all">Both</option>
+                    <option value="media">Media</option>
+                    <option value="metadata">Metadata</option>
+                </select>
+            </div>
+
+            <div class="scraper-setting">
+                <label class="setting-label" for="ids-source">IDs source</label>
+                <select class="dropdown-input" id="ids-source">
+                    <option value="all">Both</option>
+                    <option value="stories_ids_only">Stories tray</option>
+                    <option value="extra_ids_only">Extra IDs</option>
+                </select>
+            </div>
+
+            <div class="scraper-setting">
+                <label class="setting-label" for="loop-mode">Loop mode</label>
+                <select class="dropdown-input" id="loop-mode">
+                    <option value="false">Single</option>
+                    <option value="true">Loop</option>
+                </select>
+            </div>
+
+            <div class="scraper-setting">
+                <label class="setting-label" for="user-limit">User limit</label>
+                <div class="input-group">
+                    <input type="number" id="user-limit" class="text-input" />
+                    <div class="input-unit">
+                        <p>users</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="button-container"></div>
+
+        <div id="progress-container" class="hidden">
+            <div class="progress-content">
+                <img class="users-icon" src="/static/images/users_icon.png" alt="">
+                <p id="users-progress-results"></p>
+            </div>
+            <div class="progress-content">
+                <img class="image-icon" src="/static/images/image_icon.png" alt="">
+                <p id="image-scraping-results"></p>
+            </div>
+            <div class="progress-content">
+                <img class="video-icon" src="/static/images/video_icon.png" alt="">
+                <p id="video-scraping-results"></p>
+            </div>
+        </div>
+
+        <label class="setting-label" for="logs-container">Scraping history</label>
+        <div id="logs-container">
+            <ul class="logs-container" id="scraping-logs"></ul>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/index.js') }}"></script>
+{% endblock %}

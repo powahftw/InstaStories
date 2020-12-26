@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Insta scraper - {{ active_page }}</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    {% block header %}
+    {% endblock %}
+</head>
+    <body>
+        <div class="navbar">
+            <div class="navbar-icon-container">
+                <img class="navbar-display-button desktop-hidden" onclick="toggleNavbarLinks()" src="/static/images/menu_icon.png" alt="">
+                <img class="navbar-logo" src="/static/images/logo.png">
+            </div>
+            <div class="navbar-links" id="navbar-links">
+                <a href="/" class="navbar-link {{ 'navbar-link-active' if active_page == 'index' }}">
+                    <img class="navbar-icon" src="/static/images/home_icon.svg">
+                    <p class="navbar-text">Home</p>
+                </a>
+
+                <a href="/gallery" class="navbar-link {{ 'navbar-link-active' if active_page == 'gallery' }}">
+                    <img class="navbar-icon" src="/static/images/gallery_icon.svg">
+                    <p class="navbar-text">Gallery</p>
+                </a>
+
+                <a href="/settings" class="navbar-link {{ 'navbar-link-active' if active_page == 'settings' }}">
+                    <img class="navbar-icon" src="/static/images/settings_icon.svg">
+                    <p class="navbar-text">Settings</p>
+                </a>
+
+                <a href="/logs" class="navbar-link {{ 'navbar-link-active' if active_page == 'logs' }}">
+                    <img class="navbar-icon" src="/static/images/logs_icon.svg">
+                    <p class="navbar-text">Logs</p>
+                </a>
+            </div>
+        </div>
+    {% block content %}
+    {% endblock %}
+</body>
+
+    <script>
+        const toggleNavbarLinks = () => {
+            const navLinks = document.getElementById('navbar-links');
+            navLinks.classList.toggle('display-navbar-links');
+        }
+    </script>
+</html>

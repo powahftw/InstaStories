@@ -1,0 +1,69 @@
+{% set active_page = 'settings' %}
+{% extends 'base.html' %} {% block content %}
+    <div class="container" id="settings">
+        <div class="header">
+            <p class="breadcrumb">Settings</p>
+            <div class="header-settings">
+                <p class="version">v 1.0</p>
+                <button id="logoutBtn" class="button header-button">Logout</button>
+                <button id="deleteMediaBtn" class="button header-button">Delete all media</button>
+            </div>
+        </div>
+        <div class="content">
+            <p>Please enter your Session ID</p>
+            <div class="setting-field" id="login-field">
+                <label class="setting-label" for="session-id">Session ID</label>
+                <input class="text-input settings-text-input" id="session-id" type="text">
+            </div>
+    
+            <div class="setting-field">
+                <label class="setting-label" for="folder-path">Download folder path:</label>
+                <input class="text-input settings-text-input" id="folder-path" type="text">
+            </div>
+    
+            <div class="row">
+                <div class="setting-field">
+                    <label class="setting-label" for="loop-delay-seconds">Loop delay:</label>
+                    <div class="input-group">
+                        <input class="text-input" type="number" id="loop-delay-seconds" min="1">
+                        <div class="input-unit"><p>s</p></div>
+                    </div>
+                </div>
+        
+                <div class="setting-field">
+                    <label class="setting-label" for="loop-variation-percentage">Variation:</label>
+                    <div class="input-group">
+                        <input class="text-input" type="number" id="loop-variation-percentage" min="1" max="100">
+                        <div class="input-unit"><p>%</p></div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="setting-field">
+                <label class="setting-label" for="add-extra-id">Extra nicknames/IDS to scrape</label>
+                <div id="extra-ids"></div>
+                <div class="settings-row">
+                    <input class="text-input extra-ids-text-input" type="text" id="new-extra-id"/>
+                    <button class="button" id="add-extra-id">Add extra ID</button>
+                </div>
+            </div>
+
+            <div class="setting-field">
+                <label class="setting-label">Blacklisted IDs</label>
+                <div id="blacklisted-ids"></div>
+                <div class="settings-row">
+                    <input class="text-input extra-ids-text-input" type="text" id="blacklist-id"/>
+                    <button class="button" id="add-blacklisted-id">Add ID to blacklist</button>
+                </div>
+            </div>
+
+            <div class="errors" id="errors"></div>
+            <div class="setting-field disk-usage" id="disk-usage"></div>
+            <div class="setting-field buttons-field">
+                <button id="submitBtn" class="button">Save changes</button>
+            </div>
+            <div id="status-bar" class="status-bar"></div>
+        </div>
+    </div>
+<script type="text/javascript" src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}
