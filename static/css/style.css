@@ -318,6 +318,17 @@ ul {
   margin: 0;
 }
 
+.pagination-container button {
+  background-color: var(--secondary-color);
+  border-radius: 8px;
+  border: none;
+  color: var(--primary-color-light);
+  font-size: 120%;
+  margin: 0 8px;
+  padding: 5px;
+  user-select: none;
+}
+
 .logs-container {
   height: 200px;
   width: 90vw;

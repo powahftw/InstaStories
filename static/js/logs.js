@@ -3,6 +3,7 @@ const baseUrl = window.location.origin;
 
 const renderLogs = (logLines) => {
   const logsNode = document.getElementById('logs');
+  logsNode.innerHTML = '';
   const root = document.createElement('div');
   logLines.forEach((line) => {
     const pNode = document.createElement('p');
@@ -12,9 +13,34 @@ const renderLogs = (logLines) => {
   logsNode.appendChild(root);
 };
 
-const getAndRenderLogs = async () => {
-  const requestUrl = `${baseUrl}/${API_PREFIX}/logs`;
+const renderNav = (pageN, maxPage) => {
+  const paginationNode = document.getElementById('pagination');
+  paginationNode.innerHTML = ''
+
+  if (maxPage == 1) {
+    return; // Don't display pagination on log files that fit in a single page.
+  }
+  const root = document.createElement('div');
+  if (pageN > 1) {
+    decrease = document.createElement('button');
+    decrease.innerText = '<';
+    decrease.addEventListener('click', () => getAndRenderLogs(pageN - 1));
+    root.append(decrease);
+  }
+  root.append(document.createTextNode(`${pageN} / ${maxPage}`));
+  if (pageN < maxPage) {
+    increase = document.createElement('button');
+    increase.innerText = '>';
+    increase.addEventListener('click', () => getAndRenderLogs(pageN + 1));
+    root.append(increase);
+  }
+  paginationNode.append(root);
+}
+
+const getAndRenderLogs = async (page = 1) => {
+  const requestUrl = `${baseUrl}/${API_PREFIX}/logs/${page}`;
   const responseData = await (await fetch(requestUrl)).json();
+  renderNav(responseData['page'], responseData['max_page']);
   renderLogs(responseData['logs']);
 };
 

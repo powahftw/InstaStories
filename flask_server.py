@@ -10,6 +10,7 @@ app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 SKIP_EXTENSIONS = (".json", ".txt")
+PAGINATE_EVERY_N_ROWS = 100
 
 settings.setup_logger()
 logger = logging.getLogger(__name__)
@@ -62,7 +63,7 @@ def get_disk_usage():
         "total_space": total_disk_size,
     }
 
-def get_system_logs():
+def get_app_logs():
     log_file_path = settings.get('system_log_file_path')
     if not os.path.exists(log_file_path): return []
     with open(log_file_path, 'r+') as log_file:
@@ -208,9 +209,13 @@ def logout():
 def disk_usage():
     return jsonify(get_disk_usage())
 
-@app.route('/api/logs/', methods=["GET"])
-def get_logs():
-    return jsonify({"logs": get_system_logs()})
+@app.route("/api/logs/<int:page>/", methods=['GET'])
+def get_logs(page):
+    logs = get_app_logs()
+    paginated_logs = [logs[start:start+PAGINATE_EVERY_N_ROWS] for start in range(0, len(logs), PAGINATE_EVERY_N_ROWS)]
+    if page < 1 or page > len(paginated_logs):
+        return jsonify({"page": -1, "max_page": len(paginated_logs), "logs": []})
+    return jsonify({"page": page, "max_page": len(paginated_logs), "logs": paginated_logs[page - 1]})
 
 ################### SERVE MEDIA ###################
 
