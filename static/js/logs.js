@@ -17,22 +17,23 @@ const renderNav = (pageN, maxPage) => {
   const paginationNode = document.getElementById('pagination');
   paginationNode.innerHTML = ''
 
-  if (maxPage == 1) {
+  if (maxPage == 1 || maxPage == 0) {
     return; // Don't display pagination on log files that fit in a single page.
   }
   const root = document.createElement('div');
-  if (pageN > 1) {
-    decrease = document.createElement('button');
-    decrease.innerText = '<';
-    decrease.addEventListener('click', () => getAndRenderLogs(pageN - 1));
-    root.append(decrease);
-  }
+  decrease = document.createElement('button');
+  decrease.innerText = '<';
+  decrease.addEventListener('click', () => getAndRenderLogs(pageN - 1));
+  root.append(decrease);
   root.append(document.createTextNode(`${pageN} / ${maxPage}`));
-  if (pageN < maxPage) {
-    increase = document.createElement('button');
-    increase.innerText = '>';
-    increase.addEventListener('click', () => getAndRenderLogs(pageN + 1));
-    root.append(increase);
+  increase = document.createElement('button');
+  increase.innerText = '>';
+  increase.addEventListener('click', () => getAndRenderLogs(pageN + 1));
+  root.append(increase);
+  if(pageN <= 1) {
+    decrease.style.visibility = 'hidden'
+  } else if (pageN >= maxPage) {
+    increase.style.visibility = 'hidden'
   }
   paginationNode.append(root);
 }

@@ -319,10 +319,11 @@ ul {
 }
 
 .pagination-container button {
+  cursor: pointer;
   background-color: var(--secondary-color);
   border-radius: 8px;
   border: none;
-  color: var(--primary-color-light);
+  color: white;
   font-size: 120%;
   margin: 0 8px;
   padding: 5px;
