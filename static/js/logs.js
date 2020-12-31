@@ -15,9 +15,9 @@ const renderLogs = (logLines) => {
 
 const renderNav = (pageN, maxPage) => {
   const paginationNode = document.getElementById('pagination');
-  paginationNode.innerHTML = ''
+  paginationNode.innerHTML = '';
 
-  if (maxPage == 1 || maxPage == 0) {
+  if (maxPage <= 1) {
     return; // Don't display pagination on log files that fit in a single page.
   }
   const root = document.createElement('div');
@@ -30,10 +30,10 @@ const renderNav = (pageN, maxPage) => {
   increase.innerText = '>';
   increase.addEventListener('click', () => getAndRenderLogs(pageN + 1));
   root.append(increase);
-  if(pageN <= 1) {
-    decrease.style.visibility = 'hidden'
+  if (pageN <= 1) {
+    decrease.style.visibility = 'hidden';
   } else if (pageN >= maxPage) {
-    increase.style.visibility = 'hidden'
+    increase.style.visibility = 'hidden';
   }
   paginationNode.append(root);
 }

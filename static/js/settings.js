@@ -189,6 +189,11 @@ const setUpButtonsListeners = () => {
   const submitBtn = document.getElementById('submitBtn');
   const addExtraIDBtn = document.getElementById('add-extra-id');
   const addBlacklistedIDBtn = document.getElementById('add-blacklisted-id');
+  const changingInputs = [
+    document.getElementById('loop-variation-percentage'),
+    document.getElementById('loop-delay-seconds'),
+    document.getElementById('folder-path'),
+  ];
 
   logoutBtn.addEventListener('click', () => {
     if (confirm('Are you sure you want to logout?')) {
@@ -214,6 +219,12 @@ const setUpButtonsListeners = () => {
   addBlacklistedIDBtn.addEventListener('click', () => {
     const blacklistedID = document.getElementById('blacklist-id').value;
     addID(blacklistedID, 'blacklistedIDs');
+  });
+
+  changingInputs.forEach((input) => {
+    input.addEventListener('input', () => {
+      displayWarningUnsavedChanges(true);
+    });
   });
 };
 
