@@ -318,6 +318,18 @@ ul {
   margin: 0;
 }
 
+.pagination-container button {
+  cursor: pointer;
+  background-color: var(--secondary-color);
+  border-radius: 8px;
+  border: none;
+  color: white;
+  font-size: 120%;
+  margin: 0 8px;
+  padding: 5px;
+  user-select: none;
+}
+
 .logs-container {
   height: 200px;
   width: 90vw;

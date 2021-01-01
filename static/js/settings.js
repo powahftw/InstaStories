@@ -215,6 +215,17 @@ const setUpButtonsListeners = () => {
     const blacklistedID = document.getElementById('blacklist-id').value;
     addID(blacklistedID, 'blacklistedIDs');
   });
+
+  const changingInputs = [
+    document.getElementById('loop-variation-percentage'),
+    document.getElementById('loop-delay-seconds'),
+    document.getElementById('folder-path'),
+  ];
+  changingInputs.forEach((input) => {
+    input.addEventListener('input', () => {
+      displayWarningUnsavedChanges(true);
+    });
+  });
 };
 
 window.onload = () => {

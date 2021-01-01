@@ -26,6 +26,7 @@ DEFAULT_VALUES = {
     'media_folder_path': MEDIA_FOLDER_PATH,
     'system_log_file_path': LOG_FILE_PATH,
     'extra_ids': [],
+    'blacklist_ids': [],
     'ids_to_nickname_path': IDS_TO_NICKNAME_PATH,
     'loop_delay_seconds': 8 * 60 * 60,
     'loop_variation_percentage': 20,
