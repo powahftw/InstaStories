@@ -82,6 +82,7 @@ const fetchResponseToHtml = async (response) => {
   const isUserLoggedIn = ('session_id' in responseData);
   if (isUserLoggedIn) {
     loginField.style.display = 'none';
+    logoutField.style.display = 'block'
   } else {
     loginField.style.display = 'flex';
     logoutField.style.display = 'none';
