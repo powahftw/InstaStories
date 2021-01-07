@@ -78,11 +78,13 @@ const fetchResponseToHtml = async (response) => {
 
   const responseData = await response.json();
   const loginField = document.getElementById('login-field');
+  const logoutField = document.getElementById('logoutBtn');
   const isUserLoggedIn = ('session_id' in responseData);
   if (isUserLoggedIn) {
     loginField.style.display = 'none';
   } else {
     loginField.style.display = 'flex';
+    logoutField.style.display = 'none';
   }
 
   for (element in responseData) {
