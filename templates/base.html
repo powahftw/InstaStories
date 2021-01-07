@@ -4,7 +4,7 @@
     <title>Insta scraper - {{ active_page }}</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
     <link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=0"> 
     <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     {% block header %}
     {% endblock %}
@@ -17,7 +17,7 @@
             </div>
             <div class="navbar-links" id="navbar-links">
                 <a href="/" class="navbar-link {{ 'navbar-link-active' if active_page == 'index' }}">
-                    <img class="navbar-icon" src="/static/images/home_icon.svg">
+                  <img class="navbar-icon" src="/static/images/home_icon.svg">
                     <p class="navbar-text">Home</p>
                 </a>
 
