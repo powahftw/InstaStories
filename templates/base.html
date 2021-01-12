@@ -13,7 +13,9 @@
         <div class="navbar">
             <div class="navbar-icon-container">
                 <img class="navbar-display-button desktop-hidden" onclick="toggleNavbarLinks()" src="/static/images/menu_icon.png" alt="">
-                <img class="navbar-logo" src="/static/images/logo.png">
+                <a href="/">
+                    <img class="navbar-logo" src="/static/images/logo.png">
+                </a>
             </div>
             <div class="navbar-links" id="navbar-links">
                 <a href="/" class="navbar-link {{ 'navbar-link-active' if active_page == 'index' }}">
