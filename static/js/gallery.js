@@ -51,8 +51,17 @@ const fetchResponseToHtml = async (response) => {
   }
 
   const responseData = await response.json();
-  if (responseData["title"]) {
-    document.getElementById("title").innerText = responseData["title"];
+  if (responseData["page_info"]) {
+    pageInfo = responseData["page_info"];
+    section = pageInfo['section'];
+    let breadcrumb = `<a href="/${section}">${section}<a>`;
+    if (pageInfo['user_id']) {
+      breadcrumb += `/<a href="/${section}/${pageInfo['user_id']}">${pageInfo['display_name']}</a>`;
+      if (pageInfo['date']) {
+        breadcrumb += `/<span href='#'>${pageInfo['date']}<span>`;
+      }
+    }
+    document.getElementById("title").innerHTML = breadcrumb;
   }
 
   const sortBasedOnName = (x, y) => {

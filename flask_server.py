@@ -20,6 +20,7 @@ scraper_runner = ThreadRunner(start_scrape, user_settings["loop_delay_seconds"],
 
 ################### UTIL FUNCTIONS ###################
 
+
 def get_log_file_list():
     scraping_logs_path = settings.get('scraping_log_file_path')
     if not os.path.exists(scraping_logs_path):
@@ -27,6 +28,7 @@ def get_log_file_list():
     with open(scraping_logs_path, "r+") as o:
         logs = [log_lines for log_lines in o.readlines()]
         return logs[::-1]
+
 
 def get_folders(path, ids_to_names={}):
     rendered_folders = []  # List of {type: 'folder', name: Y}
@@ -42,6 +44,7 @@ def get_folders(path, ids_to_names={}):
                                  'id': f'{folder}'})
     return rendered_folders
 
+
 def get_media_files(path):
     to_render_media = []
     for media in os.listdir(path):
@@ -49,10 +52,12 @@ def get_media_files(path):
         to_render_media.append({'type': 'media', 'name': media, 'is_img': media.endswith(".jpg")})
     return to_render_media
 
+
 def get_stats_from_log_line(log_lines):
     _, users_count, img_count, video_count = log_lines[-1].split(" - ")
     count_u, count_i, count_v = [int(val.strip().split(" ")[0]) for val in [users_count, img_count, video_count]]
     return count_u, count_i, count_v
+
 
 def get_disk_usage():
     hdd_usage = shutil.disk_usage("/")
@@ -63,11 +68,13 @@ def get_disk_usage():
         "total_space": total_disk_size,
     }
 
+
 def get_app_logs():
     log_file_path = settings.get('system_log_file_path')
     if not os.path.exists(log_file_path): return []
     with open(log_file_path, 'r+') as log_file:
         return [log for log in log_file.readlines()[::-1]]
+
 
 def get_scraper_status():
     return {
@@ -76,6 +83,7 @@ def get_scraper_status():
         "output": scraper_runner.getOutput(),
         "status": scraper_runner.getStatus()
     }
+
 
 def get_scraper_settings():
     args = scraper_runner.args
@@ -90,15 +98,18 @@ def get_scraper_settings():
 
 ################### ROUTES ###################
 
+
 @app.route("/")
 def index():
     logger.info(f"{request.method} request to /index")
     return render_template('index.html')
 
+
 @app.route("/settings/", methods=['GET', 'POST'])
 def settings_page():
     logger.info(f"{request.method} request to /settings/")
     return render_template("settings.html")
+
 
 @app.route("/gallery/", methods=['GET'], defaults={"text": ''})
 @app.route("/gallery/<path:text>", methods=['GET'])
@@ -112,6 +123,7 @@ def logs():
     return render_template('logs.html')
 
 ################### API ROUTES ###################
+
 
 @app.route("/api/scraper/status/", methods=["GET", "POST"])
 def running_status():
@@ -132,15 +144,18 @@ def running_status():
 
     return jsonify(get_scraper_status())
 
+
 @app.route("/api/scraper/settings/", methods=["GET"])
 def scraper_settings():
     logger.info(f"API/{request.method} request to /scraper/settings/")
     return jsonify(get_scraper_settings())
 
+
 class PageType:
     USERS_VIEW = 1
     DATES_VIEW = 2
     MEDIA_VIEW = 3
+
 
 @app.route("/api/gallery/", methods=['GET'], defaults={"user_id": None, "date": None})
 @app.route("/api/gallery/<user_id>/", methods=['GET'], defaults={"date": None})
@@ -158,12 +173,11 @@ def gallery_api(user_id, date):
         view = PageType.USERS_VIEW
 
     ids_to_names = settings.get_ids_to_names_file()
-    page_title = 'Gallery'
-    if user_id:
-        page_title += f"/{ids_to_names.get(user_id, user_id)}"
-        if date:
-            page_title += f"/{date}"
 
+    page_info = {'section': 'gallery',
+                 'user_id': user_id if user_id else '',
+                 'display_name': ids_to_names.get(user_id, user_id) if user_id else '',
+                 'date': date if date else ''}
     if view == PageType.MEDIA_VIEW:
         date_path = os.path.join(os.path.join(folder_path, user_id), date)
         to_render_items = get_media_files(date_path)
@@ -172,7 +186,8 @@ def gallery_api(user_id, date):
         to_render_items = get_folders(user_path, ids_to_names=ids_to_names)
     else:
         to_render_items = get_folders(folder_path, ids_to_names=ids_to_names)
-    return jsonify({'title': page_title, 'items': to_render_items})
+    return jsonify({'page_info': page_info, 'items': to_render_items})
+
 
 @app.route("/api/gallery/", methods=['DELETE'])
 def delete_media():
@@ -181,6 +196,7 @@ def delete_media():
         shutil.rmtree(folder_path)
         logger.info(f"Deleted {folder_path} folder")
     return jsonify(success=True)
+
 
 @app.route("/api/settings/", methods=['GET', 'POST'])
 def get_settings_api():
@@ -198,6 +214,7 @@ def get_settings_api():
         scraper_runner.updateDelay(**loop_args)
         return jsonify(user_settings)
 
+
 @app.route('/api/settings/logout/', methods=["GET"])
 def logout():
     logger.info(f"API/{request.method} request to /settings/logout/")
@@ -205,9 +222,11 @@ def logout():
     logger.info("The user has logged out")
     return jsonify(success=True)
 
+
 @app.route('/api/settings/diskusage')
 def disk_usage():
     return jsonify(get_disk_usage())
+
 
 @app.route("/api/logs/<int:page>/", methods=['GET'])
 def get_logs(page):
@@ -218,6 +237,7 @@ def get_logs(page):
     return jsonify({"page": page, "max_page": len(paginated_logs), "logs": paginated_logs[page - 1]})
 
 ################### SERVE MEDIA ###################
+
 
 @app.route("/gallery/<username>/<date>/<filename>", methods=['GET'])
 def serve_media(username, date, filename):
