@@ -5,6 +5,7 @@ import shutil
 import settings
 import logging
 from thread_runner import ThreadRunner
+import json
 
 app = Flask(__name__)
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -31,7 +32,7 @@ def get_log_file_list():
 
 
 def get_folders(path, ids_to_names={}):
-    rendered_folders = []  # List of {type: 'folder', name: Y}
+    rendered_folders = []  # List of {type: 'folder', name: Y, id: X}
     if not os.path.exists(path): return []
     for folder in os.listdir(path):
         if folder.endswith(SKIP_EXTENSIONS): continue
@@ -105,21 +106,27 @@ def index():
     return render_template('index.html')
 
 
-@app.route("/settings/", methods=['GET', 'POST'])
+@app.route("/settings/", methods=['GET'])
 def settings_page():
-    logger.info(f"{request.method} request to /settings/")
+    logger.info(f"GET request to /settings")
     return render_template("settings.html")
 
 
 @app.route("/gallery/", methods=['GET'], defaults={"text": ''})
 @app.route("/gallery/<path:text>", methods=['GET'])
 def gallery(text):
-    logger.info(f"GET request to /gallery/")
+    logger.info(f"GET request to /gallery")
     return render_template("gallery.html")
 
+@app.route("/analytics/", methods=['GET'], defaults={"text": ''})
+@app.route("/analytics/<path:text>", methods=['GET'])
+def analytics_page(text):
+    logger.info(f"GET request to /analytics")
+    return render_template("analytics.html")
 
 @app.route("/logs/", methods=['GET'])
 def logs():
+    logger.info(f"GET request to /logs")
     return render_template('logs.html')
 
 ################### API ROUTES ###################
@@ -197,6 +204,44 @@ def delete_media():
         logger.info(f"Deleted {folder_path} folder")
     return jsonify(success=True)
 
+@app.route("/api/analytics/", methods=['GET'])
+def analytics_api():
+    media_path = settings.get("media_folder_path")
+    if not os.path.exists(media_path): return []
+
+    ids_to_names = settings.get_ids_to_names_file()
+    users_with_json_files = []
+    for folder in os.listdir(media_path):
+        if folder.endswith(SKIP_EXTENSIONS): continue
+
+        json_file_path = os.path.join(os.path.join(media_path, folder), f'{folder}.json')
+        # Check we have metadata of this user. Not having this might mean we didn't saved the .json stories or the folder structure is an old one.
+        if not (os.path.exists(json_file_path)):
+            logger.info(f"Didn't found {json_file_path} while looking for analytics files")
+            continue
+
+        # In the user names page we convert the ids to more usable displayed name.
+        displayed_name = ids_to_names.get(folder, folder)
+
+        users_with_json_files.append({'name': f'{displayed_name}',
+                                      'id': f'{folder}'})
+    return jsonify({"selected_user": None, "all_users": users_with_json_files, "json_file": None})
+
+@app.route("/api/analytics/<user_id>/", methods=['GET'])
+def analytics_api_single_user(user_id):
+    error_response = {"selected_user": None, "all_users": [], "user_json_file": None}
+    media_path = settings.get("media_folder_path")
+    json_file_path = os.path.join(os.path.join(media_path, user_id), f'{user_id}.json')
+    # Check we have metadata of this user. Not having this might mean we didn't saved the .json stories or the folder structure is an old one.
+    if not (os.path.exists(json_file_path)):
+        logger.info(f"Didn't {json_file_path} while looking for analytics files")
+        return jsonify(error_response)
+    try:
+        user_json = json.load(open(json_file_path, 'r'))
+        return jsonify({"selected_user": user_id, "all_users": [], "user_json_file": user_json})
+    except ValueError as e:
+        logger.error(f"Error in parsing {json_file_path} {e}")
+        return jsonify(error_response)
 
 @app.route("/api/settings/", methods=['GET', 'POST'])
 def get_settings_api():
