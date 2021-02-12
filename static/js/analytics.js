@@ -16,8 +16,14 @@ const composeUserChoicePage = (users) => {
 
 const composeStatisticsFromSingleUserJson = (json) => {
   let pageHtml = "";
+
   const nStories = json.length;
-  const storiesOfType = (s, type) => s.filter((j) => j["media_type"] === type).length;
+  if (nStories == 0) {
+    return "No stories founds!";
+  }
+
+  const storiesOfType = (s, type) =>
+    s.filter((j) => j["media_type"] === type).length;
   const nPics = storiesOfType(json, 1);
   const nVideos = storiesOfType(json, 2);
   const lastStory = json[nStories - 1];
@@ -33,14 +39,19 @@ const composeStatisticsFromSingleUserJson = (json) => {
         .filter((j) => "reel_mentions" in j)
         .flatMap((j) => j["reel_mentions"])
         .filter((j) => j["display_type"] === "mention_username")
-        .map((j) => j["user"]["full_name"])
+        .map((j) => j["user"]["full_name"] ?? j["user"]["username"])
+        .filter(Boolean) // Remove empty values, if any.
     )
   );
   pageHtml += `<h2>${lastUserName}<h2>`;
-  pageHtml += `<p>Last fetched Story at ${lastFetchedStoryTime}</p>`;
-  pageHtml += `<p>N:${nStories} STORIES | N: ${nPics} PICS | N: ${nVideos} VIDEOS</p>`;
-  pageHtml += `<p>Geotagged ${NGPSLocations} times</p>`;
-  pageHtml += `<p>Tagged friends: ${taggedFriends.join(" ")}</p>`;
+  pageHtml += `<p>Last fetched story: ${lastFetchedStoryTime}</p>`;
+  pageHtml += `<p>N: ${nStories} Stories | N: ${nPics} Pictures | N: ${nVideos} Videos</p>`;
+  if (NGPSLocations > 0) {
+    pageHtml += `<p>Geotagged ${NGPSLocations} times</p>`;
+  }
+  if (taggedFriends.length > 0) {
+    pageHtml += `<p>Tagged friends: ${taggedFriends.join(" - ")}</p>`;
+  }
   return pageHtml;
 };
 
