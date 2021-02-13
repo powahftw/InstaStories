@@ -126,7 +126,7 @@ const renderDiskUsage = async (res) => {
 const updateSettings = async () => {
   const settings = {};
   idToJsonFields.forEach((jsonField) => {
-    idField = jsonToIdFields.get(field);
+    idField = jsonToIdFields.get(jsonField);
     settings[jsonField] =
       document.getElementById(idField).value ||
       document.getElementById(idField).placeholder;

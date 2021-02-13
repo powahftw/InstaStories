@@ -1,5 +1,6 @@
 const API_PREFIX = "api";
 const baseUrl = window.location.origin;
+const CHART_CANVAS_ID = "chart";
 
 const composeUserChoicePage = (users) => {
   let pageHtml = "";
@@ -46,6 +47,8 @@ const composeStatisticsFromSingleUserJson = (json) => {
   pageHtml += `<h2>${lastUserName}<h2>`;
   pageHtml += `<p>Last fetched story: ${lastFetchedStoryTime}</p>`;
   pageHtml += `<p>N: ${nStories} Stories | N: ${nPics} Pictures | N: ${nVideos} Videos</p>`;
+  pageHtml += `<canvas width="100%" id="${CHART_CANVAS_ID}"></canvas>`;
+
   if (NGPSLocations > 0) {
     pageHtml += `<p>Geotagged ${NGPSLocations} times</p>`;
   }
@@ -53,6 +56,65 @@ const composeStatisticsFromSingleUserJson = (json) => {
     pageHtml += `<p>Tagged friends: ${taggedFriends.join(" - ")}</p>`;
   }
   return pageHtml;
+};
+
+const renderChartsFromSingleUserJson = (json) => {
+  const chartNode = document.getElementById(CHART_CANVAS_ID);
+  if (!chartNode) {
+    return;
+  }
+
+  const pastNMonths = (n) => {
+    const now = new Date();
+    return Array(n)
+      .fill(0)
+      .map((x, y) => x + y)
+      .map((n) => new Date(now.getFullYear(), now.getMonth() - n))
+      .reverse();
+  };
+
+  const dateToLabel = (date) =>
+    `${date.toLocaleString("en-US", { month: "long" })} ${date.getFullYear()}`;
+
+  const last12Months = pastNMonths(12);
+  // Initialize the counter map
+  const storyCounter = new Map(last12Months.map((m) => [dateToLabel(m), 0]));
+  json.forEach((j) => {
+    const timestamp = new Date(j["taken_at"] * 1000);
+    const date = dateToLabel(timestamp);
+    if (storyCounter.has(date)) {
+      storyCounter.set(date, storyCounter.get(date) + 1);
+    }
+  });
+  const ctx = chartNode.getContext("2d");
+  const getPurplePalette = (opacity = 1) => `rgba(153, 102, 255, ${opacity})`;
+
+  const _ = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: [...storyCounter.keys()],
+      datasets: [
+        {
+          label: "# of Stories",
+          data: [...storyCounter.values()],
+          backgroundColor: getPurplePalette(0.2),
+          borderColor: getPurplePalette(),
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      scales: {
+        yAxes: [
+          {
+            ticks: {
+              beginAtZero: true,
+            },
+          },
+        ],
+      },
+    },
+  });
 };
 
 const getAndRenderAnalytics = async () => {
@@ -74,15 +136,15 @@ const getAndRenderAnalytics = async () => {
 
   const isUserChoicePage = responseData["all_users"].length > 0;
 
-  let pageHtml = "";
   if (isUserChoicePage) {
-    pageHtml = composeUserChoicePage(responseData["all_users"]);
+    const pageHtml = composeUserChoicePage(responseData["all_users"]);
+    root.insertAdjacentHTML("afterbegin", pageHtml);
   } else {
-    pageHtml = composeStatisticsFromSingleUserJson(
-      responseData["user_json_file"]
-    );
+    userJsonFile = responseData["user_json_file"];
+    const pageHtml = composeStatisticsFromSingleUserJson(userJsonFile);
+    root.insertAdjacentHTML("afterbegin", pageHtml);
+    renderChartsFromSingleUserJson(userJsonFile);
   }
-  root.insertAdjacentHTML("afterbegin", pageHtml);
 };
 
 window.onload = () => {
