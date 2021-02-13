@@ -319,7 +319,7 @@ def start_scrape(user_limit, media_mode="all", ids_source="all"):
         stories_ids = tray_to_ids(stories)
         if user_limit <= 0: user_limit = len(stories_ids)
     extra_ids = normalize_ids(scrape_settings["extra_ids"] if "extra_ids" in scrape_settings else [])
-    blacklisted_ids = normalize_ids(scrape_settings['blacklisted_ids'] if "extra_ids" in scrape_settings else [])
+    blacklisted_ids = normalize_ids(scrape_settings['blacklisted_ids'] if "blacklisted_ids" in scrape_settings else [])
     ids = get_ids(stories_ids, user_limit, ids_source, extra_ids, blacklisted_ids)
 
     logger.info(f"Starting scraping in mode: {media_mode}, ids source: {ids_source}")
