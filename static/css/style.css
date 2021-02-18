@@ -186,6 +186,15 @@ ul {
   width: 100%;
 }
 
+.breadcrumb a:visited, .breadcrumb a { 
+  color: var(--secondary-color);
+  text-decoration: underline;
+}
+
+.breadcrumb a:hover {
+  color: var(--blue-complementary-color);
+}
+
 .settings-row {
   display: flex;
   flex-direction: column;
@@ -594,4 +603,17 @@ ul {
   justify-content: center;
   text-decoration: none;
   color: white;
+}
+
+.analitics-wrapper {
+  width: 100%;
+  text-align: center;
+}
+
+.analitics-users {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 240px));
+  column-gap: 18px;
+  row-gap: 12px;
+  justify-content: center;
 }

@@ -54,7 +54,10 @@ const fetchResponseToHtml = async (response) => {
   if (responseData["page_info"]) {
     pageInfo = responseData["page_info"];
     section = pageInfo['section'];
-    let breadcrumb = `<a href="/${section}">${section}<a>`;
+    
+    const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+    let breadcrumb = `<a href="/${section}">${capitalize(section)}</a>`;
     if (pageInfo['user_id']) {
       breadcrumb += `/<a href="/${section}/${pageInfo['user_id']}">${pageInfo['display_name']}</a>`;
       if (pageInfo['date']) {
