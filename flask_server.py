@@ -234,7 +234,7 @@ def analytics_api_single_user(user_id):
     json_file_path = os.path.join(os.path.join(media_path, user_id), f'{user_id}.json')
     # Check we have metadata of this user. Not having this might mean we didn't saved the .json stories or the folder structure is an old one.
     if not (os.path.exists(json_file_path)):
-        logger.info(f"Didn't {json_file_path} while looking for analytics files")
+        logger.info(f"Didn't found {json_file_path} while looking for analytics files")
         return jsonify(error_response)
     try:
         user_json = json.load(open(json_file_path, 'r'))

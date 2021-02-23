@@ -1,5 +1,6 @@
 const API_PREFIX = "api";
 const baseUrl = window.location.origin;
+const pathName = window.location.pathname;
 
 const getNColours = (n) => {
   const defaultPaletteSize = CHARTS_DEFAULTS_COLORS.length;
@@ -215,8 +216,6 @@ const renderChartsFromSingleUserJson = (json) => {
 };
 
 const getAndRenderAnalytics = async () => {
-  const baseUrl = window.location.origin;
-  const pathName = window.location.pathname;
 
   const requestUrl = `${baseUrl}/${API_PREFIX}${pathName}`;
   const responseData = await (await fetch(requestUrl)).json();
