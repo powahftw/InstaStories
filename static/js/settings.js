@@ -142,7 +142,7 @@ const updateStatusBar = (res) => {
   const HIDE_STATUS_AFTER_MS = 2000;
   const statusBar = document.getElementById("status-bar");
   const statusText =
-    res.status === 200 ? "Success!" : `Failure, ${res.error}`;
+    res.status === 200 ? "Success!" : `Failure, ${res.error || 'Unknown error'}`;
   statusBar.innerText = statusText;
   statusBar.className = res.status === 200 ? 'status-bar-success' : 'status-bar-failure'
 
