@@ -142,7 +142,7 @@ const updateStatusBar = (res) => {
   const HIDE_STATUS_AFTER_MS = 2000;
   const statusBar = document.getElementById("status-bar");
   const statusText =
-    res.status === 200 ? "Success!" : `Failure, ${res.error || 'Unknown error'}`;
+    res.status === 200 ? "Success!" : `Failure, ${res.error ?? 'Unknown error'}`;
   statusBar.innerText = statusText;
   statusBar.className = res.status === 200 ? 'status-bar-success' : 'status-bar-failure'
 
@@ -154,7 +154,7 @@ const updateStatusBar = (res) => {
 };
 
 const postUpdatedSettings = async (payload) => {
-  if (!payload.session_id) {
+  if (!('session_id' in payload)) {
     updateStatusBar({status: '400', error: 'you must provide session id to continue'});
     return;
   }
