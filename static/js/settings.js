@@ -6,7 +6,7 @@ const blacklistedIDs = new Set();
 
 const jsonToIdFields = new Map([
   ["session_id", "session-id"],
-  ["folder_path", "folder-path"],
+  ["media_folder_path", "media-folder-path"],
   ["loop_delay_seconds", "loop-delay-seconds"],
   ["loop_variation_percentage", "loop-variation-percentage"],
   ["extra_ids", "extra-ids"],
