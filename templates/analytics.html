@@ -1,11 +1,18 @@
-{% set active_page = 'analytics' %}
+{% set active_page = 'analytics' %} 
 {% extends 'base.html' %} 
 
+{% block header %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/analytics.css') }}">
+{% endblock %}
+
 {% block content %}
-<div class="container analytics">  
-    <p class="breadcrumb"><a href="/analytics">Analytics</a></p>
-    <div class="content" id="content"></div>  
+<div class="container analytics">
+  <p class="breadcrumb"><a href="/analytics">Analytics</a></p>
+  <div class="content" id="content"></div>
 </div>
 <script src="{{ url_for('static', filename='ext/chart.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+<script
+  type="text/javascript"
+  src="{{ url_for('static', filename='js/analytics.js') }}"
+></script>
 {% endblock %}

@@ -232,13 +232,20 @@ def analytics_api_single_user(user_id):
     error_response = {"selected_user": None, "all_users": [], "user_json_file": None}
     media_path = settings.get("media_folder_path")
     json_file_path = os.path.join(os.path.join(media_path, user_id), f'{user_id}.json')
+    start_date, end_date = int(request.args.get('start_date')), int(request.args.get('end_date'))
     # Check we have metadata of this user. Not having this might mean we didn't saved the .json stories or the folder structure is an old one.
     if not (os.path.exists(json_file_path)):
         logger.info(f"Didn't found {json_file_path} while looking for analytics files")
         return jsonify(error_response)
     try:
         user_json = json.load(open(json_file_path, 'r'))
-        return jsonify({"selected_user": user_id, "all_users": [], "user_json_file": user_json})
+        start_date = int(user_json[0]['taken_at']) if not start_date else start_date
+        end_date = int(user_json[-1]['taken_at']) if not end_date else end_date
+        user_json_response = []
+        for elem in user_json:
+            if start_date <= elem['taken_at'] <= end_date:
+                user_json_response.append(elem)
+        return jsonify({"selected_user": user_id, "all_users": [], "user_json_file": user_json_response})
     except ValueError as e:
         logger.error(f"Error in parsing {json_file_path} {e}")
         return jsonify(error_response)

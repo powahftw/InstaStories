@@ -28,12 +28,28 @@ const composeUserChoicePage = (users) => {
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach(({ name, id }) => {
       pageHtml += `<a href='${baseUrl}/analytics/${id}'>
-                    <ul>${name}</ul>
+                    <div class="user-preview">${name}</div>
                    </a>`;
     });
   pageHtml += "</div>";
   return `<div class='analitics-wrapper'>${pageHtml}</div>`;
 };
+
+const composeDatePicker = () =>
+  `<div class="date-picker-container">
+      <p>Select an interval</p>
+      <div class="date-picker">
+        <div class="date-picker-input">
+          <label for="start-date">Starting date</label>
+          <input type="date" id="start-date" name="start_date" placeholder="yyyy-mm-dd">
+        </div>
+        <div class="date-picker-input">
+          <label for="start-date">End date</label>
+          <input type="date" id="end-date" name="end_date" placeholder="yyyy-mm-dd">
+        </div>
+      </div>
+      <button class="button submit-date-btn" id="submit-date-btn">Filter</button>
+    </div>`;
 
 const taggedFriendsFromJson = (json) => {
   return json
@@ -46,6 +62,18 @@ const taggedFriendsFromJson = (json) => {
 
 const composeStatisticsFromSingleUserJson = (json) => {
   let pageHtml = "";
+
+  const composeChartContainer = (header, body) =>
+    `<div class="analytics-box">
+      <div class="analytics-box-header">${header}</div>
+      <div class="analytics-box-body">${body}</div>
+    </div>`;
+
+  const composeUserDetailsBarBox = (header, body) =>
+    `<div class="user-details-box">
+      <div class="user-details-box-header">${header}</div>
+      <div class="user-details-box-body">${body}</div>
+    </div>`;
 
   const nStories = json.length;
   if (nStories == 0) {
@@ -64,24 +92,53 @@ const composeStatisticsFromSingleUserJson = (json) => {
     .slice(0, 19)
     .replace("T", " ");
   const taggedFriends = Array.from(new Set(taggedFriendsFromJson(json)));
-  pageHtml += `<h2>${lastUserName}</h2>`;
-  pageHtml += `<p>Last fetched story: ${lastFetchedStoryTime}</p>`;
-  pageHtml += `<p>N: ${nStories} Stories | N: ${nPics} Pictures | N: ${nVideos} Videos</p>`;
-  pageHtml += `<canvas width="100%" id="chart-media"></canvas>`;
-  pageHtml += `<canvas width="100%" id="chart-hourly-freq"></canvas>`;
+
+  const userDetails = {
+    "Username": lastUserName,
+    "Last fetched story": lastFetchedStoryTime,
+    "Number of stories": nStories,
+    "Number of pictures": nPics,
+    "Number of videos": nVideos,
+  };
+
+  const mediaChart = `<canvas width="100%" id="chart-media"></canvas>`;
+  const freqChart = `<canvas width="100%" id="chart-hourly-freq"></canvas>`;
+  const charts = {
+    "Media chart": mediaChart,
+    "Frequency chart": freqChart,
+  };
+
+  let userDetailsBar = "";
+  userDetailsBar += `<div class="user-details-bar">`;
+  for (const [key, value] of Object.entries(userDetails)) {
+    userDetailsBar += composeUserDetailsBarBox(key, value);
+  }
+  userDetailsBar += `</div>`;
+
+  let analyticsBox = "";
+  analyticsBox += `<div class="analytics-box-container">`;
+  for (const [key, value] of Object.entries(charts)) {
+    analyticsBox += composeChartContainer(key, value);
+  }
+  if (taggedFriends.length > 0) {
+    analyticsBox += composeChartContainer(
+      "Tagged people",
+      `<canvas width="100%" id="chart-tagged"></canvas>`
+    );
+  }
+  analyticsBox += `</div>`;
+
+  pageHtml += userDetailsBar + analyticsBox;
 
   if (NGPSLocations > 0) {
     pageHtml += `<p>Geotagged ${NGPSLocations} times</p>`;
-  }
-  if (taggedFriends.length > 0) {
-    pageHtml += `<p>Tagged friends: ${taggedFriends.join(" - ")}</p>`;
-    pageHtml += `<canvas width="100%" id="chart-tagged"></canvas>`;
   }
   return pageHtml;
 };
 
 const createBarGraph = (ctx, label, labels, data) => {
   const getPurplePalette = (opacity = 1) => `rgba(153, 102, 255, ${opacity})`;
+  const getGreyPalette = (opacity = 1) => `rgba(255, 255, 255, ${opacity})`;
 
   return new Chart(ctx, {
     type: "bar",
@@ -99,10 +156,20 @@ const createBarGraph = (ctx, label, labels, data) => {
     },
     options: {
       scales: {
+        xAxes: [
+          {
+            gridLines: {
+              display: true,
+              color: getGreyPalette(0.1),
+            },
+          },
+        ],
         yAxes: [
           {
-            ticks: {
-              beginAtZero: true,
+            gridLines: {
+              display: true,
+              color: getGreyPalette(0.1),
+              zeroLineColor: getGreyPalette(0.3),
             },
           },
         ],
@@ -215,11 +282,11 @@ const renderChartsFromSingleUserJson = (json) => {
   renderTaggedFriendsGraphFromJson(json);
 };
 
-const getAndRenderAnalytics = async () => {
-
-  const requestUrl = `${baseUrl}/${API_PREFIX}${pathName}`;
+const getAndRenderAnalytics = async (startDate, endDate) => {
+  const requestUrl = `${baseUrl}/${API_PREFIX}${pathName}/?start_date=${startDate}&end_date=${endDate}`;
   const responseData = await (await fetch(requestUrl)).json();
   const root = document.getElementById("content");
+  root.innerHTML = "";
 
   if (!responseData["all_users"].length && !responseData["user_json_file"]) {
     // TODO: Implement a proper error page
@@ -239,10 +306,32 @@ const getAndRenderAnalytics = async () => {
     userJsonFile = responseData["user_json_file"];
     const pageHtml = composeStatisticsFromSingleUserJson(userJsonFile);
     root.insertAdjacentHTML("afterbegin", pageHtml);
+    const datePicker = composeDatePicker();
+    root.insertAdjacentHTML("afterbegin", datePicker);
     renderChartsFromSingleUserJson(userJsonFile);
+    dateFilter();
   }
 };
 
-window.onload = () => {
-  getAndRenderAnalytics();
+const dateFilter = () => {
+  const datePickerButton = document.getElementById("submit-date-btn");
+  if (datePickerButton) {
+    datePickerButton.addEventListener("click", () => {
+      const startDate = new Date(document.getElementById("start-date").value);
+      const endDate = new Date(document.getElementById("end-date").value);
+      endDate.setDate(endDate.getDate() + 1);
+      const startDateTimestamp = (startDate.getTime() / 1000) | 0;
+      const endDateTimestamp = (endDate.getTime() / 1000) | 0;
+      getAndRenderAnalytics(startDateTimestamp, endDateTimestamp);
+    });
+  }
+};
+
+window.onload = async () => {
+  const currentDate = new Date();
+  const endDate = (currentDate.getTime() / 1000) | 0;
+  const startDate =
+    (new Date().setMonth(currentDate.getMonth() - 1) / 1000) | 0;
+  await getAndRenderAnalytics(startDate, endDate);
+  dateFilter();
 };
