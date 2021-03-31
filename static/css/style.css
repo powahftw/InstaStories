@@ -469,8 +469,12 @@ ul {
   font-size: 14px;
 }
 
-.status-bar {
+.status-bar-success {
   color: var(--green-complementary-color);
+}
+
+.status-bar-failure {
+  color: var(--red-complementary-color);
 }
 
 .version {
