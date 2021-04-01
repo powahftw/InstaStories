@@ -23,7 +23,7 @@ const CHARTS_DEFAULTS_COLORS = [
 const composeUserChoicePage = (users) => {
   let pageHtml = "";
   pageHtml += `<p>Users: ${users.length}</p>`;
-  pageHtml += "<div class='analitics-users'>";
+  pageHtml += "<div class='analytics-users'>";
   Array.from(users)
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach(({ name, id }) => {
@@ -32,24 +32,8 @@ const composeUserChoicePage = (users) => {
                    </a>`;
     });
   pageHtml += "</div>";
-  return `<div class='analitics-wrapper'>${pageHtml}</div>`;
+  return `<div class='analytics-wrapper'>${pageHtml}</div>`;
 };
-
-const composeDatePicker = () =>
-  `<div class="date-picker-container">
-      <p>Select an interval</p>
-      <div class="date-picker">
-        <div class="date-picker-input">
-          <label for="start-date">Starting date</label>
-          <input type="date" id="start-date" name="start_date" placeholder="yyyy-mm-dd">
-        </div>
-        <div class="date-picker-input">
-          <label for="start-date">End date</label>
-          <input type="date" id="end-date" name="end_date" placeholder="yyyy-mm-dd">
-        </div>
-      </div>
-      <button class="button submit-date-btn" id="submit-date-btn">Filter</button>
-    </div>`;
 
 const taggedFriendsFromJson = (json) => {
   return json
@@ -101,24 +85,22 @@ const composeStatisticsFromSingleUserJson = (json) => {
     "Number of videos": nVideos,
   };
 
-  const mediaChart = `<canvas width="100%" id="chart-media"></canvas>`;
-  const freqChart = `<canvas width="100%" id="chart-hourly-freq"></canvas>`;
-  const charts = {
-    "Media chart": mediaChart,
-    "Frequency chart": freqChart,
-  };
-
   let userDetailsBar = "";
   userDetailsBar += `<div class="user-details-bar">`;
-  for (const [key, value] of Object.entries(userDetails)) {
-    userDetailsBar += composeUserDetailsBarBox(key, value);
+  for (const [fieldName, fieldValue] of Object.entries(userDetails)) {
+    userDetailsBar += composeUserDetailsBarBox(fieldName, fieldValue);
   }
   userDetailsBar += `</div>`;
 
+  const chartCanvas = (id) => `<canvas width="100%" id="${id}"></canvas>`;
+  const charts = {
+    "Media chart": chartCanvas("chart-media"),
+    "Frequency chart": chartCanvas("chart-hourly-freq"),
+  };
   let analyticsBox = "";
   analyticsBox += `<div class="analytics-box-container">`;
-  for (const [key, value] of Object.entries(charts)) {
-    analyticsBox += composeChartContainer(key, value);
+  for (const [chartName, chartCanvas] of Object.entries(charts)) {
+    analyticsBox += composeChartContainer(chartName, chartCanvas);
   }
   if (taggedFriends.length > 0) {
     analyticsBox += composeChartContainer(
@@ -303,13 +285,12 @@ const getAndRenderAnalytics = async (startDate, endDate) => {
     const pageHtml = composeUserChoicePage(responseData["all_users"]);
     root.insertAdjacentHTML("afterbegin", pageHtml);
   } else {
+    const datePickerContainer = document.getElementById('date-picker-container')
+    datePickerContainer.style.display = 'block'
     userJsonFile = responseData["user_json_file"];
     const pageHtml = composeStatisticsFromSingleUserJson(userJsonFile);
     root.insertAdjacentHTML("afterbegin", pageHtml);
-    const datePicker = composeDatePicker();
-    root.insertAdjacentHTML("afterbegin", datePicker);
     renderChartsFromSingleUserJson(userJsonFile);
-    dateFilter();
   }
 };
 
@@ -333,5 +314,6 @@ window.onload = async () => {
   const startDate =
     (new Date().setMonth(currentDate.getMonth() - 1) / 1000) | 0;
   await getAndRenderAnalytics(startDate, endDate);
+
   dateFilter();
 };

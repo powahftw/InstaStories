@@ -1,4 +1,4 @@
-{% set active_page = 'analytics' %} 
+{% set active_page = 'analytics' %}
 {% extends 'base.html' %} 
 
 {% block header %}
@@ -8,6 +8,21 @@
 {% block content %}
 <div class="container analytics">
   <p class="breadcrumb"><a href="/analytics">Analytics</a></p>
+  <div id="date-picker-container" class="date-picker-container">
+    <p>Select an interval</p>
+    <div class="date-picker">
+      <div class="date-picker-input">
+        <label for="start-date">Starting date</label>
+        <input type="date" id="start-date" name="start_date" placeholder="yyyy-mm-dd">
+      </div>
+      <div class="date-picker-input">
+        <label for="start-date">End date</label>
+        <input type="date" id="end-date" name="end_date" placeholder="yyyy-mm-dd">
+      </div>
+    </div>
+    <button class="button submit-date-btn" id="submit-date-btn">Filter</button>
+  </div>
+
   <div class="content" id="content"></div>
 </div>
 <script src="{{ url_for('static', filename='ext/chart.js') }}"></script>

@@ -241,10 +241,8 @@ def analytics_api_single_user(user_id):
         user_json = json.load(open(json_file_path, 'r'))
         start_date = int(user_json[0]['taken_at']) if not start_date else start_date
         end_date = int(user_json[-1]['taken_at']) if not end_date else end_date
-        user_json_response = []
-        for elem in user_json:
-            if start_date <= elem['taken_at'] <= end_date:
-                user_json_response.append(elem)
+        should_keep_story = lambda timestamp: not ((start_date and timestamp < start_date) or (end_date and timestamp > end_date))
+        user_json_response = [elem for elem in user_json if should_keep_story(elem['taken_at'])]
         return jsonify({"selected_user": user_id, "all_users": [], "user_json_file": user_json_response})
     except ValueError as e:
         logger.error(f"Error in parsing {json_file_path} {e}")

@@ -1,144 +1,142 @@
-/* Users list page */ 
+/* Users list page */
 .user-preview {
-    background-color: var(--secondary-color);
-    padding: 4px 8px;
-    margin: 8px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    color: white;
-    height: 28px;
-    border-radius: 8px;
+  background-color: var(--secondary-color);
+  padding: 4px 8px;
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: var(--white);
+  height: 28px;
+  border-radius: 8px;
 }
-  
-.analitics-wrapper {
-    width: 100%;
-    text-align: center;
+
+.analytics-wrapper {
+  width: 100%;
+  text-align: center;
 }
-  
-.analitics-users {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 240px));
-    column-gap: 18px;
-    row-gap: 12px;
-    justify-content: center;
+
+.analytics-users {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 240px));
+  column-gap: 18px;
+  row-gap: 12px;
+  justify-content: center;
 }
 
 /* User details bar */
 .user-details-bar {
-    width: 100%;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    flex-wrap: wrap;
+  width: 100%;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .user-details-box {
-    display: inline-block;
-    margin: 2px;
-    width: 80%;
-    min-width: 200px;
-    border: solid 1px var(--primary-color-accent);
-    border-radius: 8px;
-
+  display: inline-block;
+  margin: 2px;
+  width: 80%;
+  min-width: 200px;
+  border: solid 1px var(--primary-color-accent);
+  border-radius: 8px;
 }
 
 .user-details-box-header {
-    background-color: var(--primary-color-light);
-    height: 48px;
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px 8px 0 0;
+  background-color: var(--primary-color-light);
+  height: 48px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px 8px 0 0;
 }
 
 .user-details-box-body {
-    height: 50px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--primary-color-lighter);
-    border-radius: 0 0 8px 8px;
+  height: 50px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--primary-color-lighter);
+  border-radius: 0 0 8px 8px;
 }
-  
+
 /* Graphs box style */
 .analytics-box-container {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
-  
+
 .analytics-box {
-    display: inline-block;
-    margin: 8px;
-    width: 80%;
-    height: auto;
-    background-color: var(--primary-color-lighter);
-    border: solid 1px var(--primary-color-accent);
-    border-radius: 8px;
-  
+  display: inline-block;
+  margin: 8px;
+  width: 80%;
+  height: auto;
+  background-color: var(--primary-color-lighter);
+  border: solid 1px var(--primary-color-accent);
+  border-radius: 8px;
 }
-  
+
 .analytics-box-header {
-    background-color: var(--primary-color-light);
-    height: 48px;
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    border-radius: 8px 8px 0 0;
+  background-color: var(--primary-color-light);
+  height: 48px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px 8px 0 0;
 }
 
 .date-picker-container {
-    border: 1px solid var(--primary-color-lighter);
-    border-radius: 8px;
-    text-align: center;
-    padding: 0 20px;
-    margin-bottom: 20px;
+  display: none;
+  border: 1px solid var(--primary-color-lighter);
+  border-radius: 8px;
+  text-align: center;
+  padding: 0 20px;
+  margin-bottom: 20px;
 }
 
 .date-picker {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .date-picker-input {
-    margin-bottom: 8px;
-    display: flex;
-    flex-direction: column;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
 }
 
 .submit-date-btn {
-    margin-top: 8px;
+  margin-top: 8px;
 }
-
 
 /* Small screens / laptops */
 @media screen and (min-width: 1024px) {
-    .analytics-box-container {
-        flex-direction: row;
-    }
+  .analytics-box-container {
+    flex-direction: row;
+  }
 
-    .analytics-box {
-        width: 45%;
-    }
-    
-    .user-details-box {
-        width: 15%;
-    }
+  .analytics-box {
+    width: 45%;
+  }
 
-    .date-picker {
-        flex-direction: row;
-    }
+  .user-details-box {
+    width: 15%;
+  }
+
+  .date-picker {
+    flex-direction: row;
+  }
 }
