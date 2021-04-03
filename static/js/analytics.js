@@ -77,7 +77,7 @@ const composeStatisticsFromSingleUserJson = (json) => {
     .replace("T", " ");
   const taggedFriends = Array.from(new Set(taggedFriendsFromJson(json)));
 
-  const userDetails = {
+  const selectedUserStoriesInfo = {
     "Username": lastUserName,
     "Last fetched story": lastFetchedStoryTime,
     "Number of stories": nStories,
@@ -85,20 +85,21 @@ const composeStatisticsFromSingleUserJson = (json) => {
     "Number of videos": nVideos,
   };
 
-  let userDetailsBar = "";
-  userDetailsBar += `<div class="user-details-bar">`;
-  for (const [fieldName, fieldValue] of Object.entries(userDetails)) {
-    userDetailsBar += composeUserDetailsBarBox(fieldName, fieldValue);
+  let selectedUserInfoBar = `<div class="user-details-bar">`;
+  for (const [fieldName, fieldValue] of Object.entries(
+    selectedUserStoriesInfo
+  )) {
+    selectedUserInfoBar += composeUserDetailsBarBox(fieldName, fieldValue);
   }
-  userDetailsBar += `</div>`;
+  selectedUserInfoBar += `</div>`;
 
-  const chartCanvas = (id) => `<canvas width="100%" id="${id}"></canvas>`;
+  const createCanvasFromId = (id) =>
+    `<canvas width="100%" id="${id}"></canvas>`;
   const charts = {
-    "Media chart": chartCanvas("chart-media"),
-    "Frequency chart": chartCanvas("chart-hourly-freq"),
+    "Media chart": createCanvasFromId("chart-media"),
+    "Frequency chart": createCanvasFromId("chart-hourly-freq"),
   };
-  let analyticsBox = "";
-  analyticsBox += `<div class="analytics-box-container">`;
+  let analyticsBox = `<div class="analytics-box-container">`;
   for (const [chartName, chartCanvas] of Object.entries(charts)) {
     analyticsBox += composeChartContainer(chartName, chartCanvas);
   }
@@ -110,7 +111,7 @@ const composeStatisticsFromSingleUserJson = (json) => {
   }
   analyticsBox += `</div>`;
 
-  pageHtml += userDetailsBar + analyticsBox;
+  pageHtml += selectedUserInfoBar + analyticsBox;
 
   if (NGPSLocations > 0) {
     pageHtml += `<p>Geotagged ${NGPSLocations} times</p>`;
@@ -264,8 +265,27 @@ const renderChartsFromSingleUserJson = (json) => {
   renderTaggedFriendsGraphFromJson(json);
 };
 
-const getAndRenderAnalytics = async (startDate, endDate) => {
-  const requestUrl = `${baseUrl}/${API_PREFIX}${pathName}/?start_date=${startDate}&end_date=${endDate}`;
+const getAndRenderAnalytics = async (startDateTimestamp, endDateTimestamp) => {
+  if (!startDateTimestamp && !endDateTimestamp) {
+    // Default date interval is from 3 months ago
+    const monthsAgo = 3;
+    const currentDate = new Date();
+    const startDate = new Date(
+      new Date().setMonth(currentDate.getMonth() - monthsAgo)
+    );
+    endDateTimestamp = Math.trunc(currentDate.getTime() / 1000);
+    startDateTimestamp = Math.trunc(
+      new Date().setMonth(currentDate.getMonth() - monthsAgo) / 1000
+    );
+    // Setting default values on the date picker
+    document.getElementById("start-date").value = startDate
+      .toISOString()
+      .split("T")[0];
+    document.getElementById("end-date").value = currentDate
+      .toISOString()
+      .split("T")[0];
+  }
+  const requestUrl = `${baseUrl}/${API_PREFIX}${pathName}/?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
   const responseData = await (await fetch(requestUrl)).json();
   const root = document.getElementById("content");
   root.innerHTML = "";
@@ -285,8 +305,10 @@ const getAndRenderAnalytics = async (startDate, endDate) => {
     const pageHtml = composeUserChoicePage(responseData["all_users"]);
     root.insertAdjacentHTML("afterbegin", pageHtml);
   } else {
-    const datePickerContainer = document.getElementById('date-picker-container')
-    datePickerContainer.style.display = 'block'
+    const datePickerContainer = document.getElementById(
+      "date-picker-container"
+    );
+    datePickerContainer.style.display = "block";
     userJsonFile = responseData["user_json_file"];
     const pageHtml = composeStatisticsFromSingleUserJson(userJsonFile);
     root.insertAdjacentHTML("afterbegin", pageHtml);
@@ -294,26 +316,21 @@ const getAndRenderAnalytics = async (startDate, endDate) => {
   }
 };
 
-const dateFilter = () => {
+const addDateFilterEventListener = () => {
   const datePickerButton = document.getElementById("submit-date-btn");
   if (datePickerButton) {
     datePickerButton.addEventListener("click", () => {
       const startDate = new Date(document.getElementById("start-date").value);
       const endDate = new Date(document.getElementById("end-date").value);
       endDate.setDate(endDate.getDate() + 1);
-      const startDateTimestamp = (startDate.getTime() / 1000) | 0;
-      const endDateTimestamp = (endDate.getTime() / 1000) | 0;
+      const startDateTimestamp = Math.trunc(startDate.getTime() / 1000);
+      const endDateTimestamp = Math.trunc(endDate.getTime() / 1000);
       getAndRenderAnalytics(startDateTimestamp, endDateTimestamp);
     });
   }
 };
 
 window.onload = async () => {
-  const currentDate = new Date();
-  const endDate = (currentDate.getTime() / 1000) | 0;
-  const startDate =
-    (new Date().setMonth(currentDate.getMonth() - 1) / 1000) | 0;
-  await getAndRenderAnalytics(startDate, endDate);
-
-  dateFilter();
+  await getAndRenderAnalytics();
+  addDateFilterEventListener();
 };
