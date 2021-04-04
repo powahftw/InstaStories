@@ -265,26 +265,35 @@ const renderChartsFromSingleUserJson = (json) => {
   renderTaggedFriendsGraphFromJson(json);
 };
 
-const getAndRenderAnalytics = async (startDateTimestamp, endDateTimestamp) => {
-  if (!startDateTimestamp && !endDateTimestamp) {
-    // Default date interval is from 3 months ago
-    const monthsAgo = 3;
-    const currentDate = new Date();
-    const startDate = new Date(
-      new Date().setMonth(currentDate.getMonth() - monthsAgo)
-    );
-    endDateTimestamp = Math.trunc(currentDate.getTime() / 1000);
-    startDateTimestamp = Math.trunc(
-      new Date().setMonth(currentDate.getMonth() - monthsAgo) / 1000
-    );
-    // Setting default values on the date picker
-    document.getElementById("start-date").value = startDate
-      .toISOString()
-      .split("T")[0];
-    document.getElementById("end-date").value = currentDate
-      .toISOString()
-      .split("T")[0];
-  }
+const updateDatePicker = (startDate, endDate) => {
+  document.getElementById("start-date").value = startDate;
+  document.getElementById("end-date").value = endDate;
+};
+
+const getDateIntervalAndUpdateDatePicker = () => {
+  const startDateField = document.getElementById("start-date").value;
+  const endDateField = document.getElementById("end-date").value;
+  const monthsAgo = 3;
+  let endDate = endDateField ? new Date(endDateField) : new Date();
+  let startDate = startDateField
+    ? new Date(startDateField)
+    : new Date(new Date().setMonth(endDate.getMonth() - monthsAgo));
+
+  endDate.setDate(endDate.getDate() + 1); // Handles the last day
+  startDate = startDate.toISOString().split("T")[0];
+  endDate = endDate.toISOString().split("T")[0];
+  const startDateTimestamp = Date.parse(startDate) / 1000;
+  const endDateTimestamp = Date.parse(endDate) / 1000;
+
+  updateDatePicker(startDate, endDate);
+  return [startDateTimestamp, endDateTimestamp];
+};
+
+const getAndRenderAnalytics = async () => {
+  const [
+    startDateTimestamp,
+    endDateTimestamp,
+  ] = getDateIntervalAndUpdateDatePicker();
   const requestUrl = `${baseUrl}/${API_PREFIX}${pathName}/?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
   const responseData = await (await fetch(requestUrl)).json();
   const root = document.getElementById("content");
@@ -320,12 +329,7 @@ const addDateFilterEventListener = () => {
   const datePickerButton = document.getElementById("submit-date-btn");
   if (datePickerButton) {
     datePickerButton.addEventListener("click", () => {
-      const startDate = new Date(document.getElementById("start-date").value);
-      const endDate = new Date(document.getElementById("end-date").value);
-      endDate.setDate(endDate.getDate() + 1);
-      const startDateTimestamp = Math.trunc(startDate.getTime() / 1000);
-      const endDateTimestamp = Math.trunc(endDate.getTime() / 1000);
-      getAndRenderAnalytics(startDateTimestamp, endDateTimestamp);
+      getAndRenderAnalytics();
     });
   }
 };
