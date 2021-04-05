@@ -5,6 +5,7 @@ import shutil
 import settings
 import logging
 from thread_runner import ThreadRunner
+from datetime import datetime, timedelta
 import json
 
 app = Flask(__name__)
@@ -232,13 +233,16 @@ def analytics_api_single_user(user_id):
     error_response = {"selected_user": None, "all_users": [], "user_json_file": None}
     media_path = settings.get("media_folder_path")
     json_file_path = os.path.join(os.path.join(media_path, user_id), f'{user_id}.json')
-    start_date, end_date = int(request.args.get('start_date')), int(request.args.get('end_date'))
+    start_date_in_ms, end_date_in_ms = int(request.args.get('start_date')), int(request.args.get('end_date'))
     # Check we have metadata of this user. Not having this might mean we didn't saved the .json stories or the folder structure is an old one.
     if not (os.path.exists(json_file_path)):
         logger.info(f"Didn't found {json_file_path} while looking for analytics files")
         return jsonify(error_response)
     try:
         user_json = json.load(open(json_file_path, 'r'))
+        # Normalizing timestamps from ms to secs and adding a day to include the last day
+        start_date = int(start_date_in_ms / 1000)
+        end_date = int(datetime.timestamp(datetime.fromtimestamp(end_date_in_ms / 1000) + timedelta(days=1)))
         should_keep_story = lambda timestamp: not ((start_date and timestamp < start_date) or (end_date and timestamp > end_date))
         user_json_response = [elem for elem in user_json if should_keep_story(elem['taken_at'])]
         return jsonify({"selected_user": user_id, "all_users": [], "user_json_file": user_json_response})

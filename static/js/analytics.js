@@ -2,6 +2,8 @@ const API_PREFIX = "api";
 const baseUrl = window.location.origin;
 const pathName = window.location.pathname;
 
+const DEFAULT_LOOKBACK_MONTHS = 3;
+
 const getNColours = (n) => {
   const defaultPaletteSize = CHARTS_DEFAULTS_COLORS.length;
   const repeatPaletteNTimes = Math.ceil(n / defaultPaletteSize);
@@ -265,7 +267,9 @@ const renderChartsFromSingleUserJson = (json) => {
   renderTaggedFriendsGraphFromJson(json);
 };
 
-const updateDatePicker = (startDate, endDate) => {
+const updateDatePicker = (startDateTimestamp, endDateTimestamp) => {
+  const startDate = new Date(startDateTimestamp).toISOString().split("T")[0];
+  const endDate = new Date(endDateTimestamp).toISOString().split("T")[0];
   document.getElementById("start-date").value = startDate;
   document.getElementById("end-date").value = endDate;
 };
@@ -273,19 +277,16 @@ const updateDatePicker = (startDate, endDate) => {
 const getDateIntervalAndUpdateDatePicker = () => {
   const startDateField = document.getElementById("start-date").value;
   const endDateField = document.getElementById("end-date").value;
-  const monthsAgo = 3;
-  let endDate = endDateField ? new Date(endDateField) : new Date();
-  let startDate = startDateField
-    ? new Date(startDateField)
-    : new Date(new Date().setMonth(endDate.getMonth() - monthsAgo));
-
-  endDate.setDate(endDate.getDate() + 1); // Handles the last day
-  startDate = startDate.toISOString().split("T")[0];
-  endDate = endDate.toISOString().split("T")[0];
-  const startDateTimestamp = Date.parse(startDate) / 1000;
-  const endDateTimestamp = Date.parse(endDate) / 1000;
-
-  updateDatePicker(startDate, endDate);
+  const currentDate = new Date();
+  let endDateTimestamp = endDateField
+    ? new Date(endDateField).getTime()
+    : currentDate.getTime();
+  let startDateTimestamp = startDateField
+    ? new Date(startDateField).getTime()
+    : new Date().setMonth(currentDate.getMonth() - DEFAULT_LOOKBACK_MONTHS);
+  if (!startDateField || !endDateField) {
+    updateDatePicker(startDateTimestamp, endDateTimestamp);
+  }
   return [startDateTimestamp, endDateTimestamp];
 };
 
