@@ -278,10 +278,10 @@ const getDateIntervalAndUpdateDatePicker = () => {
   const startDateField = document.getElementById("start-date").value;
   const endDateField = document.getElementById("end-date").value;
   const currentDate = new Date();
-  let endDateTimestamp = endDateField
+  const endDateTimestamp = endDateField
     ? new Date(endDateField).getTime()
     : currentDate.getTime();
-  let startDateTimestamp = startDateField
+  const startDateTimestamp = startDateField
     ? new Date(startDateField).getTime()
     : new Date().setMonth(currentDate.getMonth() - DEFAULT_LOOKBACK_MONTHS);
   if (!startDateField || !endDateField) {
