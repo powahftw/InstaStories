@@ -46,6 +46,14 @@ const taggedFriendsFromJson = (json) => {
     .filter(Boolean); // Remove empty values, if any.
 };
 
+const hashtagsFromJson = (json) => {
+  return json
+    .filter((j) => "story_hashtags" in j)
+    .flatMap((j) => j["story_hashtags"])
+    .map((j) => j["hashtag"]["name"])
+    .filter(Boolean);
+};
+
 const composeStatisticsFromSingleUserJson = (json) => {
   let pageHtml = "";
 
@@ -78,6 +86,7 @@ const composeStatisticsFromSingleUserJson = (json) => {
     .slice(0, 19)
     .replace("T", " ");
   const taggedFriends = Array.from(new Set(taggedFriendsFromJson(json)));
+  const hashtags = Array.from(new Set(hashtagsFromJson(json)));
 
   const selectedUserStoriesInfo = {
     "Username": lastUserName,
@@ -100,16 +109,16 @@ const composeStatisticsFromSingleUserJson = (json) => {
   const charts = {
     "Media chart": createCanvasFromId("chart-media"),
     "Frequency chart": createCanvasFromId("chart-hourly-freq"),
+    ...(hashtags.length && {
+      "Hashtags chart": createCanvasFromId("chart-hashtags"),
+    }),
+    ...(taggedFriends.length && {
+      "Tags chart": createCanvasFromId("chart-tagged"),
+    }),
   };
   let analyticsBox = `<div class="analytics-box-container">`;
   for (const [chartName, chartCanvas] of Object.entries(charts)) {
     analyticsBox += composeChartContainer(chartName, chartCanvas);
-  }
-  if (taggedFriends.length > 0) {
-    analyticsBox += composeChartContainer(
-      "Tagged people",
-      `<canvas width="100%" id="chart-tagged"></canvas>`
-    );
   }
   analyticsBox += `</div>`;
 
@@ -162,6 +171,7 @@ const createBarGraph = (ctx, label, labels, data) => {
     },
   });
 };
+
 const renderMediaCountGraphFromJson = (json) => {
   const mediaCountGraph = document.getElementById("chart-media");
 
@@ -261,10 +271,40 @@ const renderTaggedFriendsGraphFromJson = (json) => {
   });
 };
 
+const renderHashtagsGraphFromJson = (json) => {
+  const hashtagsGraph = document.getElementById("chart-hashtags");
+  if (!hashtagsGraph) {
+    return;
+  }
+
+  const hashtagsCtx = hashtagsGraph.getContext("2d");
+  const hashtags = hashtagsFromJson(json);
+  const hashtagsCounter = new Map();
+  hashtags.forEach((hashtag) => hashtagsCounter.set(hashtag, (hashtagsCounter.get(hashtag) || 0) + 1));
+
+  new Chart(hashtagsCtx, {
+    type: "pie",
+    data: {
+      labels: [...hashtagsCounter.keys()],
+      datasets: [
+        {
+          label: "Hashtags",
+          data: [...hashtagsCounter.values()],
+          backgroundColor: getNColours(hashtags.length),
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+    },
+  });
+};
+
 const renderChartsFromSingleUserJson = (json) => {
   renderMediaCountGraphFromJson(json);
   renderHourlyFrequencyGraphFromJson(json);
   renderTaggedFriendsGraphFromJson(json);
+  renderHashtagsGraphFromJson(json);
 };
 
 const updateDatePicker = (startDateTimestamp, endDateTimestamp) => {
