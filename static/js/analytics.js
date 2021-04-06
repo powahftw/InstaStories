@@ -2,6 +2,8 @@ const API_PREFIX = "api";
 const baseUrl = window.location.origin;
 const pathName = window.location.pathname;
 
+const DEFAULT_LOOKBACK_MONTHS = 3;
+
 const getNColours = (n) => {
   const defaultPaletteSize = CHARTS_DEFAULTS_COLORS.length;
   const repeatPaletteNTimes = Math.ceil(n / defaultPaletteSize);
@@ -23,16 +25,16 @@ const CHARTS_DEFAULTS_COLORS = [
 const composeUserChoicePage = (users) => {
   let pageHtml = "";
   pageHtml += `<p>Users: ${users.length}</p>`;
-  pageHtml += "<div class='analitics-users'>";
+  pageHtml += "<div class='analytics-users'>";
   Array.from(users)
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach(({ name, id }) => {
       pageHtml += `<a href='${baseUrl}/analytics/${id}'>
-                    <ul>${name}</ul>
+                    <div class="user-preview">${name}</div>
                    </a>`;
     });
   pageHtml += "</div>";
-  return `<div class='analitics-wrapper'>${pageHtml}</div>`;
+  return `<div class='analytics-wrapper'>${pageHtml}</div>`;
 };
 
 const taggedFriendsFromJson = (json) => {
@@ -46,6 +48,18 @@ const taggedFriendsFromJson = (json) => {
 
 const composeStatisticsFromSingleUserJson = (json) => {
   let pageHtml = "";
+
+  const composeChartContainer = (header, body) =>
+    `<div class="analytics-box">
+      <div class="analytics-box-header">${header}</div>
+      <div class="analytics-box-body">${body}</div>
+    </div>`;
+
+  const composeUserDetailsBarBox = (header, body) =>
+    `<div class="user-details-box">
+      <div class="user-details-box-header">${header}</div>
+      <div class="user-details-box-body">${body}</div>
+    </div>`;
 
   const nStories = json.length;
   if (nStories == 0) {
@@ -64,24 +78,52 @@ const composeStatisticsFromSingleUserJson = (json) => {
     .slice(0, 19)
     .replace("T", " ");
   const taggedFriends = Array.from(new Set(taggedFriendsFromJson(json)));
-  pageHtml += `<h2>${lastUserName}</h2>`;
-  pageHtml += `<p>Last fetched story: ${lastFetchedStoryTime}</p>`;
-  pageHtml += `<p>N: ${nStories} Stories | N: ${nPics} Pictures | N: ${nVideos} Videos</p>`;
-  pageHtml += `<canvas width="100%" id="chart-media"></canvas>`;
-  pageHtml += `<canvas width="100%" id="chart-hourly-freq"></canvas>`;
+
+  const selectedUserStoriesInfo = {
+    "Username": lastUserName,
+    "Last fetched story": lastFetchedStoryTime,
+    "Number of stories": nStories,
+    "Number of pictures": nPics,
+    "Number of videos": nVideos,
+  };
+
+  let selectedUserInfoBar = `<div class="user-details-bar">`;
+  for (const [fieldName, fieldValue] of Object.entries(
+    selectedUserStoriesInfo
+  )) {
+    selectedUserInfoBar += composeUserDetailsBarBox(fieldName, fieldValue);
+  }
+  selectedUserInfoBar += `</div>`;
+
+  const createCanvasFromId = (id) =>
+    `<canvas width="100%" id="${id}"></canvas>`;
+  const charts = {
+    "Media chart": createCanvasFromId("chart-media"),
+    "Frequency chart": createCanvasFromId("chart-hourly-freq"),
+  };
+  let analyticsBox = `<div class="analytics-box-container">`;
+  for (const [chartName, chartCanvas] of Object.entries(charts)) {
+    analyticsBox += composeChartContainer(chartName, chartCanvas);
+  }
+  if (taggedFriends.length > 0) {
+    analyticsBox += composeChartContainer(
+      "Tagged people",
+      `<canvas width="100%" id="chart-tagged"></canvas>`
+    );
+  }
+  analyticsBox += `</div>`;
+
+  pageHtml += selectedUserInfoBar + analyticsBox;
 
   if (NGPSLocations > 0) {
     pageHtml += `<p>Geotagged ${NGPSLocations} times</p>`;
-  }
-  if (taggedFriends.length > 0) {
-    pageHtml += `<p>Tagged friends: ${taggedFriends.join(" - ")}</p>`;
-    pageHtml += `<canvas width="100%" id="chart-tagged"></canvas>`;
   }
   return pageHtml;
 };
 
 const createBarGraph = (ctx, label, labels, data) => {
   const getPurplePalette = (opacity = 1) => `rgba(153, 102, 255, ${opacity})`;
+  const getGreyPalette = (opacity = 1) => `rgba(255, 255, 255, ${opacity})`;
 
   return new Chart(ctx, {
     type: "bar",
@@ -99,10 +141,20 @@ const createBarGraph = (ctx, label, labels, data) => {
     },
     options: {
       scales: {
+        xAxes: [
+          {
+            gridLines: {
+              display: true,
+              color: getGreyPalette(0.1),
+            },
+          },
+        ],
         yAxes: [
           {
-            ticks: {
-              beginAtZero: true,
+            gridLines: {
+              display: true,
+              color: getGreyPalette(0.1),
+              zeroLineColor: getGreyPalette(0.3),
             },
           },
         ],
@@ -215,11 +267,38 @@ const renderChartsFromSingleUserJson = (json) => {
   renderTaggedFriendsGraphFromJson(json);
 };
 
-const getAndRenderAnalytics = async () => {
+const updateDatePicker = (startDateTimestamp, endDateTimestamp) => {
+  const startDate = new Date(startDateTimestamp).toISOString().split("T")[0];
+  const endDate = new Date(endDateTimestamp).toISOString().split("T")[0];
+  document.getElementById("start-date").value = startDate;
+  document.getElementById("end-date").value = endDate;
+};
 
-  const requestUrl = `${baseUrl}/${API_PREFIX}${pathName}`;
+const getDateIntervalAndUpdateDatePicker = () => {
+  const startDateField = document.getElementById("start-date").value;
+  const endDateField = document.getElementById("end-date").value;
+  const currentDate = new Date();
+  const endDateTimestamp = endDateField
+    ? new Date(endDateField).getTime()
+    : currentDate.getTime();
+  const startDateTimestamp = startDateField
+    ? new Date(startDateField).getTime()
+    : new Date().setMonth(currentDate.getMonth() - DEFAULT_LOOKBACK_MONTHS);
+  if (!startDateField || !endDateField) {
+    updateDatePicker(startDateTimestamp, endDateTimestamp);
+  }
+  return [startDateTimestamp, endDateTimestamp];
+};
+
+const getAndRenderAnalytics = async () => {
+  const [
+    startDateTimestamp,
+    endDateTimestamp,
+  ] = getDateIntervalAndUpdateDatePicker();
+  const requestUrl = `${baseUrl}/${API_PREFIX}${pathName}/?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
   const responseData = await (await fetch(requestUrl)).json();
   const root = document.getElementById("content");
+  root.innerHTML = "";
 
   if (!responseData["all_users"].length && !responseData["user_json_file"]) {
     // TODO: Implement a proper error page
@@ -236,6 +315,10 @@ const getAndRenderAnalytics = async () => {
     const pageHtml = composeUserChoicePage(responseData["all_users"]);
     root.insertAdjacentHTML("afterbegin", pageHtml);
   } else {
+    const datePickerContainer = document.getElementById(
+      "date-picker-container"
+    );
+    datePickerContainer.style.display = "block";
     userJsonFile = responseData["user_json_file"];
     const pageHtml = composeStatisticsFromSingleUserJson(userJsonFile);
     root.insertAdjacentHTML("afterbegin", pageHtml);
@@ -243,6 +326,16 @@ const getAndRenderAnalytics = async () => {
   }
 };
 
-window.onload = () => {
-  getAndRenderAnalytics();
+const addDateFilterEventListener = () => {
+  const datePickerButton = document.getElementById("submit-date-btn");
+  if (datePickerButton) {
+    datePickerButton.addEventListener("click", () => {
+      getAndRenderAnalytics();
+    });
+  }
+};
+
+window.onload = async () => {
+  await getAndRenderAnalytics();
+  addDateFilterEventListener();
 };

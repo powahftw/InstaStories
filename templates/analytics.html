@@ -1,11 +1,42 @@
-{% set active_page = 'analytics' %}
-{% extends 'base.html' %} 
+{% set active_page = 'analytics' %} {% extends 'base.html' %} {% block header %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{{ url_for('static', filename='css/analytics.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="container analytics">
+  <p class="breadcrumb"><a href="/analytics">Analytics</a></p>
+  <div id="date-picker-container" class="date-picker-container">
+    <p>Select an interval</p>
+    <div class="date-picker">
+      <div class="date-picker-input">
+        <label for="start-date">Starting date</label>
+        <input
+          type="date"
+          id="start-date"
+          name="start_date"
+          placeholder="yyyy-mm-dd"
+        />
+      </div>
+      <div class="date-picker-input">
+        <label for="start-date">End date</label>
+        <input
+          type="date"
+          id="end-date"
+          name="end_date"
+          placeholder="yyyy-mm-dd"
+        />
+      </div>
+    </div>
+    <button class="button submit-date-btn" id="submit-date-btn">Filter</button>
+  </div>
 
-{% block content %}
-<div class="container analytics">  
-    <p class="breadcrumb"><a href="/analytics">Analytics</a></p>
-    <div class="content" id="content"></div>  
+  <div class="content" id="content"></div>
 </div>
 <script src="{{ url_for('static', filename='ext/chart.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+<script
+  type="text/javascript"
+  src="{{ url_for('static', filename='js/analytics.js') }}"
+></script>
 {% endblock %}
