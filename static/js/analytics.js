@@ -78,10 +78,15 @@ const composeStatisticsFromSingleUserJson = (json) => {
     s.filter((j) => j["media_type"] === type).length;
   const nPics = storiesOfType(json, 1);
   const nVideos = storiesOfType(json, 2);
+  const firstStory = json[0];
   const lastStory = json[nStories - 1];
   const lastUserName = lastStory["user"]["username"];
   const NGPSLocations = json.filter((j) => "location" in j).length;
   const lastFetchedStoryTime = new Date(lastStory["taken_at"] * 1000)
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", " ");
+  const firstFetchedStoryTime = new Date(firstStory["taken_at"] * 1000)
     .toISOString()
     .slice(0, 19)
     .replace("T", " ");
@@ -90,6 +95,7 @@ const composeStatisticsFromSingleUserJson = (json) => {
 
   const selectedUserStoriesInfo = {
     "Username": lastUserName,
+    "First fetched story": firstFetchedStoryTime,
     "Last fetched story": lastFetchedStoryTime,
     "Number of stories": nStories,
     "Number of pictures": nPics,
@@ -375,7 +381,28 @@ const addDateFilterEventListener = () => {
   }
 };
 
+const predefinedIntervalsEventListener = () => {
+  const currentDate = new Date()
+  const currentDateTimestamp = currentDate.getTime()
+  const predefinedIntervalsInMonths = {
+    "ALL": 100, 
+    "1Y": 12, 
+    "6M": 6,
+    "3M": 3,
+    "1M": 1, 
+  }
+  document.querySelectorAll(".predefined-interval-btn").forEach((item) => {
+    item.addEventListener('click', () => {
+      const id = item.id
+      const startDateTimestamp = new Date().setMonth(currentDate.getMonth() - predefinedIntervalsInMonths[id])
+      updateDatePicker(startDateTimestamp, currentDateTimestamp)
+      getAndRenderAnalytics()
+    } )
+  })
+}
+
 window.onload = async () => {
   await getAndRenderAnalytics();
   addDateFilterEventListener();
+  predefinedIntervalsEventListener();
 };
