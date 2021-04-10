@@ -8,7 +8,6 @@
 <div class="container analytics">
   <p class="breadcrumb"><a href="/analytics">Analytics</a></p>
   <div id="date-picker-container" class="date-picker-container">
-    <p>Select an interval</p>
     <div class="date-picker">
       <div class="date-picker-input">
         <label for="start-date">Starting date</label>
@@ -28,8 +27,15 @@
           placeholder="yyyy-mm-dd"
         />
       </div>
+      <button class="button submit-date-btn" id="submit-date-btn">Filter</button>
     </div>
-    <button class="button submit-date-btn" id="submit-date-btn">Filter</button>
+    <div class="predefined-intervals">
+      <div class="bar-button predefined-interval-btn" id="ALL">ALL</div>
+      <div class="bar-button predefined-interval-btn" id="1Y">1Y</div>
+      <div class="bar-button predefined-interval-btn" id="6M">6M</div>
+      <div class="bar-button predefined-interval-btn" id="3M">3M</div>
+      <div class="bar-button predefined-interval-btn" id="1M">1M</div>
+    </div>
   </div>
 
   <div class="content" id="content"></div>

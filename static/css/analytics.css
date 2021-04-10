@@ -39,7 +39,7 @@
   display: inline-block;
   margin: 2px;
   width: 80%;
-  min-width: 200px;
+  min-width: 165px;
   border: solid 1px var(--primary-color-accent);
   border-radius: 8px;
 }
@@ -96,12 +96,13 @@
   border-radius: 8px 8px 0 0;
 }
 
+/* Date picker style  */
 .date-picker-container {
   display: none;
   border: 1px solid var(--primary-color-lighter);
   border-radius: 8px;
   text-align: center;
-  padding: 0 20px;
+  padding: 20px;
   margin-bottom: 20px;
 }
 
@@ -110,16 +111,58 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  margin-bottom: 8px;
 }
 
 .date-picker-input {
-  margin-bottom: 8px;
   display: flex;
   flex-direction: column;
+  margin-bottom: 8px;
+}
+
+.date-picker-input input {
+  height: 32px;
+  border: none;
+  padding: 0 0 0 4px;
+  margin: 4px 8px 0 8px;
+  border-radius: 4px;
+  color: white;
+  background-color: var(--primary-color-lighter);
 }
 
 .submit-date-btn {
-  margin-top: 8px;
+  margin: 0 0 0 8px;
+}
+
+.predefined-intervals {
+  margin-bottom: 12px;
+}
+
+.bar-button {
+  height: 100%;
+  padding: 4px;
+  background-color: var(--secondary-color);
+  display: inline-block;
+  vertical-align: middle;
+  width: 32px;
+  border: 0.5px solid var(--secondary-color-light);
+  color: white;
+  margin: 0;
+  cursor: pointer;
+  transition: 0.2s;
+  margin: 0 -2px;
+}
+
+.bar-button:first-child {
+  border-radius: 8px 0px 0px 8px;
+}
+
+.bar-button:last-child {
+  border-radius: 0px 8px 8px 0px;
+}
+
+.bar-button:hover {
+  background-color: #483ccc;
 }
 
 /* Small screens / laptops */
@@ -133,10 +176,15 @@
   }
 
   .user-details-box {
-    width: 15%;
+    width: 10%;
   }
 
   .date-picker {
     flex-direction: row;
+    align-items: flex-end;
+  }
+
+  .date-picker-input {
+    margin-bottom: 0;
   }
 }
