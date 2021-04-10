@@ -123,17 +123,15 @@
 .date-picker-input input {
   height: 32px;
   border: none;
-  padding: 0;
-  padding-left: 4px;
-  margin: 0 8px;
-  margin-top: 4px;
+  padding: 0 0 0 4px;
+  margin: 4px 8px 0 8px;
   border-radius: 4px;
   color: white;
   background-color: var(--primary-color-lighter);
 }
 
 .submit-date-btn {
-  margin: 0;
+  margin: 0 0 0 8px;
 }
 
 .predefined-intervals {
@@ -142,14 +140,14 @@
 
 .bar-button {
   height: 100%;
-  padding: 4px 4px;
+  padding: 4px;
   background-color: var(--secondary-color);
   display: inline-block;
   vertical-align: middle;
   width: 32px;
   border: 0.5px solid var(--secondary-color-light);
   color: white;
-  margin: 0 0;
+  margin: 0;
   cursor: pointer;
   transition: 0.2s;
   margin: 0 -2px;

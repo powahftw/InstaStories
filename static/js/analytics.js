@@ -82,14 +82,11 @@ const composeStatisticsFromSingleUserJson = (json) => {
   const lastStory = json[nStories - 1];
   const lastUserName = lastStory["user"]["username"];
   const NGPSLocations = json.filter((j) => "location" in j).length;
-  const lastFetchedStoryTime = new Date(lastStory["taken_at"] * 1000)
-    .toISOString()
-    .slice(0, 19)
-    .replace("T", " ");
-  const firstFetchedStoryTime = new Date(firstStory["taken_at"] * 1000)
-    .toISOString()
-    .slice(0, 19)
-    .replace("T", " ");
+
+  const timestampToISOString = (timestamp) =>
+    new Date(timestamp * 1000).toISOString().slice(0, 19).replace("T", " ");
+  const lastFetchedStoryTime = timestampToISOString(lastStory["taken_at"]);
+  const firstFetchedStoryTime = timestampToISOString(firstStory["taken_at"]);
   const taggedFriends = Array.from(new Set(taggedFriendsFromJson(json)));
   const hashtags = Array.from(new Set(hashtagsFromJson(json)));
 
@@ -286,7 +283,9 @@ const renderHashtagsGraphFromJson = (json) => {
   const hashtagsCtx = hashtagsGraph.getContext("2d");
   const hashtags = hashtagsFromJson(json);
   const hashtagsCounter = new Map();
-  hashtags.forEach((hashtag) => hashtagsCounter.set(hashtag, (hashtagsCounter.get(hashtag) || 0) + 1));
+  hashtags.forEach((hashtag) =>
+    hashtagsCounter.set(hashtag, (hashtagsCounter.get(hashtag) || 0) + 1)
+  );
 
   new Chart(hashtagsCtx, {
     type: "pie",
@@ -381,28 +380,32 @@ const addDateFilterEventListener = () => {
   }
 };
 
-const predefinedIntervalsEventListener = () => {
-  const currentDate = new Date()
-  const currentDateTimestamp = currentDate.getTime()
+const setPredefinedIntervalsEventListener = () => {
+  const currentDate = new Date();
+  const currentDateTimestamp = currentDate.getTime();
   const predefinedIntervalsInMonths = {
-    "ALL": 100, 
-    "1Y": 12, 
+    "ALL": 100,
+    "1Y": 12,
     "6M": 6,
     "3M": 3,
-    "1M": 1, 
-  }
-  document.querySelectorAll(".predefined-interval-btn").forEach((item) => {
-    item.addEventListener('click', () => {
-      const id = item.id
-      const startDateTimestamp = new Date().setMonth(currentDate.getMonth() - predefinedIntervalsInMonths[id])
-      updateDatePicker(startDateTimestamp, currentDateTimestamp)
-      getAndRenderAnalytics()
-    } )
-  })
-}
+    "1M": 1,
+  };
+  document
+    .querySelectorAll(".predefined-interval-btn")
+    .forEach((predefinedIntervalButton) => {
+      predefinedIntervalButton.addEventListener("click", () => {
+        const startDateTimestamp = new Date().setMonth(
+          currentDate.getMonth() -
+            predefinedIntervalsInMonths[predefinedIntervalButton.id]
+        );
+        updateDatePicker(startDateTimestamp, currentDateTimestamp);
+        getAndRenderAnalytics();
+      });
+    });
+};
 
 window.onload = async () => {
   await getAndRenderAnalytics();
   addDateFilterEventListener();
-  predefinedIntervalsEventListener();
+  setPredefinedIntervalsEventListener();
 };
