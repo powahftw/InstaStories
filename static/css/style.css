@@ -45,7 +45,8 @@
   --secondary-color-light: #7065f3;
   --red-complementary-color: #f72823;
   --blue-complementary-color: #4be0fe;
-  --green-complementary-color: #23f751;
+  --green-aquamarine: #7FFFD4;
+  --green-complementary-color: #101110;
   --white: #ffffff;
 
   --desktop-navbar-width: 96px;
@@ -92,11 +93,15 @@ ul {
 
 .navbar-icon-container {
   height: 100%;
-  padding: 0 5%;
+  padding: 0 24px;
   display: flex;
   flex-direction: row;
   justify-content: flex-start;
   align-items: center;
+}
+
+.navbar-icon-container > a {
+  line-height: 0;
 }
 
 .navbar-logo {
@@ -137,7 +142,7 @@ ul {
 
 .navbar-link-active {
   background-color: var(--primary-color-lighter);
-  border-radius: 7px;
+  border-radius: 8px;
 }
 
 .navbar-icon {
@@ -185,7 +190,13 @@ ul {
 }
 
 .breadcrumb {
-  width: 100%;
+  width: fit-content;
+  border-radius: 8px;
+  padding: 4px 8px;
+  background-color: var(--green-aquamarine);
+  color: var(--primary-color-lighter);
+  align-self: start;
+  font-size: 120%;
 }
 
 .breadcrumb a:visited, .breadcrumb a { 
@@ -225,7 +236,7 @@ ul {
   height: 32px;
   background-color: var(--primary-color-light);
   border: none;
-  border-radius: 7px;
+  border-radius: 8px;
   margin-bottom: 20px;
   color: white;
 }
@@ -235,7 +246,7 @@ ul {
   height: 32px;
   background-color: var(--primary-color-light);
   border: none;
-  border-radius: 7px;
+  border-radius: 8px;
   margin-bottom: 20px;
   color: white;
   text-indent: 10px;
@@ -249,7 +260,7 @@ ul {
 }
 
 .input-group input {
-  border-radius: 7px 0 0 7px;
+  border-radius: 8px 0 0 8px;
 }
 
 .input-unit {
@@ -261,7 +272,7 @@ ul {
   margin-bottom: 20px;
   padding: 0 10px;
   background-color: var(--secondary-color);
-  border-radius: 0 7px 7px 0;
+  border-radius: 0 8px 8px 0;
 }
 
 .button {
@@ -270,7 +281,7 @@ ul {
   height: 32px;
   background-color: var(--secondary-color);
   border: none;
-  border-radius: 7px;
+  border-radius: 8px;
   color: white;
   margin: 0 20px 20px;
   cursor: pointer;
@@ -349,7 +360,7 @@ ul {
   overflow-y: scroll;
   background-color: var(--primary-color-accent);
   border: 1px solid var(--primary-color-light);
-  border-radius: 7px;
+  border-radius: 8px;
   font-size: 12px;
   text-align: center;
 }
@@ -359,9 +370,10 @@ ul {
 }
 
 .gallery-container div ul {
-  margin-top: auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(235px, 300px));
+  gap: 24px;
+  padding: 32px 0;
+  grid-template-columns: repeat(auto-fit, minmax(235px, 268px));
   /* This does the trick */
   justify-content: center;
 }
@@ -375,10 +387,9 @@ ul {
 .gallery-folder {
   background-image: url(/static/images/folder.png);
   background-repeat: no-repeat;
-  height: 182px;
+  height: 108px;
   width: 235px;
-  margin: 20px;
-  padding-top: calc(182px / 2);
+  padding-top: calc(184px / 2);
   text-align: center;
   color: black;
 }
@@ -434,7 +445,7 @@ ul {
   max-width: 80vw;
   height: 32px;
   padding: 0 20px;
-  border-radius: 7px;
+  border-radius: 8px;
 }
 
 .extra-id-container {
@@ -482,30 +493,6 @@ ul {
 .version {
   width: max-content;
   margin: auto 20px;
-}
-
-.logs-field {
-  width: 90%;
-  padding: 5px;
-  border-radius: 7px;
-  border: 2px solid var(--primary-color-light);
-}
-
-.logs-field div p {
-  width: 90%;
-  display: block;
-  overflow-wrap: break-word;
-  font-size: 12px;
-  padding: 5px 5%;
-  margin: 0;
-}
-
-.logs-field div p:nth-child(odd) {
-  background-color: var(--primary-color-light);
-}
-
-.logs-field div p:nth-child(even) {
-  background-color: var(--primary-color-lighter);
 }
 
 /* Tablets */
@@ -590,11 +577,7 @@ ul {
   .textarea-input {
     width: 50vw;
   }
-
-  .logs-field div p {
-    font-size: 12px;
-  }
-
+  
   .logs-container {
     font-size: 16px;
   }

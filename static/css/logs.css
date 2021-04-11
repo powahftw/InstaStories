@@ -1,0 +1,30 @@
+.logs-field {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px;
+  border-radius: 8px;
+  border: 2px solid var(--primary-color-light);
+}
+
+.logs-field div p {
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  font-size: 12px;
+  padding: 4px 16px;
+  margin: 0;
+}
+
+.logs-field div p:nth-child(odd) {
+  background-color: var(--primary-color-light);
+}
+
+.logs-field div p:nth-child(even) {
+  background-color: var(--primary-color-lighter);
+}
+
+/* Small screens / laptops */
+@media screen and (min-width: 1024px) {
+  .logs-field div p {
+    font-size: 12px;
+  }
+}

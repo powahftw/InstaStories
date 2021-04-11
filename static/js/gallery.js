@@ -19,10 +19,8 @@ const showAndUpdateSummary = (folderCount, mediaCount) => {
 const renderFolder = (folder) => {
   const liNode = document.createElement("li");
   liNode.innerHTML = `
-    <a href="${removeTrailingSlash(window.location.href)}/${folder["id"]}">
-        <div class="gallery-folder">
-            ${folder["name"]}
-        </div>
+    <a class="gallery-folder" href="${removeTrailingSlash(window.location.href)}/${folder["id"]}">
+      ${folder["name"]}
     </a>`;
   return liNode;
 };

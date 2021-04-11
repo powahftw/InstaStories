@@ -2,7 +2,14 @@ const API_PREFIX = "api";
 const baseUrl = window.location.origin;
 const pathName = window.location.pathname;
 
-const DEFAULT_LOOKBACK_MONTHS = 3;
+const PREDEFINED_INTERVALS_ID_TO_MONTHS = {
+  ALL: 100,
+  "1Y": 12,
+  "6M": 6,
+  "3M": 3,
+  "1M": 1,
+};
+const DEFAULT_LOOKBACK_ID = "3M";
 
 const getNColours = (n) => {
   const defaultPaletteSize = CHARTS_DEFAULTS_COLORS.length;
@@ -323,12 +330,17 @@ const getDateIntervalAndUpdateDatePicker = () => {
   const startDateField = document.getElementById("start-date").value;
   const endDateField = document.getElementById("end-date").value;
   const currentDate = new Date();
-  const endDateTimestamp = endDateField
-    ? new Date(endDateField).getTime()
-    : currentDate.getTime();
+  const endDateTimestamp = (endDateField ? new Date(endDateField) : currentDate).getTime();
   const startDateTimestamp = startDateField
     ? new Date(startDateField).getTime()
-    : new Date().setMonth(currentDate.getMonth() - DEFAULT_LOOKBACK_MONTHS);
+    : new Date().setMonth(
+        currentDate.getMonth() -
+          PREDEFINED_INTERVALS_ID_TO_MONTHS[DEFAULT_LOOKBACK_ID]
+      );
+  if (!startDateField) {
+    /* Set the styling of the default interval button. */
+    setActiveSelectorStyle(DEFAULT_LOOKBACK_ID);
+  }
   if (!startDateField || !endDateField) {
     updateDatePicker(startDateTimestamp, endDateTimestamp);
   }
@@ -376,29 +388,41 @@ const addDateFilterEventListener = () => {
   if (datePickerButton) {
     datePickerButton.addEventListener("click", () => {
       getAndRenderAnalytics();
+      /* Clear active style from all predefined intervals buttons. */
+      setActiveSelectorStyle();
     });
   }
+};
+
+const PREDEFINED_INTERVAL_CLASS = ".predefined-interval-btn";
+
+const setActiveSelectorStyle = (activeId) => {
+  const ACTIVE_CLASS = "active";
+  document
+    .querySelectorAll(PREDEFINED_INTERVAL_CLASS)
+    .forEach((predifinedIntervalButton) => {
+      if (predifinedIntervalButton.id != activeId) {
+        predifinedIntervalButton.classList.remove(ACTIVE_CLASS);
+      } else {
+        predifinedIntervalButton.classList.add(ACTIVE_CLASS);
+      }
+    });
 };
 
 const setPredefinedIntervalsEventListener = () => {
   const currentDate = new Date();
   const currentDateTimestamp = currentDate.getTime();
-  const predefinedIntervalsInMonths = {
-    "ALL": 100,
-    "1Y": 12,
-    "6M": 6,
-    "3M": 3,
-    "1M": 1,
-  };
+
   document
-    .querySelectorAll(".predefined-interval-btn")
+    .querySelectorAll(PREDEFINED_INTERVAL_CLASS)
     .forEach((predefinedIntervalButton) => {
       predefinedIntervalButton.addEventListener("click", () => {
         const startDateTimestamp = new Date().setMonth(
           currentDate.getMonth() -
-            predefinedIntervalsInMonths[predefinedIntervalButton.id]
+            PREDEFINED_INTERVALS_ID_TO_MONTHS[predefinedIntervalButton.id]
         );
         updateDatePicker(startDateTimestamp, currentDateTimestamp);
+        setActiveSelectorStyle(predefinedIntervalButton.id);
         getAndRenderAnalytics();
       });
     });
