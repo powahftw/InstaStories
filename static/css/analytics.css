@@ -27,17 +27,15 @@
 
 /* User details bar */
 .user-details-bar {
-  width: 100%;
-  border-radius: 8px;
   display: flex;
   flex-direction: row;
   justify-content: center;
   flex-wrap: wrap;
+  gap: 8px;
 }
 
 .user-details-box {
   display: inline-block;
-  margin: 2px;
   width: 80%;
   min-width: 165px;
   border: solid 1px var(--primary-color-accent);
@@ -135,7 +133,12 @@
 }
 
 .predefined-intervals {
-  margin-bottom: 12px;
+  margin: 12px 0;
+}
+
+.predefined-interval-btn.active {
+  background-color: var(--green-aquamarine);
+  color: var(--primary-color-light);
 }
 
 .bar-button {

@@ -2,6 +2,11 @@
 {% extends 'base.html' %} 
 
 {% block content %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{{ url_for('static', filename='css/logs.css') }}"
+/>
 <div class="container">  
     <p class="breadcrumb">Logs</p>
     <p class="pagination-container" id="pagination"></p>    
