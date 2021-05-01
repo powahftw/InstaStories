@@ -4,6 +4,10 @@
   type="text/css"
   href="{{ url_for('static', filename='css/analytics.css') }}"
 />
+<link
+  rel="stylesheet"
+  href="{{ url_for('static', filename='ext/leaflet/leaflet.css') }}"
+/>
 {% endblock %} {% block content %}
 <div class="container analytics">
   <p class="breadcrumb"><a href="/analytics">Analytics</a></p>
@@ -27,7 +31,9 @@
           placeholder="yyyy-mm-dd"
         />
       </div>
-      <button class="button submit-date-btn" id="submit-date-btn">Filter</button>
+      <button class="button submit-date-btn" id="submit-date-btn">
+        Filter
+      </button>
     </div>
     <div class="predefined-intervals">
       <div class="bar-button predefined-interval-btn" id="ALL">ALL</div>
@@ -41,6 +47,7 @@
   <div class="content" id="content"></div>
 </div>
 <script src="{{ url_for('static', filename='ext/chart.js') }}"></script>
+<script src="{{ url_for('static', filename='ext/leaflet/leaflet.js') }}"></script>
 <script
   type="text/javascript"
   src="{{ url_for('static', filename='js/analytics.js') }}"
