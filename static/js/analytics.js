@@ -96,7 +96,6 @@ const composeStatisticsFromSingleUserJson = (json) => {
   const firstFetchedStoryTime = timestampToISOString(firstStory["taken_at"]);
   const taggedFriends = Array.from(new Set(taggedFriendsFromJson(json)));
   const hashtags = Array.from(new Set(hashtagsFromJson(json)));
-  
   const selectedUserStoriesInfo = {
     "Username": lastUserName,
     "First fetched story": firstFetchedStoryTime,
@@ -313,18 +312,31 @@ const renderHashtagsGraphFromJson = (json) => {
   });
 };
 
-const renderGeotaggetGraphFromJsom = (json) => {
-  const geotaggedCoords = json
+const renderGeotaggedMapFromJson = (json) => {
+  const geotaggedPlaces = json
     .filter((j) => "location" in j)
-    .map((location) => [location.lat, location.lng]);
-  const mapBounds = new L.latLngBounds(geotaggedCoords).extend();
-  var mymap = L.map("chart-geotagged");
+    .map((story) => {
+      const location = story.location;
+      return {
+        name: location.short_name,
+        coords: [location.lat, location.lng],
+      };
+    });
+  const mapBounds = new L.latLngBounds(
+    geotaggedPlaces.map((geotaggedPlaces) => geotaggedPlaces.coords)
+  ).extend();
+  const geotaggedMap = L.map("chart-geotagged", {
+    attributionControl: false,
+  });
   L.tileLayer("http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
     maxZoom: 15,
     subdomains: ["mt0", "mt1", "mt2", "mt3"],
-  }).addTo(mymap);
-  mymap.fitBounds(mapBounds);
-  geotaggedCoords.map((coords) => L.marker(coords).addTo(mymap));
+  }).addTo(geotaggedMap);
+  geotaggedMap.fitBounds(mapBounds);
+  geotaggedPlaces.map((geotaggedPlace) => {
+    const marker = L.marker(geotaggedPlace.coords).addTo(geotaggedMap);
+    marker.bindPopup(geotaggedPlace.name);
+  });
 };
 
 const renderChartsFromSingleUserJson = (json) => {
@@ -332,7 +344,7 @@ const renderChartsFromSingleUserJson = (json) => {
   renderHourlyFrequencyGraphFromJson(json);
   renderTaggedFriendsGraphFromJson(json);
   renderHashtagsGraphFromJson(json);
-  renderGeotaggetGraphFromJsom(json);
+  renderGeotaggedMapFromJson(json);
 };
 
 const updateDatePicker = (startDateTimestamp, endDateTimestamp) => {
