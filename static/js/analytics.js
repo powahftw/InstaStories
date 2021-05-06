@@ -313,18 +313,6 @@ const renderHashtagsGraphFromJson = (json) => {
 };
 
 const renderGeotaggedMapFromJson = (json) => {
-  const geotaggedPlaces = json
-    .filter((j) => "location" in j)
-    .map((story) => {
-      const location = story.location;
-      return {
-        name: location.short_name,
-        coords: [location.lat, location.lng],
-      };
-    });
-  const mapBounds = new L.latLngBounds(
-    geotaggedPlaces.map((geotaggedPlaces) => geotaggedPlaces.coords)
-  ).extend();
   const geotaggedMap = L.map("chart-geotagged", {
     attributionControl: false,
   });
@@ -332,11 +320,18 @@ const renderGeotaggedMapFromJson = (json) => {
     maxZoom: 15,
     subdomains: ["mt0", "mt1", "mt2", "mt3"],
   }).addTo(geotaggedMap);
+
+  const markers = [];
+  json
+    .filter((j) => "location" in j)
+    .map((story) => {
+      const location = story.location;
+      const marker = L.marker([location.lat, location.lng]).addTo(geotaggedMap);
+      marker.bindPopup(location.name);
+      markers.push(marker);
+    });
+  const mapBounds = new L.featureGroup(markers).getBounds();
   geotaggedMap.fitBounds(mapBounds);
-  geotaggedPlaces.map((geotaggedPlace) => {
-    const marker = L.marker(geotaggedPlace.coords).addTo(geotaggedMap);
-    marker.bindPopup(geotaggedPlace.name);
-  });
 };
 
 const renderChartsFromSingleUserJson = (json) => {
