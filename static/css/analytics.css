@@ -77,7 +77,7 @@
   display: inline-block;
   margin: 8px;
   width: 80%;
-  height: auto;
+  height: 400px;
   background-color: var(--primary-color-lighter);
   border: solid 1px var(--primary-color-accent);
   border-radius: 8px;
@@ -166,6 +166,12 @@
 
 .bar-button:hover {
   background-color: #483ccc;
+}
+
+/* Geotagging container */
+
+#chart-geotagged {
+  height: 342px;
 }
 
 /* Small screens / laptops */

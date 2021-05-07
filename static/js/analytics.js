@@ -96,7 +96,6 @@ const composeStatisticsFromSingleUserJson = (json) => {
   const firstFetchedStoryTime = timestampToISOString(firstStory["taken_at"]);
   const taggedFriends = Array.from(new Set(taggedFriendsFromJson(json)));
   const hashtags = Array.from(new Set(hashtagsFromJson(json)));
-
   const selectedUserStoriesInfo = {
     "Username": lastUserName,
     "First fetched story": firstFetchedStoryTime,
@@ -116,6 +115,8 @@ const composeStatisticsFromSingleUserJson = (json) => {
 
   const createCanvasFromId = (id) =>
     `<canvas width="100%" id="${id}"></canvas>`;
+  const createDivFromId = (id) => `<div width="100%" id="${id}"></div>`;
+
   const charts = {
     "Media chart": createCanvasFromId("chart-media"),
     "Frequency chart": createCanvasFromId("chart-hourly-freq"),
@@ -125,6 +126,9 @@ const composeStatisticsFromSingleUserJson = (json) => {
     ...(taggedFriends.length && {
       "Tags chart": createCanvasFromId("chart-tagged"),
     }),
+    ...(NGPSLocations && {
+      "Geotagged chart": createDivFromId("chart-geotagged"),
+    }),
   };
   let analyticsBox = `<div class="analytics-box-container">`;
   for (const [chartName, chartCanvas] of Object.entries(charts)) {
@@ -133,10 +137,6 @@ const composeStatisticsFromSingleUserJson = (json) => {
   analyticsBox += `</div>`;
 
   pageHtml += selectedUserInfoBar + analyticsBox;
-
-  if (NGPSLocations > 0) {
-    pageHtml += `<p>Geotagged ${NGPSLocations} times</p>`;
-  }
   return pageHtml;
 };
 
@@ -312,11 +312,33 @@ const renderHashtagsGraphFromJson = (json) => {
   });
 };
 
+const renderGeotaggedMapFromJson = (json) => {
+  const geotaggedMap = L.map("chart-geotagged", {
+    attributionControl: false,
+  });
+  L.tileLayer("http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+    maxZoom: 15,
+    subdomains: ["mt0", "mt1", "mt2", "mt3"],
+  }).addTo(geotaggedMap);
+
+  const markers = json
+    .filter((j) => "location" in j)
+    .map((story) => {
+      const location = story.location;
+      const marker = L.marker([location.lat, location.lng]).addTo(geotaggedMap);
+      marker.bindPopup(location.name);
+      return marker;
+    });
+  const mapBounds = new L.featureGroup(markers).getBounds();
+  geotaggedMap.fitBounds(mapBounds);
+};
+
 const renderChartsFromSingleUserJson = (json) => {
   renderMediaCountGraphFromJson(json);
   renderHourlyFrequencyGraphFromJson(json);
   renderTaggedFriendsGraphFromJson(json);
   renderHashtagsGraphFromJson(json);
+  renderGeotaggedMapFromJson(json);
 };
 
 const updateDatePicker = (startDateTimestamp, endDateTimestamp) => {
@@ -330,7 +352,10 @@ const getDateIntervalAndUpdateDatePicker = () => {
   const startDateField = document.getElementById("start-date").value;
   const endDateField = document.getElementById("end-date").value;
   const currentDate = new Date();
-  const endDateTimestamp = (endDateField ? new Date(endDateField) : currentDate).getTime();
+  const endDateTimestamp = (endDateField
+    ? new Date(endDateField)
+    : currentDate
+  ).getTime();
   const startDateTimestamp = startDateField
     ? new Date(startDateField).getTime()
     : new Date().setMonth(
