@@ -321,14 +321,13 @@ const renderGeotaggedMapFromJson = (json) => {
     subdomains: ["mt0", "mt1", "mt2", "mt3"],
   }).addTo(geotaggedMap);
 
-  const markers = [];
-  json
+  const markers = json
     .filter((j) => "location" in j)
     .map((story) => {
       const location = story.location;
       const marker = L.marker([location.lat, location.lng]).addTo(geotaggedMap);
       marker.bindPopup(location.name);
-      markers.push(marker);
+      return marker;
     });
   const mapBounds = new L.featureGroup(markers).getBounds();
   geotaggedMap.fitBounds(mapBounds);
