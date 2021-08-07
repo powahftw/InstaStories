@@ -1,6 +1,17 @@
+const baseUrl = window.location.origin;
+
 const removeTrailingSlash = (string) => {
   return string.endsWith("/") ? string.slice(0, -1) : string;
 };
+
+const composeAnalyticsLink = (userId) => {
+  const galleryLink = document.getElementById("gallery-analytics-link");
+  galleryLink.innerHTML = `
+  <a href="${baseUrl}/analytics/${userId}">
+      <button class="button header-button">Analytics</button>
+    </a>
+  `;
+}
 
 const showAndUpdateSummary = (folderCount, mediaCount) => {
   const summaryEl = document.getElementById("summary");
@@ -58,6 +69,7 @@ const fetchResponseToHtml = async (response) => {
     let breadcrumb = `<a href="/${section}">${capitalize(section)}</a>`;
     if (pageInfo['user_id']) {
       breadcrumb += `/<a href="/${section}/${pageInfo['user_id']}">${pageInfo['display_name']}</a>`;
+      composeAnalyticsLink(pageInfo['user_id'])
       if (pageInfo['date']) {
         breadcrumb += `/<span href='#'>${pageInfo['date']}<span>`;
       }
