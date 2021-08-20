@@ -144,10 +144,10 @@ const composeGalleryLink = (userId) => {
   const galleryLink = document.getElementById("gallery-analytics-link");
   galleryLink.innerHTML = `
   <a href="${baseUrl}/gallery/${userId}">
-      <button class="button header-button">Gallery</button>
+      <button class="button header-button">Medias</button>
     </a>
   `;
-}
+};
 
 const createBarGraph = (ctx, label, labels, data) => {
   const getPurplePalette = (opacity = 1) => `rgba(153, 102, 255, ${opacity})`;
@@ -322,7 +322,11 @@ const renderHashtagsGraphFromJson = (json) => {
 };
 
 const renderGeotaggedMapFromJson = (json) => {
-  if (!document.getElementById("chart-geotagged")) return;
+  const geotaggetChart = document.getElementById("chart-geotagged");
+  if (!geotaggetChart) {
+    return;
+  }
+  
   const geotaggedMap = L.map("chart-geotagged", {
     attributionControl: false,
   });
@@ -362,9 +366,8 @@ const getDateIntervalAndUpdateDatePicker = () => {
   const startDateField = document.getElementById("start-date").value;
   const endDateField = document.getElementById("end-date").value;
   const currentDate = new Date();
-  const endDateTimestamp = (endDateField
-    ? new Date(endDateField)
-    : currentDate
+  const endDateTimestamp = (
+    endDateField ? new Date(endDateField) : currentDate
   ).getTime();
   const startDateTimestamp = startDateField
     ? new Date(startDateField).getTime()
@@ -383,10 +386,8 @@ const getDateIntervalAndUpdateDatePicker = () => {
 };
 
 const getAndRenderAnalytics = async () => {
-  const [
-    startDateTimestamp,
-    endDateTimestamp,
-  ] = getDateIntervalAndUpdateDatePicker();
+  const [startDateTimestamp, endDateTimestamp] =
+    getDateIntervalAndUpdateDatePicker();
   const requestUrl = `${baseUrl}/${API_PREFIX}${pathName}?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
   const responseData = await (await fetch(requestUrl)).json();
   const root = document.getElementById("content");
