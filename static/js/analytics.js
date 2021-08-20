@@ -36,7 +36,7 @@ const composeUserChoicePage = (users) => {
   Array.from(users)
     .sort((a, b) => a.name.localeCompare(b.name))
     .forEach(({ name, id }) => {
-      pageHtml += `<a href='${baseUrl}/analytics/${id}'>
+      pageHtml += `<a href='${baseUrl}/analytics/${id}/'>
                     <div class="user-preview">${name}</div>
                    </a>`;
     });
@@ -138,6 +138,15 @@ const composeStatisticsFromSingleUserJson = (json) => {
 
   pageHtml += selectedUserInfoBar + analyticsBox;
   return pageHtml;
+};
+
+const composeGalleryLink = (userId) => {
+  const galleryLink = document.getElementById("gallery-analytics-link");
+  galleryLink.innerHTML = `
+  <a href="${baseUrl}/gallery/${userId}">
+      <button class="button header-button">Medias</button>
+    </a>
+  `;
 };
 
 const createBarGraph = (ctx, label, labels, data) => {
@@ -313,6 +322,11 @@ const renderHashtagsGraphFromJson = (json) => {
 };
 
 const renderGeotaggedMapFromJson = (json) => {
+  const geotaggetChart = document.getElementById("chart-geotagged");
+  if (!geotaggetChart) {
+    return;
+  }
+  
   const geotaggedMap = L.map("chart-geotagged", {
     attributionControl: false,
   });
@@ -352,9 +366,8 @@ const getDateIntervalAndUpdateDatePicker = () => {
   const startDateField = document.getElementById("start-date").value;
   const endDateField = document.getElementById("end-date").value;
   const currentDate = new Date();
-  const endDateTimestamp = (endDateField
-    ? new Date(endDateField)
-    : currentDate
+  const endDateTimestamp = (
+    endDateField ? new Date(endDateField) : currentDate
   ).getTime();
   const startDateTimestamp = startDateField
     ? new Date(startDateField).getTime()
@@ -373,11 +386,9 @@ const getDateIntervalAndUpdateDatePicker = () => {
 };
 
 const getAndRenderAnalytics = async () => {
-  const [
-    startDateTimestamp,
-    endDateTimestamp,
-  ] = getDateIntervalAndUpdateDatePicker();
-  const requestUrl = `${baseUrl}/${API_PREFIX}${pathName}/?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
+  const [startDateTimestamp, endDateTimestamp] =
+    getDateIntervalAndUpdateDatePicker();
+  const requestUrl = `${baseUrl}/${API_PREFIX}${pathName}?start_date=${startDateTimestamp}&end_date=${endDateTimestamp}`;
   const responseData = await (await fetch(requestUrl)).json();
   const root = document.getElementById("content");
   root.innerHTML = "";
@@ -402,6 +413,7 @@ const getAndRenderAnalytics = async () => {
     );
     datePickerContainer.style.display = "block";
     userJsonFile = responseData["user_json_file"];
+    composeGalleryLink(responseData["selected_user"]);
     const pageHtml = composeStatisticsFromSingleUserJson(userJsonFile);
     root.insertAdjacentHTML("afterbegin", pageHtml);
     renderChartsFromSingleUserJson(userJsonFile);

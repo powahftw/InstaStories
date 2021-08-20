@@ -193,14 +193,13 @@ ul {
   width: fit-content;
   border-radius: 8px;
   padding: 4px 8px;
-  background-color: var(--green-aquamarine);
-  color: var(--primary-color-lighter);
+  color: var(--white);
   align-self: start;
   font-size: 120%;
 }
 
 .breadcrumb a:visited, .breadcrumb a { 
-  color: var(--secondary-color);
+  color: var(--white);
   text-decoration: underline;
 }
 
