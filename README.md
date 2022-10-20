@@ -1,4 +1,7 @@
 # InstaStories
+
+### Note: The project is currently not used and up-to-date with the latest unofficial API. It's unlikely to be working out of the box.
+
 Simple web app to get and save users stories from IG.
 It's useful to archive users stories!  
 
